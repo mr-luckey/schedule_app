@@ -1,0 +1,19 @@
+{
+  "files.exclude": {
+    ".dart_tool": true,
+    ".git": true,
+    ".gitignore": true,
+    ".idea": true,
+    ".metadata": true,
+    "README.md": true,
+    "analysis_options.yaml": true,
+    "build": true,
+    "ios": true,
+    "linux": true,
+    "macos": true,
+    "pubspec.lock": true,
+    "schedule_app.iml": true,
+    "web": true,
+    "windows": true
+  }
+}

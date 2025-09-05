@@ -9,6 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  get: ^4.6.6
+  responsive_framework: ^1.1.1
+  intl: ^0.19.0
+  table_calendar: ^3.0.9
+  get_storage: ^2.1.1
 
 dev_dependencies:
   flutter_test:
