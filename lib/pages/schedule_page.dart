@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart';
+import 'package:schedule_app/pages/Calender_Main/Week_Calender.dart';
 import '../theme/app_colors.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/schedule_header.dart';
@@ -62,7 +64,21 @@ class SchedulePage extends StatelessWidget {
           child: Column(
             children: [
               const ScheduleHeader(),
-              const Expanded(child: CalendarGrid()),
+              Expanded(
+                child: WeekTimeCalendar(
+                  //TODO: Need to make this widget when we will make rest of the tabs
+                  events: events,
+                  initialWeek: DateTime(2025, 4, 28),
+                  startHour: 9,
+                  endHour: 15,
+                  showWeekend: true,
+                  onEventTap: (e) {
+                    // handle tap
+                  },
+                ),
+                // CalendarGrid()
+              ),
+              // const Expanded(child: CalendarGrid()),
             ],
           ),
         ),
@@ -74,14 +90,27 @@ class SchedulePage extends StatelessWidget {
     return Row(
       children: [
         // Sidebar for desktop
-        const Sidebar(),
+        Sidebar(),
 
         // Main content
         Expanded(
           child: Column(
             children: [
-              const ScheduleHeader(),
-              const Expanded(child: CalendarGrid()),
+              ScheduleHeader(),
+              Expanded(
+                child: WeekTimeCalendar(
+                  //TODO: Need to make this widget when we will make rest of the tabs
+                  events: events,
+                  initialWeek: DateTime(2025, 4, 28),
+                  startHour: 9,
+                  endHour: 15,
+                  showWeekend: true,
+                  onEventTap: (e) {
+                    // handle tap
+                  },
+                ),
+                // CalendarGrid()
+              ),
             ],
           ),
         ),

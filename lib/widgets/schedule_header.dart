@@ -99,6 +99,7 @@ class _ScheduleHeaderState extends State<ScheduleHeader> {
           // New Schedule button
           ElevatedButton.icon(
             onPressed: () {
+              setState(() {});
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const BookingPage()),
               );
