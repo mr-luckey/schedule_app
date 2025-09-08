@@ -82,7 +82,7 @@ class BookingPage extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              const ScheduleHeader(),
+              // const ScheduleHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -111,13 +111,13 @@ class BookingPage extends StatelessWidget {
     return Row(
       children: [
         // Sidebar for desktop
-        const Sidebar(),
+        // const Sidebar(),
 
         // Main content
         Expanded(
           child: Column(
             children: [
-              const ScheduleHeader(),
+              // const ScheduleHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
