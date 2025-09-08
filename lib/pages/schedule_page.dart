@@ -1,15 +1,12 @@
 // import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
-import 'package:schedule_app/controllers/booking_controller.dart';
 import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart';
 import 'package:schedule_app/pages/Calender_Main/Week_Calender.dart';
-import 'package:schedule_app/widgets/booking_form.dart';
-import 'package:schedule_app/widgets/booking_summary.dart';
+
 import '../theme/app_colors.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/calendar_grid.dart';
@@ -244,7 +241,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   : Expanded(
                       child: WeekTimeCalendar(
                         events: events,
-                        initialWeek: DateTime(2025, 4, 28),
+                        currentDate: _currentDate,
+                        // initialWeek: DateTime(2025, 4, 28),
                         startHour: 9,
                         endHour: 15,
                         showWeekend: true,
@@ -279,7 +277,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   : Expanded(
                       child: WeekTimeCalendar(
                         events: events,
-                        initialWeek: DateTime(2025, 4, 28),
+                        currentDate:
+                            _currentDate, // Use the current date from state
                         startHour: 9,
                         endHour: 15,
                         showWeekend: true,

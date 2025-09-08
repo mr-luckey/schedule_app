@@ -516,7 +516,8 @@ class _CalendarGridState extends State<CalendarGrid> {
     return WeekTimeCalendar(
       //TODO: Need to make this widget when we will make rest of the tabs
       events: events,
-      initialWeek: DateTime(2025, 4, 28),
+
+      // initialWeek: DateTime(2025, 4, 28),
       startHour: 9,
       endHour: 15,
       showWeekend: true,

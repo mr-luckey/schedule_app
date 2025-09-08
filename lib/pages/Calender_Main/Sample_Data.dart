@@ -6,8 +6,8 @@ final events = <CalendarEvent>[
   CalendarEvent(
     id: 'e1',
     title: 'Consultation',
-    start: DateTime(2025, 4, 25, 9, 0),
-    end: DateTime(2025, 4, 25, 12, 0),
+    start: DateTime(2025, 9, 10, 9, 0),
+    end: DateTime(2025, 9, 10, 12, 0),
     subtitle: 'Guests: 1000',
   ),
   CalendarEvent(
@@ -20,8 +20,8 @@ final events = <CalendarEvent>[
   CalendarEvent(
     id: 'e3',
     title: 'Consultation',
-    start: DateTime(2025, 4, 27, 10, 0),
-    end: DateTime(2025, 4, 27, 12, 0),
+    start: DateTime(2025, 9, 8, 10, 0),
+    end: DateTime(2025, 9, 8, 12, 0),
     subtitle:
         '1000', //TODO: API data should be overrider be int to string or guest should be string in API
   ),
