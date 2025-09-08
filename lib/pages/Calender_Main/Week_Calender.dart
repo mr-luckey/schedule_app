@@ -3,12 +3,6 @@ import 'package:schedule_app/model/Calender_model.dart';
 import 'package:schedule_app/model/Source/Data_sorce.dart';
 import 'package:schedule_app/widgets/event_card.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-// import 'package:syncfusion_flutter_calendar/calendar.dart';
-// import 'package:wedding_booking_app/Data/Data_Source.dart';
-// import 'package:wedding_booking_app/Model/Calender_Event.dart';
-// import 'calendar_event.dart';
-// import 'event_data_source.dart';
-// import 'event_tile.dart';
 
 class WeekTimeCalendar extends StatelessWidget {
   final List<CalendarEvent> events;
