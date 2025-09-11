@@ -100,9 +100,9 @@ class _ScheduleHeaderState extends State<ScheduleHeader> {
           ElevatedButton.icon(
             onPressed: () {
               setState(() {});
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const BookingPage()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => BookingPage()));
             },
             icon: const Icon(Icons.add, size: 18),
             label: const Text('New Schedule'),

@@ -132,7 +132,7 @@ class BookingSummary extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: controller.confirmBooking,
+                onPressed: controller.showBookingConfirmation,
                 icon: const Icon(Icons.check, size: 18),
                 label: const Text('Confirm Booking'),
                 style: ElevatedButton.styleFrom(
