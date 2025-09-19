@@ -20,9 +20,8 @@ class Event {
   @HiveField(4)
   final int guests;
 
-  @HiveField(5)
-  final String eventType;
-
+  // @HiveField(5)
+  // final String eventType;
   @HiveField(6)
   final String package;
 
@@ -47,7 +46,7 @@ class Event {
     required this.startTime,
     required this.endTime,
     required this.guests,
-    required this.eventType,
+    // required this.eventType,
     required this.package,
     required this.customerName,
     required this.customerEmail,

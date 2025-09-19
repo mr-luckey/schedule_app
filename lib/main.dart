@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -5,6 +6,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:schedule_app/model/event_model.dart';
+import 'package:schedule_app/pages/Auth/Login_Signup.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'theme/app_theme.dart';
 import 'pages/schedule_page.dart';
 
@@ -14,6 +18,9 @@ void main() async {
   await Hive.initFlutter();
 
   Hive.registerAdapter(EventAdapter());
+  if (kIsWeb) {
+    WebViewPlatform.instance = WebWebViewPlatform();
+  }
 
   runApp(const BookingScheduleApp());
 }
@@ -27,7 +34,9 @@ class BookingScheduleApp extends StatelessWidget {
       title: 'Booking Schedule',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: SchedulePage(),
+      home: AuthScreen(),
+      // FoodBeverageSelection(),
+      // SchedulePage(),
       builder: (context, child) {
         return ResponsiveBreakpoints.builder(
           child: child!,

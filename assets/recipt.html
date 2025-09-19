@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation Receipt - A4</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: white;
+            color: #000;
+            line-height: 1.2;
+            font-size: 12px;
+        }
+        
+        .receipt-container {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #000;
+            padding: 15mm;
+            overflow: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        .company-details {
+            font-size: 10px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .receipt-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        
+        .receipt-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 9px;
+        }
+        
+        .section {
+            margin-bottom: 10px;
+        }
+        
+        .section-title {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .info-table {
+            width: 100%;
+            font-size: 9px;
+            margin-bottom: 5px;
+        }
+        
+        .info-table td {
+            padding: 1px 0;
+            vertical-align: top;
+        }
+        
+        .info-table td:first-child {
+            width: 25%;
+            font-weight: bold;
+        }
+        
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            font-size: 8px;
+        }
+        
+        .order-table th,
+        .order-table td {
+            border: 1px solid #000;
+            padding: 3px;
+            text-align: left;
+        }
+        
+        .order-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 7px;
+        }
+        
+        .order-table td:nth-child(2),
+        .order-table td:nth-child(3),
+        .order-table td:nth-child(4) {
+            text-align: right;
+        }
+        
+        .subtotal-section {
+            border: 1px solid #000;
+            padding: 8px;
+            margin-top: 8px;
+        }
+        
+        .subtotal-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            font-size: 9px;
+        }
+        
+        .subtotal-row.total {
+            border-top: 2px solid #000;
+            padding-top: 4px;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .footer {
+            border-top: 2px solid #000;
+            padding-top: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 9px;
+        }
+        
+        .terms {
+            font-size: 7px;
+            margin-top: 8px;
+            text-align: justify;
+            line-height: 1.2;
+        }
+        
+        .signature-section {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 150px;
+            text-align: center;
+            font-size: 8px;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #000;
+            margin-bottom: 3px;
+            height: 20px;
+        }
+        
+        .two-column {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .receipt-container {
+                border: none;
+                padding: 15mm;
+                margin: 0;
+                width: 210mm;
+                height: 297mm;
+                max-width: none;
+                max-height: none;
+            }
+        }
+        
+        @media screen {
+            body {
+                padding: 10px;
+                background-color: #f0f0f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="header">
+            <div class="company-name">Premium Event Catering Ltd.</div>
+            <div class="company-details">
+                123 Wedding Lane, London, EC1A 1BB<br>
+                Tel: +44-20-7123-4567 | Email: events@premiumcatering.co.uk | VAT: GB123456789
+            </div>
+            <div class="receipt-title">Booking Confirmation Receipt</div>
+        </div>
+        
+        <div class="receipt-info">
+            <div>
+                <strong>Receipt No:</strong> WED-2025-0916-001<br>
+                <strong>Date:</strong> 16th September 2025<br>
+                <strong>Payment Method:</strong> Bank Transfer
+            </div>
+            <div>
+                <strong>Account Manager:</strong> Emma Wilson<br>
+                <strong>Reference:</strong> WEDDING-SJ-001<br>
+                <strong>Status:</strong> CONFIRMED
+            </div>
+        </div>
+        
+        <div class="two-column">
+            <div class="column">
+                <div class="section">
+                    <div class="section-title">Customer Information</div>
+                    <table class="info-table">
+                        <tr><td>Customer Name:</td><td>Sarah & Michael Johnson</td></tr>
+                        <tr><td>Email:</td><td>sarah.johnson@email.com</td></tr>
+                        <tr><td>Contact:</td><td>+44-789-123-4567</td></tr>
+                        <tr><td>Event Address:</td><td>Royal Gardens Hotel, 45 Park Lane, London</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="column">
+                <div class="section">
+                    <div class="section-title">Event Details</div>
+                    <table class="info-table">
+                        <tr><td>Event Type:</td><td>Wedding Reception</td></tr>
+                        <tr><td>Date:</td><td>Saturday, 12th October 2025</td></tr>
+                        <tr><td>Time:</td><td>18:00 - 23:30</td></tr>
+                        <tr><td>Guests:</td><td>120 persons</td></tr>
+                        <tr><td>Package:</td><td>Premium Wedding Package</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Food Items</div>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Description</th>
+                        <th style="width: 15%;">Qty</th>
+                        <th style="width: 17%;">Unit Price</th>
+                        <th style="width: 18%;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Chicken Tikka (per portion)</td><td>120</td><td>£12.50</td><td>£1,500.00</td></tr>
+                    <tr><td>Paneer Tikka (per portion)</td><td>60</td><td>£10.00</td><td>£600.00</td></tr>
+                    <tr><td>Basmati Rice (per portion)</td><td>120</td><td>£4.00</td><td>£480.00</td></tr>
+                    <tr><td>Naan Bread (per piece)</td><td>180</td><td>£2.50</td><td>£450.00</td></tr>
+                    <tr><td>Mixed Vegetable Curry</td><td>80</td><td>£6.50</td><td>£520.00</td></tr>
+                    <tr><td>Wedding Cake (3-tier)</td><td>1</td><td>£350.00</td><td>£350.00</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Additional Services</div>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Service Description</th>
+                        <th style="width: 15%;">Qty</th>
+                        <th style="width: 17%;">Rate</th>
+                        <th style="width: 18%;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Professional Waiter Service (6 hours)</td><td>6</td><td>£150.00</td><td>£900.00</td></tr>
+                    <tr><td>Event Coordination Service</td><td>1</td><td>£300.00</td><td>£300.00</td></tr>
+                    <tr><td>Table & Chair Setup (120 guests)</td><td>1</td><td>£200.00</td><td>£200.00</td></tr>
+                    <tr><td>Linen & Cutlery Service</td><td>120</td><td>£8.50</td><td>£1,020.00</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="subtotal-section">
+            <div class="subtotal-row"><span>Food Items Subtotal:</span><span>£3,900.00</span></div>
+            <div class="subtotal-row"><span>Services Subtotal:</span><span>£2,420.00</span></div>
+            <div class="subtotal-row"><span>Net Amount:</span><span>£6,320.00</span></div>
+            <div class="subtotal-row"><span>Service Charge (10%):</span><span>£632.00</span></div>
+            <div class="subtotal-row"><span>Early Booking Discount (5%):</span><span>-£316.00</span></div>
+            <div class="subtotal-row"><span>Subtotal after Discount:</span><span>£6,636.00</span></div>
+            <div class="subtotal-row"><span>VAT @ 20%:</span><span>£1,327.20</span></div>
+            <div class="subtotal-row total"><span>TOTAL AMOUNT:</span><span>£7,963.20</span></div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>BOOKING CONFIRMED - PAYMENT DUE: 50% DEPOSIT BY 30TH SEPTEMBER 2025</strong></p>
+            <p>Balance payment due 7 days prior to event date</p>
+            
+            <div class="terms">
+                <strong>Terms & Conditions:</strong> This booking is subject to our standard terms and conditions. Cancellation policy: 30 days notice required for full refund minus 10% administration fee. Final guest numbers must be confirmed 7 days prior to event. Additional charges may apply for changes made within 48 hours of event. All prices include VAT at current rate.
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div>Customer Signature</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div>Authorized Signature</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

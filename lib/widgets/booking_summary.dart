@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/pages/booking_page.dart';
 import '../theme/app_colors.dart';
-import '../controllers/booking_controller.dart';
 
 class BookingSummary extends StatelessWidget {
   const BookingSummary({super.key});

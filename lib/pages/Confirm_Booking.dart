@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:schedule_app/pages/booking_page.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 import '../theme/app_colors.dart';
 
 class BookingConfirmationPopup extends StatelessWidget {
@@ -316,9 +318,7 @@ class BookingConfirmationPopup extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              // Handle payment confirmation
-                              Get.back();
-                              // Show success message or navigate to success screen
+                              Get.to(SchedulePage());
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
