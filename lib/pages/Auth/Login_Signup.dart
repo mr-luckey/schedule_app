@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/route_manager.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io'; // For SocketException and HttpException
+import 'dart:io';
+
+import 'package:schedule_app/pages/schedule_page.dart'; // For SocketException and HttpException
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -352,7 +355,14 @@ class _AuthScreenState extends State<AuthScreen> {
               rememberMe: _rememberMe,
               onToggleRememberMe: (value) =>
                   setState(() => _rememberMe = value ?? false),
-              onLogin: _handleLogin,
+              onLogin: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Login Sucess")));
+                // SnackBar(content: )
+                Get.to(SchedulePage());
+              },
+              // onLogin: _handleLogin,
               isLoading: _isLoading,
             ),
           ),
@@ -439,7 +449,14 @@ class _AuthScreenState extends State<AuthScreen> {
               rememberMe: _rememberMe,
               onToggleRememberMe: (value) =>
                   setState(() => _rememberMe = value ?? false),
-              onLogin: _handleLogin,
+              onLogin: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Login Sucess")));
+                // SnackBar(content: )
+                Get.to(SchedulePage());
+              },
+              // _handleLogin,
               isLoading: _isLoading,
             ),
           ),
