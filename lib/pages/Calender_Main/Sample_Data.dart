@@ -5,16 +5,16 @@ import 'package:schedule_app/model/Calender_model.dart';
 final events = <CalendarEvent>[
   CalendarEvent(
     id: 'e1',
-    title: 'Consultation',
-    start: DateTime(2025, 9, 10, 9, 0),
-    end: DateTime(2025, 9, 10, 12, 0),
+    title: 'Birthday',
+    start: DateTime(2025, 9, 22, 9, 0),
+    end: DateTime(2025, 9, 22, 12, 0),
     subtitle: 'Guests: 1000',
   ),
   CalendarEvent(
     id: 'e2',
-    title: 'Consultation',
-    start: DateTime(2025, 4, 28, 10, 0),
-    end: DateTime(2025, 4, 28, 11, 0),
+    title: 'Marrige',
+    start: DateTime(2025, 9, 24, 10, 0),
+    end: DateTime(2025, 9, 24, 11, 0),
     subtitle: 'Guests: 1000',
   ),
   CalendarEvent(
