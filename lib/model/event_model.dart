@@ -36,7 +36,7 @@ class Event {
 
     String customerName =
         json['customerName'] ??
-            '${json['firstname'] ?? ''} ${json['lastname'] ?? ''}'.trim();
+        '${json['firstname'] ?? ''} ${json['lastname'] ?? ''}'.trim();
     if (customerName.isEmpty) {
       customerName = 'Customer';
     }
@@ -46,8 +46,12 @@ class Event {
       final String eventDate = json['event_date'];
 
       // Extract time parts from the time strings and combine with event date
-      startTime = DateTime.parse('$eventDate${json['start_time']?.substring(10) ?? 'T10:00:00.000Z'}');
-      endTime = DateTime.parse('$eventDate${json['end_time']?.substring(10) ?? 'T12:00:00.000Z'}');
+      startTime = DateTime.parse(
+        '$eventDate${json['start_time']?.substring(10) ?? 'T10:00:00.000Z'}',
+      );
+      endTime = DateTime.parse(
+        '$eventDate${json['end_time']?.substring(10) ?? 'T12:00:00.000Z'}',
+      );
     } catch (e) {
       print('Error parsing dates: $e');
       // Fallback to current time if parsing fails
@@ -78,7 +82,7 @@ class Event {
       hall: json['hall'] ?? json['venue'] ?? 'Main Hall',
       timeRange: timeRange,
       specialRequirements:
-      json['specialRequirements'] ??
+          json['specialRequirements'] ??
           json['requirement'] ??
           json['description'] ??
           '',
@@ -93,7 +97,7 @@ class Event {
       start: startTime,
       end: endTime,
       eventDate: eventDate,
-      guests: guests,
+      guests: guests.toString(),
       subtitle: '${guests != null ? ' • $guests guests' : ''}',
       color: color,
     );

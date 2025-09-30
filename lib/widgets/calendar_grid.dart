@@ -19,7 +19,9 @@ class CalendarGrid extends StatefulWidget {
 }
 
 class _CalendarGridState extends State<CalendarGrid> {
-  final CalendarsController _calendarController = Get.put(CalendarsController());
+  final CalendarsController _calendarController = Get.put(
+    CalendarsController(),
+  );
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -40,7 +42,9 @@ class _CalendarGridState extends State<CalendarGrid> {
   Widget build(BuildContext context) {
     // Debug: log event count every build
     // ignore: avoid_print
-    print('🗓️ CalendarGrid build: events length = ${_calendarController.events.length}');
+    print(
+      '🗓️ CalendarGrid build: events length = ${_calendarController.events.length}',
+    );
     return Container(
       color: AppColors.surface,
       child: Column(
@@ -165,8 +169,8 @@ class _CalendarGridState extends State<CalendarGrid> {
       events: _calendarController.events,
 
       // initialWeek: DateTime(2025, 4, 28),
-      startHour: 9,
-      endHour: 23,
+      startHour: 0,
+      endHour: 12,
       showWeekend: true,
       onEventTap: (e) {
         // handle tap

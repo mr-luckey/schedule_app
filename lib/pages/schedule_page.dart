@@ -972,7 +972,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
               Expanded(
                 child: WeekTimeCalendar(
-                  events:calendarsController.events,
+                  events: calendarsController.events,
                   currentDate: _currentDate,
                   // initialWeek: DateTime(2025, 4, 28),
                   startHour: 9,
@@ -1009,9 +1009,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   : Expanded(
                       child: WeekTimeCalendar(
                         events: calendarsController.events,
-                        currentDate: _currentDate, // Use the current date from state
+                        currentDate:
+                            _currentDate, // Use the current date from state
                         startHour: 8,
-                        endHour: 15,
+                        endHour: 24,
                         showWeekend: true,
                         onEventTap: (e) {
                           // handle tap

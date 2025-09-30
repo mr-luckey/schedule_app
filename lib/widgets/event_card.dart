@@ -479,7 +479,14 @@ class EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final CalendarEvent event = appointment.id as CalendarEvent;
-    final CalendarEvent event = CalendarEvent(id: appointment.id!.toString(), guests: 500, title: appointment.subject, start: appointment.startTime, end: appointment.endTime,eventDate: DateTime.now().toString());
+    final CalendarEvent event = CalendarEvent(
+      id: appointment.id!.toString(),
+      guests: appointment.notes,
+      title: appointment.subject,
+      start: appointment.startTime,
+      end: appointment.endTime,
+      eventDate: DateTime.now().toString(),
+    );
 
     print("Here is the events details" + "${event.guests}");
 
