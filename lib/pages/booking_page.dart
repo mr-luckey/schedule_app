@@ -333,6 +333,8 @@ class BookingForm extends StatelessWidget {
                           initialTime: TimeOfDay.now(),
                         );
                         if (time != null) controller.setStartTime(time);
+                        print("TESTING START TIME FIELD");
+                        print(time);
                       },
                     ),
                   ),
