@@ -19,7 +19,7 @@ class CalendarEvent {
     required this.start,
     required this.end,
     this.subtitle,
-    this.color = const Color(0xFF22C55E),
+    required this.color,
     this.child,
   });
 }

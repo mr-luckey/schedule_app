@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/model/Calender_model.dart';
+import 'package:schedule_app/theme/app_colors.dart';
 
 class Event {
   final String id;
@@ -25,7 +26,7 @@ class Event {
     required this.hall,
     required this.timeRange,
     required this.specialRequirements,
-    this.color = const Color(0xFF22C55E),
+    required this.color,
     this.guests,
   });
 
@@ -81,6 +82,9 @@ class Event {
       customerName: customerName,
       hall: json['hall'] ?? json['venue'] ?? 'Main Hall',
       timeRange: timeRange,
+      color: json['is_inquiry'] == true
+          ? AppColors.currentTime
+          : AppColors.primary300,
       specialRequirements:
           json['specialRequirements'] ??
           json['requirement'] ??

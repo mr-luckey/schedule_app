@@ -485,6 +485,7 @@ class EventTile extends StatelessWidget {
       title: appointment.subject,
       start: appointment.startTime,
       end: appointment.endTime,
+      color: appointment.color,
       eventDate: DateTime.now().toString(),
     );
 
