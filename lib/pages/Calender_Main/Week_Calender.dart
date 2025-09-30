@@ -648,6 +648,7 @@ import 'package:intl/intl.dart';
 import 'package:schedule_app/controllers/calender_controller.dart';
 import 'package:schedule_app/model/Calender_model.dart';
 import 'package:schedule_app/model/Source/Data_sorce.dart';
+import 'package:schedule_app/pages/booking_page.dart';
 import 'package:schedule_app/widgets/event_card.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -677,8 +678,6 @@ class WeekTimeCalendar extends StatefulWidget {
 class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
   late CalendarController _calendarController;
   CalendarsController calendController = Get.put(CalendarsController());
-
-
 
   @override
   void initState() {
@@ -713,7 +712,6 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
       print(e.end);
       print(e.title);
       print(e.subtitle);
-
 
       return Appointment(
         id: e.id,
@@ -766,25 +764,31 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
                 timeInterval: const Duration(minutes: 60),
                 timeFormat: 'h:mm a',
                 timeRulerSize: 68,
-                timeIntervalHeight: 100,
+                timeIntervalHeight: 150,
                 timeIntervalWidth: 100,
                 timeTextStyle: const TextStyle(fontSize: 12),
               ),
               appointmentBuilder: (context, details) {
-
                 final appt = details.appointments.first as Appointment;
 
                 return EventTile(appointment: appt);
               },
               onTap: (details) {
-                if (details.targetElement == CalendarElement.appointment &&
-                    details.appointments != null &&
-                    details.appointments!.isNotEmpty) {
-                  final Appointment tapped =
-                      details.appointments!.first as Appointment;
-                  final CalendarEvent event = tapped.id as CalendarEvent;
-                  widget.onEventTap?.call(event);
-                }
+                Appointment tapped = details.appointments!.first as Appointment;
+                CalendarEvent event = tapped.id as CalendarEvent;
+                print(event.id);
+                Get.to(BookingPage(selectedId: event.id));
+
+                // print()
+                // if (details.targetElement == CalendarElement.appointment &&
+                //     details.appointments != null &&
+                //     details.appointments!.isNotEmpty) {
+                //   final Appointment tapped =
+                //       details.appointments!.first as Appointment;
+                //   final CalendarEvent event = tapped.id as CalendarEvent;
+                //   widget.onEventTap?.call(event);
+                //   print(event.id);
+                // }
               },
             ),
           ),

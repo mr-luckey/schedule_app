@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/model/event_model.dart';
 import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 // import 'package:schedule_app/services/api_service.dart';
 
@@ -1068,6 +1069,167 @@ class BookingController extends GetxController {
         "requirement": specialRequirementsController.text.isEmpty
             ? "No special requirements"
             : specialRequirementsController.text,
+        "payment_method_id": 1,
+        "is_inquiry": false,
+        // Hardcoded as CASH for now
+        // Include order services if any
+        if (orderServices.isNotEmpty)
+          "order_services_attributes": orderServices,
+
+        // Include order packages
+        "order_packages_attributes": orderPackages,
+      };
+
+      print('Sending order data: ${jsonEncode(orderData)}');
+
+      // Send order to API
+      final result = await ApiService.createOrder(
+        orderData: orderData,
+        token: ApiService.bearerToken,
+      );
+
+      if (result['success'] == true) {
+        confirmPressCount.value = 0;
+        Get.back(); // Close popup
+
+        Get.snackbar(
+          'Success',
+          'Booking confirmed successfully! Order ID: ${result['data']?['id'] ?? 'N/A'}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Clear form after successful booking
+        clearForm();
+        Get.to(SchedulePage());
+        // Navigate back
+      } else {
+        throw Exception(result['error'] ?? 'Failed to create order');
+      }
+    } catch (e) {
+      Get.back();
+      Get.snackbar(
+        'Error',
+        'Failed to save booking: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> completeInquiryBooking() async {
+    try {
+      if (!isFormValid.value) {
+        Get.snackbar(
+          'Error',
+          'Please fill in all required fields',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Get the current menu for the selected package
+      final menu = menuForPackage(selectedPackage.value, guests.value);
+
+      // Prepare order services from the services in the menu
+      List<Map<String, dynamic>> orderServices = [];
+      for (var service in menu['Services']!) {
+        final serviceItem = apiServiceItems
+            .expand(
+              (category) => (category['menu_items'] as List<dynamic>? ?? []),
+            )
+            .firstWhere(
+              (item) => item['title'] == service['name'],
+              orElse: () => null,
+            );
+
+        if (serviceItem != null) {
+          orderServices.add({
+            "menu_item_id": serviceItem['id'],
+            "price": service['price'].toString(),
+          });
+        }
+      }
+
+      // Prepare order packages with items
+      List<Map<String, dynamic>> orderPackages = [];
+
+      // Get package details
+      final packageData = apiPackages.firstWhere(
+        (pkg) => pkg['id'].toString() == selectedPackageId.value,
+        orElse: () => {},
+      );
+
+      if (packageData.isNotEmpty) {
+        List<Map<String, dynamic>> packageItems = [];
+
+        // Add food items from the menu
+        for (var foodItem in menu['Food Items']!) {
+          final menuItem = apiMenuItems
+              .expand(
+                (category) => (category['menu_items'] as List<dynamic>? ?? []),
+              )
+              .firstWhere(
+                (item) => item['title'] == foodItem['name'],
+                orElse: () => null,
+              );
+
+          if (menuItem != null) {
+            packageItems.add({
+              "menu_item_id": menuItem['id'],
+              "price": foodItem['price'].toString(),
+              "no_of_gust": guests.value.toString(),
+            });
+          }
+        }
+
+        orderPackages.add({
+          "package_id": selectedPackageId.value,
+          "amount": calculateSubtotal().toStringAsFixed(2),
+          "is_custom": isPackageEditing.value,
+          "order_package_items_attributes": packageItems,
+        });
+      }
+
+      // Format dates properly for API
+      String formatDateForApi(DateTime? date) {
+        if (date == null) return '';
+        return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      }
+
+      String formatTimeForApi(TimeOfDay? time) {
+        if (time == null) return '';
+        return "2000-01-01T${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00.000Z";
+      }
+
+      // Prepare the complete order data matching your API structure
+      Map<String, dynamic> orderData = {
+        "firstname": nameController.text.split(' ').first,
+        "lastname": nameController.text.split(' ').length > 1
+            ? nameController.text.split(' ').sublist(1).join(' ')
+            : nameController.text,
+        "email": emailController.text,
+        "phone": contactController.text,
+        "is_inquiry": true,
+
+        "nin":
+            "123456789", // You can make this a field in your form or generate it
+        "city_id": selectedCityId.value,
+        "address": selectedCity
+            .value, // Using city as address, you might want an address field
+        "event_id": selectedEventId.value,
+        "no_of_gust": guests.value.toString(),
+        "event_date": formatDateForApi(selectedDate.value),
+        "event_time": formatTimeForApi(startTime.value),
+        "start_time": formatTimeForApi(startTime.value),
+        "end_time": formatTimeForApi(endTime.value),
+        "requirement": specialRequirementsController.text.isEmpty
+            ? "No special requirements"
+            : specialRequirementsController.text,
         "payment_method_id": 1, // Hardcoded as CASH for now
         // Include order services if any
         if (orderServices.isNotEmpty)
@@ -1570,6 +1732,82 @@ class BookingController extends GetxController {
                   onPressed: () async {
                     Get.back();
                     await completeBooking();
+                  },
+                  child: Text('Send Actual Order'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
+          ],
+        ),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error preparing test data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> testInquiryData() async {
+    try {
+      // Validate that all required fields are filled
+      if (!isFormValid.value) {
+        Get.snackbar(
+          'Error',
+          'Please fill in all required fields before testing',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Show a dialog with the data that will be sent
+      Get.dialog(
+        AlertDialog(
+          title: Text('Test Order Data'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'This is the data that will be sent to the API:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text('Name: ${nameController.text}'),
+                Text('Email: ${emailController.text}'),
+                Text('Phone: ${contactController.text}'),
+                Text(
+                  'City: ${selectedCity.value} (ID: ${selectedCityId.value})',
+                ),
+                Text(
+                  'Event: ${selectedEventType.value} (ID: ${selectedEventId.value})',
+                ),
+                Text(
+                  'Package: ${selectedPackage.value} (ID: ${selectedPackageId.value})',
+                ),
+                Text('Guests: ${guests.value}'),
+                Text('Date: ${selectedDate.value}'),
+                Text(
+                  'Time: ${startTime.value?.format(Get.context!)} - ${endTime.value?.format(Get.context!)}',
+                ),
+                Text('Requirements: ${specialRequirementsController.text}'),
+                SizedBox(height: 10),
+                Text('Subtotal: £${calculateSubtotal().toStringAsFixed(2)}'),
+                Text('Total: £${calculateTotal().toStringAsFixed(2)}'),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Get.back();
+                    await completeInquiryBooking();
                   },
                   child: Text('Send Actual Order'),
                 ),

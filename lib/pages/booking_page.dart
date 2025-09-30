@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/controllers/booking_controller.dart';
 import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 // import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 import 'package:schedule_app/widgets/package_card.dart';
@@ -14,7 +16,12 @@ import 'package:schedule_app/model/event_model.dart';
 import 'package:flutter/services.dart';
 
 class BookingPage extends StatelessWidget {
-  BookingPage({super.key});
+  final selectedId;
+  BookingPage({super.key, this.selectedId});
+
+  void loadandcheck() {
+    // ApiService.getOrders();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1351,18 +1358,13 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   },
                   child: Text(isEditing ? "Done" : "Edit"),
                 ),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Get.find<BookingController>().testOrderData();
-                      // inquiry has slightly different validation (name/email optional)
-                      // controller.showInquiry();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text('TestOrder'),
-                  ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Get.find<BookingController>().testInquiryData();
+                    setState(() {});
+                  },
+                  child: Text("Inquiry"),
                 ),
                 //TODO:change test here
                 // ElevatedButton(
@@ -1382,6 +1384,17 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   child: const Text("Confirm Booking"),
                 ),
               ],
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Get.find<BookingController>().testOrderData();
+                setState(() {});
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => SchedulePage()));
+              },
+              child: Text("testOrder"),
             ),
           ],
         ),

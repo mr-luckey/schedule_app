@@ -492,7 +492,7 @@ class EventTile extends StatelessWidget {
     print("Here is the events details" + "${event.guests}");
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      // padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: appointment.color,
         borderRadius: BorderRadius.circular(10),
