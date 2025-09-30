@@ -731,9 +731,12 @@
 // import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/controllers/calender_controller.dart';
 import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart';
 import 'package:schedule_app/pages/Calender_Main/Week_Calender.dart';
 
@@ -755,6 +758,8 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _currentDate = DateTime.now();
   String _selectedView = 'Week';
   bool showEmptyContainer = false; // New state variable to toggle container
+
+  CalendarsController calendarsController = Get.put(CalendarsController());
 
   // Methods from ScheduleHeader
   void _goToToday() {
@@ -967,7 +972,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
               Expanded(
                 child: WeekTimeCalendar(
-                  events: events,
+                  events:calendarsController.events,
                   currentDate: _currentDate,
                   // initialWeek: DateTime(2025, 4, 28),
                   startHour: 9,
@@ -1003,10 +1008,9 @@ class _SchedulePageState extends State<SchedulePage> {
                     ) // Empty container when button is pressed
                   : Expanded(
                       child: WeekTimeCalendar(
-                        events: events,
-                        currentDate:
-                            _currentDate, // Use the current date from state
-                        startHour: 9,
+                        events: calendarsController.events,
+                        currentDate: _currentDate, // Use the current date from state
+                        startHour: 8,
                         endHour: 15,
                         showWeekend: true,
                         onEventTap: (e) {

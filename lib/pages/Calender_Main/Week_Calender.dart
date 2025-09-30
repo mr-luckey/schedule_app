@@ -642,6 +642,10 @@
 //   }
 // }
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
+import 'package:schedule_app/controllers/calender_controller.dart';
 import 'package:schedule_app/model/Calender_model.dart';
 import 'package:schedule_app/model/Source/Data_sorce.dart';
 import 'package:schedule_app/widgets/event_card.dart';
@@ -672,6 +676,9 @@ class WeekTimeCalendar extends StatefulWidget {
 
 class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
   late CalendarController _calendarController;
+  CalendarsController calendController = Get.put(CalendarsController());
+
+
 
   @override
   void initState() {
@@ -685,6 +692,8 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
     // Update the calendar display date when the currentDate changes
     if (widget.currentDate != null &&
         oldWidget.currentDate != widget.currentDate) {
+      print("TESTING DATE");
+      print(widget.currentDate);
       _calendarController.displayDate = widget.currentDate!;
     }
   }
@@ -697,11 +706,19 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Appointment> appts = widget.events.map((e) {
+    final List<Appointment> appts = calendController.events.map((e) {
+      print("TESTING APPOINTMENT");
+      print(e.id);
+      print(e.start);
+      print(e.end);
+      print(e.title);
+      print(e.subtitle);
+
+
       return Appointment(
-        id: e,
-        startTime: e.start,
-        endTime: e.end,
+        id: e.id,
+        startTime: DateTime(2025, 9, 30, 12, 0),
+        endTime: DateTime(2025, 9, 30, 2, 0),
         subject: e.title,
         notes: e.subtitle,
         color: e.color.withOpacity(.18),
@@ -716,7 +733,6 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
         final CalendarView view = wide
             ? (widget.showWeekend ? CalendarView.week : CalendarView.workWeek)
             : CalendarView.day;
-
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: SizedBox(
@@ -755,7 +771,10 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
                 timeTextStyle: const TextStyle(fontSize: 12),
               ),
               appointmentBuilder: (context, details) {
+                print("TESTING APPOINTMENT DATA");
+                print(details.appointments.first);
                 final appt = details.appointments.first as Appointment;
+
                 return EventTile(appointment: appt);
               },
               onTap: (details) {

@@ -19,7 +19,7 @@ class CalendarGrid extends StatefulWidget {
 }
 
 class _CalendarGridState extends State<CalendarGrid> {
-  // final CalendarController _calendarController = Get.put(CalendarController());
+  final CalendarsController _calendarController = Get.put(CalendarsController());
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -29,18 +29,18 @@ class _CalendarGridState extends State<CalendarGrid> {
     super.initState();
     _selectedDay = _focusedDay;
     // Trigger a rebuild once sample data finishes loading
-    eventsLoaded.then((_) {
-      if (!mounted) return;
-      setState(() {});
-    });
-    // _calendarController.loadEvents();
+    // eventsLoaded.then((_) {
+    //   if (!mounted) return;
+    //   setState(() {});
+    // });
+    _calendarController.loadEventsFromApi();
   }
 
   @override
   Widget build(BuildContext context) {
     // Debug: log event count every build
     // ignore: avoid_print
-    print('🗓️ CalendarGrid build: events length = ${events.length}');
+    print('🗓️ CalendarGrid build: events length = ${_calendarController.events.length}');
     return Container(
       color: AppColors.surface,
       child: Column(
@@ -162,7 +162,7 @@ class _CalendarGridState extends State<CalendarGrid> {
     // final events = [];
     return WeekTimeCalendar(
       //TODO: Need to make this widget when we will make rest of the tabs
-      events: events,
+      events: _calendarController.events,
 
       // initialWeek: DateTime(2025, 4, 28),
       startHour: 9,
