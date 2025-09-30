@@ -4,8 +4,8 @@ import 'package:get/route_manager.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/controllers/calender_controller.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
-import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart'
-    as sample_data;
+// import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart'
+// as sample_data;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -18,11 +18,26 @@ class _AuthScreenState extends State<AuthScreen> {
   final _loginFormKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final CalendarsController calendarsController = Get.put(CalendarsController());
+  final CalendarsController calendarsController = Get.put(
+    CalendarsController(),
+  );
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
   bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _checkIfAlreadyLoggedIn();
+  }
+
+  void _checkIfAlreadyLoggedIn() {
+    if (ApiService.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAll(() => SchedulePage());
+      });
+    }
+  }
 
   @override
   void dispose() {

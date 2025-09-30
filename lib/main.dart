@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:schedule_app/APIS/Api_Service.dart';
 
 import 'package:schedule_app/pages/Auth/Login_Signup.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await ApiService.init();
   if (kIsWeb) {
     WebViewPlatform.instance = WebWebViewPlatform();
   }
@@ -28,7 +30,7 @@ class BookingScheduleApp extends StatelessWidget {
       title: 'Booking Schedule',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: AuthScreen(),
+      home: _getInitialScreen(),
       builder: (context, child) {
         return ResponsiveBreakpoints.builder(
           child: child!,
@@ -41,5 +43,14 @@ class BookingScheduleApp extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _getInitialScreen() {
+    // If user is already logged in, go directly to SchedulePage
+    if (ApiService.isLoggedIn) {
+      return SchedulePage();
+    } else {
+      return AuthScreen();
+    }
   }
 }
