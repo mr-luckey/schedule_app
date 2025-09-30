@@ -717,8 +717,8 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
 
       return Appointment(
         id: e.id,
-        startTime: DateTime(2025, 9, 30, 12, 0),
-        endTime: DateTime(2025, 9, 30, 2, 0),
+        startTime: e.start,
+        endTime: e.end,
         subject: e.title,
         notes: e.subtitle,
         color: e.color.withOpacity(.18),
@@ -771,8 +771,7 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
                 timeTextStyle: const TextStyle(fontSize: 12),
               ),
               appointmentBuilder: (context, details) {
-                print("TESTING APPOINTMENT DATA");
-                print(details.appointments.first);
+
                 final appt = details.appointments.first as Appointment;
 
                 return EventTile(appointment: appt);
