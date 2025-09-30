@@ -74,6 +74,7 @@ class _SidebarState extends State<Sidebar> {
                     return isSameDay(_selectedDay, day);
                   },
                   onDaySelected: (selectedDay, focusedDay) {
+                    if (!mounted) return;
                     setState(() {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;

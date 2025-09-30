@@ -8,9 +8,11 @@ class CalendarEvent {
   final String? subtitle;
   final Color color;
   final Widget? child;
+  final int? guests;
 
   const CalendarEvent({
     required this.id,
+    required this.guests,
     required this.title,
     required this.start,
     required this.end,

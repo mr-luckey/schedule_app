@@ -1,94 +1,130 @@
-import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/model/Calender_model.dart';
 
-part 'event_model.g.dart';
-
-@HiveType(typeId: 0)
 class Event {
-  @HiveField(0)
   final String id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final DateTime startTime;
-
-  @HiveField(3)
   final DateTime endTime;
-
-  @HiveField(4)
-  final int guests;
-
-  // @HiveField(5)
-  // final String eventType;
-  @HiveField(6)
-  final String package;
-
-  @HiveField(7)
   final String customerName;
-
-  @HiveField(8)
-  final String customerEmail;
-
-  @HiveField(9)
-  final String customerContact;
-
-  @HiveField(10)
   final String hall;
-
-  @HiveField(11)
+  final String timeRange;
   final String specialRequirements;
+  final Color color;
+  final int? guests; // Add guests field
 
   Event({
     required this.id,
     required this.title,
     required this.startTime,
     required this.endTime,
-    required this.guests,
-    // required this.eventType,
-    required this.package,
     required this.customerName,
-    required this.customerEmail,
-    required this.customerContact,
     required this.hall,
-    this.specialRequirements = '',
+    required this.timeRange,
+    required this.specialRequirements,
+    this.color = const Color(0xFF22C55E),
+    this.guests,
   });
+  factory Event.fromJson(Map<String, dynamic> json) {
+    // Parse date and time from API response
+    DateTime startTime;
+    DateTime endTime;
+    int? guests;
 
-  String get timeRange {
-    return '${DateFormat('h:mm a').format(startTime)} - ${DateFormat('h:mm a').format(endTime)}';
-  }
-
-  String get formattedDate {
-    return DateFormat('MMMM d, yyyy').format(startTime);
-  }
-
-  String get duration {
-    final difference = endTime.difference(startTime);
-    final hours = difference.inHours;
-    final minutes = difference.inMinutes % 60;
-
-    if (hours == 0) {
-      return '$minutes minutes';
-    } else if (minutes == 0) {
-      return '$hours hours';
-    } else {
-      return '$hours hours $minutes minutes';
+    String customerName =
+        json['customerName'] ??
+        '${json['firstname'] ?? ''} ${json['lastname'] ?? ''}'.trim();
+    if (customerName.isEmpty) {
+      customerName = 'Customer';
     }
-  }
 
-  String get timeRemaining {
-    final now = DateTime.now();
-    final difference = startTime.difference(now);
-
-    if (difference.isNegative) {
-      return 'Past event';
-    } else if (difference.inDays > 0) {
-      return 'In ${difference.inDays} day${difference.inDays > 1 ? 's' : ''}';
-    } else if (difference.inHours > 0) {
-      return 'In ${difference.inHours} hour${difference.inHours > 1 ? 's' : ''}';
-    } else {
-      return 'In ${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''}';
+    // Parse string dates to DateTime objects
+    try {
+      startTime = DateTime.parse(json['start_time']);
+      endTime = DateTime.parse(json['end_time']);
+    } catch (e) {
+      print('Error parsing dates: $e');
+      // Fallback to current time if parsing fails
+      startTime = DateTime.now();
+      endTime = DateTime.now().add(const Duration(hours: 1));
     }
+
+    // Handle guests field
+    guests = json['no_of_gust'] != null
+        ? int.tryParse(json['no_of_gust'].toString())
+        : null;
+
+    // Build time range string
+    final timeFormat = DateFormat('hh:mm a');
+    final timeRange =
+        '${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}';
+
+    print("Guests: $guests");
+
+    return Event(
+      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      title: json['title'] ?? json['event_type'] ?? 'Booking',
+      startTime: startTime,
+      endTime: endTime,
+      customerName: customerName,
+      hall: json['hall'] ?? json['venue'] ?? 'Main Hall',
+      timeRange: timeRange,
+      specialRequirements:
+          json['specialRequirements'] ??
+          json['requirement'] ??
+          json['description'] ??
+          '',
+      guests: guests,
+    );
+  }
+  // factory Event.fromJson(Map<String, dynamic> json) {
+  //   // Parse date and time from API response
+  //   DateTime startTime;
+  //   DateTime endTime;
+  //   int? guests;
+
+  //   String customerName =
+  //       json['customerName'] ??
+  //       '${json['firstname'] ?? ''} ${json['lastname'] ?? ''}'.trim();
+  //   if (customerName.isEmpty) {
+  //     customerName = 'Customer';
+  //   }
+  //   startTime = DateTime.parse(json['start_time']).toLocal();
+  //   endTime = DateTime.parse(json['end_time']).toLocal();
+  //   final timeFormat = DateFormat('hh:mm a');
+  //   final timeRange =
+  //       '${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}';
+  //   print("........................");
+  //   print(guests);
+
+  //   return Event(
+  //     id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+  //     title: json['title'] ?? json['event_type'] ?? 'Booking',
+  //     startTime: DateTime.parse(json['start_time']).toLocal(),
+  //     endTime: DateTime.parse(json['end_time']).toLocal(),
+  //     customerName: customerName,
+  //     hall: json['hall'] ?? json['venue'] ?? 'Main Hall',
+  //     timeRange: timeRange,
+  //     specialRequirements:
+  //         json['specialRequirements'] ??
+  //         json['requirement'] ??
+  //         json['description'] ??
+  //         '',
+  //     guests: guests,
+  //   );
+  // }
+
+  // Convert to CalendarEvent for the calendar widget
+  CalendarEvent toCalendarEvent() {
+    return CalendarEvent(
+      id: id,
+      title: title,
+      start: startTime,
+      end: endTime,
+      guests: guests,
+      subtitle: '${guests != null ? ' • $guests guests' : ''}',
+      color: color,
+    );
   }
 }

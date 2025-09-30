@@ -301,6 +301,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
   Widget _paymentOption(int index, IconData icon, String title) {
     return GestureDetector(
       onTap: () {
+        if (!mounted) return;
         setState(() {
           _selectedPaymentMethod = index;
         });

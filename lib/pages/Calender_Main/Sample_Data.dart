@@ -1,49 +1,29 @@
-// import 'package:wedding_booking_app/Model/Calender_Event.dart';
-
 import 'package:schedule_app/model/Calender_model.dart';
+import 'package:schedule_app/APIS/Api_Service.dart';
+import 'package:schedule_app/model/event_model.dart';
 
-final events = <CalendarEvent>[
-  CalendarEvent(
-    id: 'e1',
-    title: 'Birthday',
-    start: DateTime(2025, 9, 22, 9, 0),
-    end: DateTime(2025, 9, 22, 12, 0),
-    subtitle: 'Guests: 1000',
-  ),
-  CalendarEvent(
-    id: 'e2',
-    title: 'Marrige',
-    start: DateTime(2025, 9, 24, 10, 0),
-    end: DateTime(2025, 9, 24, 11, 0),
-    subtitle: 'Guests: 1000',
-  ),
-  CalendarEvent(
-    id: 'e3',
-    title: 'Consultation',
-    start: DateTime(2025, 9, 8, 10, 0),
-    end: DateTime(2025, 9, 8, 12, 0),
-    subtitle:
-        '1000', //TODO: API data should be overrider be int to string or guest should be string in API
-  ),
-  CalendarEvent(
-    id: 'e4',
-    title: 'Consultation',
-    start: DateTime(2025, 4, 28, 14, 0),
-    end: DateTime(2025, 4, 28, 15, 0),
-    subtitle: '1000',
-  ),
-  CalendarEvent(
-    id: 'e5',
-    title: 'Consultation',
-    start: DateTime(2025, 4, 30, 9, 0),
-    end: DateTime(2025, 4, 30, 12, 0),
-    subtitle: 'Guests: 500',
-  ),
-  CalendarEvent(
-    id: 'e6',
-    title: 'Consultation',
-    start: DateTime(2025, 5, 1, 11, 0),
-    end: DateTime(2025, 5, 1, 12, 0),
-    subtitle: 'Guests: 1000',
-  ),
-];
+final List<CalendarEvent> events = <CalendarEvent>[];
+
+Future<void> _loadEventsFromApi() async {
+  print('🔔 _loadEventsFromApi() triggered');
+  print('📦 Current cached events length (before fetch): ${events.length}');
+  try {
+    print('🌐 Calling ApiService.getOrders() ...');
+    final List<Event> apiEvents = await ApiService.getOrders();
+    print('✅ getOrders returned ${apiEvents.length} items');
+    events
+      ..clear()
+      ..addAll(apiEvents.map((e) => e.toCalendarEvent()));
+    print('🟢 Events list updated. New length: ${events.length}');
+  } catch (e) {
+    print('❌ _loadEventsFromApi error: $e');
+    // Ignore errors silently to avoid impacting existing screens
+  }
+}
+
+final Future<void> eventsLoaded = _loadEventsFromApi();
+
+// Expose a public refresh hook to load events on-demand (e.g., after login)
+Future<void> refreshCalendarEvents() async {
+  await _loadEventsFromApi();
+}

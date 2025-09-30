@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/controllers/booking_controller.dart';
 import 'package:schedule_app/pages/booking_page.dart';
 import '../theme/app_colors.dart';
 
