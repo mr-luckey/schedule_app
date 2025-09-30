@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class CalendarEvent {
   final String id;
   final String title;
+  final String eventDate;
   final DateTime start;
   final DateTime end;
   final String? subtitle;
@@ -13,6 +14,7 @@ class CalendarEvent {
   const CalendarEvent({
     required this.id,
     required this.guests,
+    required this.eventDate,
     required this.title,
     required this.start,
     required this.end,
