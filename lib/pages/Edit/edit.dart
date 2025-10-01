@@ -23,6 +23,7 @@ class EditPage extends StatefulWidget {
 class _EditPageState extends State<EditPage> {
   final EditController editController = Get.put(EditController());
   final BookingController bookingController = Get.put(BookingController());
+
   // Get.find<BookingController>();
 
   @override
@@ -781,6 +782,7 @@ class FoodBeverageSelection extends StatefulWidget {
 }
 
 class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
+  final EditController editController = Get.find<EditController>();
   bool isConfirmed = false;
   bool isEditing = false;
 
@@ -1417,12 +1419,104 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   },
                   child: Text(isEditing ? "Done" : "Edit"),
                 ),
+
                 ElevatedButton(
-                  onPressed: () {
-                    // Get.find<BookingController>().testOrderData();
-                    // setState(() {});
-                  },
-                  child: Text("Update Order"),
+                  onPressed: controller.isFormValid.value
+                      ? () async {
+                          // Show loading
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) =>
+                                Center(child: CircularProgressIndicator()),
+                          );
+
+                          try {
+                            // Get form data
+                            final fullName = controller.nameController.text;
+                            final names = editController.splitName(fullName);
+                            final firstname = names[0];
+                            final lastname = names[1];
+                            final email = controller.emailController.text;
+                            final phone = controller.contactController.text;
+                            final eventDate =
+                                controller.selectedDate.value ?? DateTime.now();
+                            final startTime =
+                                controller.startTime.value ?? TimeOfDay.now();
+                            final endTime =
+                                controller.endTime.value ?? TimeOfDay.now();
+                            final guests = controller.guests.value;
+                            final requirement =
+                                controller.specialRequirementsController.text;
+
+                            // Call update API
+                            final success = await editController
+                                .updateOrderFromForm(
+                                  firstname: firstname,
+                                  lastname: lastname,
+                                  email: email,
+                                  phone: phone,
+                                  eventDate: eventDate,
+                                  startTime: startTime,
+                                  endTime: endTime,
+                                  guests: guests,
+                                  requirement: requirement,
+                                );
+
+                            // Hide loading
+                            Navigator.of(context).pop();
+
+                            if (success) {
+                              // Show success dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text('Success'),
+                                  content: Text('Event updated successfully!'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        // You can add navigation back or other actions here
+                                      },
+                                      child: Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              // Show error
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to update event: ${editController.errorMessage.value}',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            // Hide loading
+                            Navigator.of(context).pop();
+
+                            // Show error
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error updating event: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text(
+                    'Update Event',
+                  ), // Changed text to indicate update
                 ),
               ],
             ),
