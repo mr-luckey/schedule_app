@@ -19,10 +19,6 @@ class BookingPage extends StatelessWidget {
   final selectedId;
   BookingPage({super.key, this.selectedId});
 
-  void loadandcheck() {
-    // ApiService.getOrders();
-  }
-
   @override
   Widget build(BuildContext context) {
     // Initialize the controller
@@ -1389,10 +1385,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ElevatedButton(
               onPressed: () {
                 Get.find<BookingController>().testOrderData();
-                setState(() {});
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (context) => SchedulePage()));
+                // setState(() {});
               },
               child: Text("testOrder"),
             ),

@@ -1730,8 +1730,9 @@ class BookingController extends GetxController {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {
-                    Get.back();
+                    // Get.back();
                     await completeBooking();
+                    Get.to(() => SchedulePage());
                   },
                   child: Text('Send Actual Order'),
                 ),
