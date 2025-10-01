@@ -576,39 +576,6 @@ class BookingForm extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 24),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: controller.isFormValid.value
-                          ? () => controller
-                                .showBookingConfirmation() //TODO: Change made herer
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Confirm Booking'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // inquiry has slightly different validation (name/email optional)
-                        controller.showInquiry();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text('Inquiry'),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -1450,41 +1417,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   },
                   child: Text(isEditing ? "Done" : "Edit"),
                 ),
-
                 ElevatedButton(
                   onPressed: () {
-                    Get.find<BookingController>().testInquiryData();
-                    setState(() {});
+                    // Get.find<BookingController>().testOrderData();
+                    // setState(() {});
                   },
-                  child: Text("Inquiry"),
-                ),
-                //TODO:change test here
-                // ElevatedButton(
-                //   onPressed: () {
-                //     commitEditsToController();
-                //     controller.showInquiry();
-                //   },
-                //   child: const Text("test"),
-                // ),
-                ElevatedButton(
-                  onPressed: () {
-                    commitEditsToController();
-                    setState(() {
-                      isConfirmed = true;
-                    });
-                  },
-                  child: const Text("Confirm Booking"),
+                  child: Text("Update Order"),
                 ),
               ],
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Get.find<BookingController>().testOrderData();
-                // setState(() {});
-              },
-              child: Text("testOrder"),
-            ),
           ],
         ),
       ),
