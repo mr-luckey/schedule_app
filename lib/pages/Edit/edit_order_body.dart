@@ -126,9 +126,9 @@ class Order {
 }
 
 class OrderServices {
-  int? id;
-  int? orderId;
-  int? menuItemId;
+  String? id;
+  String? orderId;
+  String? menuItemId;
   int? price;
   bool? isDeleted;
 
@@ -141,18 +141,18 @@ class OrderServices {
   });
 
   OrderServices.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    orderId = json['order_id'];
-    menuItemId = json['menu_item_id'];
+    id = json['id'].toString();
+    orderId = json['order_id'].toString();
+    menuItemId = json['menu_item_id'].toString();
     price = json['price'];
     isDeleted = json['is_deleted'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['order_id'] = orderId;
-    data['menu_item_id'] = menuItemId;
+    data['id'] = id.toString();
+    data['order_id'] = orderId.toString();
+    data['menu_item_id'] = menuItemId.toString();
     data['price'] = price;
     data['is_deleted'] = isDeleted;
     return data;
@@ -160,9 +160,9 @@ class OrderServices {
 }
 
 class OrderPackages {
-  int? id;
-  int? orderId;
-  int? packageId;
+  String? id;
+  String? orderId;
+  String? packageId;
   String? amount;
   bool? isCustom;
   List<OrderPackageItems>? orderPackageItems;
@@ -177,9 +177,9 @@ class OrderPackages {
   });
 
   OrderPackages.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    orderId = json['order_id'];
-    packageId = json['package_id'];
+    id = json['id'].toString();
+    orderId = json['order_id'].toString();
+    packageId = json['package_id'].toString();
     amount = json['amount'];
     isCustom = json['is_custom'];
     if (json['order_package_items'] != null) {
@@ -192,9 +192,9 @@ class OrderPackages {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['order_id'] = orderId;
-    data['package_id'] = packageId;
+    data['id'] = id.toString();
+    data['order_id'] = orderId.toString();
+    data['package_id'] = packageId.toString();
     data['amount'] = amount;
     data['is_custom'] = isCustom;
     if (orderPackageItems != null) {
@@ -208,9 +208,9 @@ class OrderPackages {
 }
 
 class OrderPackageItems {
-  int? id;
-  int? orderPackageId;
-  int? menuItemId;
+  String? id;
+  String? orderPackageId;
+  String? menuItemId;
   String? price;
   String? noOfGust;
   bool? isDeleted;
@@ -225,9 +225,9 @@ class OrderPackageItems {
   });
 
   OrderPackageItems.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    orderPackageId = json['order_package_id'];
-    menuItemId = json['menu_item_id'];
+    id = json['id'].toString();
+    orderPackageId = json['order_package_id'].toString();
+    menuItemId = json['menu_item_id'].toString();
     price = json['price'];
     noOfGust = json['no_of_gust'];
     isDeleted = json['is_deleted'];
@@ -235,9 +235,9 @@ class OrderPackageItems {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['order_package_id'] = orderPackageId;
-    data['menu_item_id'] = menuItemId;
+    data['id'] = id.toString();
+    data['order_package_id'] = orderPackageId.toString();
+    data['menu_item_id'] = menuItemId.toString();
     data['price'] = price;
     data['no_of_gust'] = noOfGust;
     data['is_deleted'] = isDeleted;

@@ -145,12 +145,12 @@ class _EditPageState extends State<EditPage> {
   }
 
   // NEW METHOD: Convert current BookingController menu to EditController format
-  // NEW METHOD: Convert current BookingController menu to EditController format
   void _syncMenuDataToEditController() {
     print('🔄 Syncing menu data to edit controller');
 
     // Get current menu from booking controller
     final currentMenu = bookingController.getCurrentMenu();
+
     // Convert to EditController format
     final List<OrderService> updatedServices = [];
     final List<OrderPackage> updatedPackages = [];
@@ -162,6 +162,7 @@ class _EditPageState extends State<EditPage> {
         print(
           '🧩 Map service for API: ${service['name']} (id: $rawId, price: ${service['price']})',
         );
+
         updatedServices.add(
           OrderService(
             menuItemId: rawId?.toString(),
@@ -180,8 +181,6 @@ class _EditPageState extends State<EditPage> {
     // Process food items (packages)
     if (currentMenu["Food Items"] != null &&
         currentMenu["Food Items"]!.isNotEmpty) {
-      print("Testing eror1");
-
       final List<OrderPackageItem> packageItems = [];
 
       for (var foodItem in currentMenu["Food Items"]!) {
@@ -189,6 +188,7 @@ class _EditPageState extends State<EditPage> {
         print(
           '🧩 Map food item for API: ${foodItem['name']} (id: $rawId, price: ${foodItem['price']}, qty: ${foodItem['qty']})',
         );
+
         packageItems.add(
           OrderPackageItem(
             menuItemId: int.tryParse(rawId?.toString() ?? ''),
@@ -209,7 +209,6 @@ class _EditPageState extends State<EditPage> {
         (p) => p['title'] == bookingController.selectedPackage.value,
         orElse: () => {},
       );
-      print("Testing eror1");
 
       updatedPackages.add(
         OrderPackage(
@@ -234,10 +233,105 @@ class _EditPageState extends State<EditPage> {
     print('✅ Menu data synced to edit controller:');
     print('   - Services: ${updatedServices.length}');
     print('   - Packages: ${updatedPackages.length}');
-    print(
-      '   - Package Items: ${updatedPackages.isNotEmpty ? updatedPackages.first.orderPackageItems?.length ?? 0 : 0}',
-    );
+    if (updatedPackages.isNotEmpty) {
+      print(
+        '   - Package Items: ${updatedPackages.first.orderPackageItems?.length ?? 0}',
+      );
+    }
   }
+  // NEW METHOD: Convert current BookingController menu to EditController format
+  // void _syncMenuDataToEditController() {
+  //   print('🔄 Syncing menu data to edit controller');
+
+  //   // Get current menu from booking controller
+  //   final currentMenu = bookingController.getCurrentMenu();
+  //   // Convert to EditController format
+  //   final List<OrderService> updatedServices = [];
+  //   final List<OrderPackage> updatedPackages = [];
+
+  //   // Process services
+  //   if (currentMenu["Services"] != null) {
+  //     for (var service in currentMenu["Services"]!) {
+  //       final dynamic rawId = service['menu_item_id'] ?? service['id'];
+  //       print(
+  //         '🧩 Map service for API: ${service['name']} (id: $rawId, price: ${service['price']})',
+  //       );
+  //       updatedServices.add(
+  //         OrderService(
+  //           menuItemId: rawId?.toString(),
+  //           price: (service['price'] as num).toString(),
+  //           menuItem: MenuItem(
+  //             id: rawId?.toString(),
+  //             title: service['name'] ?? 'Service',
+  //             price: (service['price'] as num).toString(),
+  //             description: '',
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   }
+
+  //   // Process food items (packages)
+  //   if (currentMenu["Food Items"] != null &&
+  //       currentMenu["Food Items"]!.isNotEmpty) {
+  //     print("Testing eror1");
+
+  //     final List<OrderPackageItem> packageItems = [];
+
+  //     for (var foodItem in currentMenu["Food Items"]!) {
+  //       final dynamic rawId = foodItem['menu_item_id'] ?? foodItem['id'];
+  //       print(
+  //         '🧩 Map food item for API: ${foodItem['name']} (id: $rawId, price: ${foodItem['price']}, qty: ${foodItem['qty']})',
+  //       );
+  //       packageItems.add(
+  //         OrderPackageItem(
+  //           menuItemId: int.tryParse(rawId?.toString() ?? ''),
+  //           price: (foodItem['price'] as num).toString(),
+  //           noOfGust: (foodItem['qty'] as int).toString(),
+  //           menuItem: MenuItem(
+  //             id: rawId?.toString(),
+  //             title: foodItem['name'] ?? 'Food Item',
+  //             price: (foodItem['price'] as num).toString(),
+  //             description: '',
+  //           ),
+  //         ),
+  //       );
+  //     }
+
+  //     // Get current package info
+  //     final currentPackage = bookingController.packages.firstWhere(
+  //       (p) => p['title'] == bookingController.selectedPackage.value,
+  //       orElse: () => {},
+  //     );
+  //     print("Testing eror1");
+
+  //     updatedPackages.add(
+  //       OrderPackage(
+  //         packageId: int.tryParse(currentPackage['id']?.toString() ?? ''),
+  //         amount: _calculateTotalFromMenu(currentMenu).toString(),
+  //         isCustom: bookingController.selectedPackage.value == 'Custom Package',
+  //         package: Package(
+  //           id: int.tryParse(currentPackage['id']?.toString() ?? '') ?? 1,
+  //           title: currentPackage['title'] ?? 'Package',
+  //           price: currentPackage['price']?.toString() ?? '0.0',
+  //           description: currentPackage['description'] ?? '',
+  //         ),
+  //         orderPackageItems: packageItems,
+  //       ),
+  //     );
+  //   }
+
+  //   // Update edit controller
+  //   editController.currentOrderServices.value = updatedServices;
+  //   editController.currentOrderPackages.value = updatedPackages;
+
+  //   print('✅ Menu data synced to edit controller:');
+  //   print('   - Services: ${updatedServices.length}');
+  //   print('   - Packages: ${updatedPackages.length}');
+  //   print(
+  //     '   - Package Items: ${updatedPackages.isNotEmpty ? updatedPackages.first.orderPackageItems?.length ?? 0 : 0}',
+  //   );
+  // }
 
   double _calculateTotalFromMenu(Map<String, List<Map<String, dynamic>>> menu) {
     double total = 0.0;

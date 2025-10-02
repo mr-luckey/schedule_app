@@ -241,7 +241,8 @@ class ApiService {
   // Get Single Order by ID
   static Future<EditOrderModel?> getOrderById(String orderId) async {
     try {
-      final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
+      int orderIdInt = int.parse(orderId);
+      final Uri uri = Uri.parse('$baseUrl/orders/$orderIdInt');
       print('🔄 Fetching order by ID: $uri');
 
       final response = await _handleRequest(
@@ -280,7 +281,7 @@ class ApiService {
         http.put(uri, headers: await getHeaders(), body: jsonEncode(orderData)),
       );
       print("UPDATED NEW BODY WILL BE HERE ");
-      print(orderData);
+      print(jsonEncode(orderData));
 
       return response;
     } catch (e) {
