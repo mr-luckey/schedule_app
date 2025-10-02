@@ -19,8 +19,9 @@ class EditOrderModel {
   City? city;
   EventType? event;
   PaymentMethod? paymentMethod;
-  List<dynamic>? orderServices;
+  List<OrderService>? orderServices; // Change from List<dynamic>
   List<OrderPackage>? orderPackages;
+
   String? url;
   String? createdAt;
   String? updatedAt;
@@ -40,6 +41,9 @@ class EditOrderModel {
     this.eventTime,
     this.startTime,
     this.endTime,
+    // this.orderServices,
+    this.orderPackages,
+
     this.requirement,
     this.isInquiry,
     this.paymentMethodId,
@@ -47,7 +51,7 @@ class EditOrderModel {
     this.event,
     this.paymentMethod,
     this.orderServices,
-    this.orderPackages,
+    // this.orderPackages,
     this.url,
     this.createdAt,
     this.updatedAt,
@@ -78,7 +82,9 @@ class EditOrderModel {
           ? PaymentMethod.fromJson(json['payment_method'])
           : null,
       orderServices: json['order_services'] != null
-          ? List<dynamic>.from(json['order_services'])
+          ? List<OrderService>.from(
+              json['order_services'].map((x) => OrderService.fromJson(x)),
+            )
           : null,
       orderPackages: json['order_packages'] != null
           ? List<OrderPackage>.from(
@@ -113,7 +119,7 @@ class EditOrderModel {
       'city': city?.toJson(),
       'event': event?.toJson(),
       'payment_method': paymentMethod?.toJson(),
-      'order_services': orderServices,
+      'order_services': orderServices?.map((x) => x.toJson()).toList(),
       'order_packages': orderPackages?.map((x) => x.toJson()).toList(),
       'url': url,
       'created_at': createdAt,
@@ -440,6 +446,56 @@ class MenuItem {
       'description': description,
       'created_at': createdAt,
       'updated_at': updatedAt,
+    };
+  }
+}
+
+class OrderService {
+  int? id;
+  int? orderId;
+  int? menuItemId;
+  String? price;
+  bool? isDeleted;
+  String? createdAt;
+  String? updatedAt;
+  MenuItem? menuItem;
+
+  OrderService({
+    this.id,
+    this.orderId,
+    this.menuItemId,
+    this.price,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.menuItem,
+  });
+
+  factory OrderService.fromJson(Map<String, dynamic> json) {
+    return OrderService(
+      id: json['id'],
+      orderId: json['order_id'],
+      menuItemId: json['menu_item_id'],
+      price: json['price'],
+      isDeleted: json['is_deleted'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+      menuItem: json['menu_item'] != null
+          ? MenuItem.fromJson(json['menu_item'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'order_id': orderId,
+      'menu_item_id': menuItemId,
+      'price': price,
+      'is_deleted': isDeleted,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'menu_item': menuItem?.toJson(),
     };
   }
 }

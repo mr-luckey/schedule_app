@@ -253,10 +253,10 @@
 //     await _prefs?.setString('token', token);
 //   }
 
-//   // static Future<void> clearToken() async {
-//   //   _bearerToken = null;
-//   //   await _prefs?.remove('token');
-//   // }
+//   static Future<void> clearToken() async {
+//     _bearerToken = null;
+//     await _prefs?.remove('token');
+//   }
 
 //   // Common headers
 //   static Future<Map<String, String>> getHeaders({String? token}) async {

@@ -147,8 +147,8 @@ class EditController extends GetxController {
     required TimeOfDay startTime,
     required TimeOfDay endTime,
     required int guests,
-    required OrderPackage,
 
+    // required OrderPackage,
     required String requirement,
   }) async {
     if (currentEditOrder.value == null) {
@@ -189,11 +189,11 @@ class EditController extends GetxController {
     // Convert order services to the required format
     return currentEditOrder.value!.orderServices!.map((service) {
       return {
-        "id": service['id'],
+        "id": service.id,
         "order_id": currentEditOrder.value!.id,
-        "menu_item_id": service['menu_item_id'] ?? 1,
-        "price": service['price'] ?? 0,
-        "is_deleted": service['is_deleted'] ?? false,
+        "menu_item_id": service.menuItemId ?? 1,
+        "price": service.price ?? "0.0",
+        "is_deleted": service.isDeleted ?? false,
       };
     }).toList();
   }
