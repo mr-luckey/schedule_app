@@ -1818,7 +1818,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           ?.paymentMethodId ??
                                       1,
                                 );
-
+                            print('My check is herer');
+                            print(availableFoodLocal);
                             // Hide loading only if widget is still mounted
                             if (mounted) {
                               Navigator.of(context).pop();

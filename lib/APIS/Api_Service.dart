@@ -238,47 +238,6 @@ class ApiService {
     }
   }
 
-  // ---------------------------
-  // Login API
-  // ---------------------------
-  // static Future<Map<String, dynamic>> login({
-  //   required String email,
-  //   required String password,
-  // }) async {
-  //   final Uri uri = Uri.parse('$baseUrl/sessions');
-  //   final Map<String, dynamic> requestBody = {
-  //     "session": {"email": email, "password": password},
-  //   };
-
-  //   final result = await _handleRequest(
-  //     http.post(
-  //       uri,
-  //       headers: await getHeaders(),
-  //       body: jsonEncode(requestBody),
-  //     ),
-  //   );
-
-  //   if (result['success'] == true) {
-  //     final data = result['data'];
-  //     final token = _extractToken(data);
-  //     if (token != null && token.isNotEmpty) {
-  //       _bearerToken = token;
-  //     }
-  //   }
-
-  //   return result;
-  // }
-  // static String _parseError(http.Response response) {
-  //   try {
-  //     final responseBody = jsonDecode(response.body);
-  //     return responseBody['message'] ??
-  //         responseBody['error'] ??
-  //         'Server returned status ${response.statusCode}';
-  //   } catch (e) {
-  //     return 'Server returned status ${response.statusCode}: ${response.body}';
-  //   }
-  // }
-
   // Get Single Order by ID
   static Future<EditOrderModel?> getOrderById(String orderId) async {
     try {

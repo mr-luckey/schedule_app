@@ -237,7 +237,7 @@ class BookingController extends GetxController {
       else if (package['items'] is List) {
         for (var item in package['items'] as List) {
           items.add({
-            'name': item['name']?.toString() ?? 'Unknown Item',
+            'name': item['name']?.toString(),
             'price': (item['price'] as num?)?.toDouble() ?? 0.0,
             'qty': (item['quantity'] as int?) ?? (item['qty'] as int?) ?? 1,
           });

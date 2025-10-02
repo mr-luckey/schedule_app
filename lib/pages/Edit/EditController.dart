@@ -707,6 +707,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/model.dart';
+import 'package:schedule_app/pages/Edit/edit_order_body.dart' as body;
 
 class EditController extends GetxController {
   final Rx<EditOrderModel?> currentEditOrder = Rx<EditOrderModel?>(null);
@@ -871,9 +872,45 @@ class EditController extends GetxController {
         }
       }
 
-      // Prepare the order data according to your example
-      final orderData = ApiService.formatUpdateOrderData(
-        orderId: orderId,
+      // Build request body using dedicated model as requested
+      final bodyOrderServices = orderServicesData.map((m) {
+        return body.OrderServices(
+          id: m['id'],
+          orderId: m['order_id'],
+          menuItemId: m['menu_item_id'],
+          price: (m['price'] is num) ? (m['price'] as num).toInt() : m['price'],
+          isDeleted: m['is_deleted'] ?? false,
+        );
+      }).toList();
+
+      final bodyOrderPackages = orderPackagesData.map((pkg) {
+        final List<dynamic> itemsDyn =
+            (pkg['order_package_items_attributes'] ??
+                    pkg['order_package_items'] ??
+                    [])
+                as List<dynamic>;
+        final items = itemsDyn.map((it) {
+          return body.OrderPackageItems(
+            id: it['id'],
+            orderPackageId: it['order_package_id'],
+            menuItemId: it['menu_item_id'],
+            price: it['price']?.toString(),
+            noOfGust: it['no_of_gust']?.toString(),
+            isDeleted: it['is_deleted'] ?? false,
+          );
+        }).toList();
+        return body.OrderPackages(
+          id: pkg['id'],
+          orderId: pkg['order_id'],
+          packageId: pkg['package_id'],
+          amount: (pkg['amount'] ?? '0').toString(),
+          isCustom: pkg['is_custom'] ?? false,
+          orderPackageItems: items,
+        );
+      }).toList();
+
+      final bodyOrder = body.Order(
+        id: orderId,
         firstname: firstname,
         lastname: lastname,
         email: email,
@@ -890,15 +927,20 @@ class EditController extends GetxController {
         requirement: requirement,
         isInquiry: isInquiry,
         paymentMethodId: paymentMethodId,
-        orderServices: orderServicesData,
-        orderPackages: orderPackagesData,
+        orderServices: bodyOrderServices,
+        orderPackages: bodyOrderPackages,
       );
+
+      final requestBody = body.EditOrderBody(order: bodyOrder).toJson();
+
+      print('🧪 EditOrderBody JSON preview:');
+      print(requestBody);
 
       print('🔄 Sending PUT request to update order...');
 
       final response = await ApiService.updateOrder(
         orderId: orderId.toString(),
-        orderData: orderData,
+        orderData: requestBody,
       );
 
       if (response['success'] == true) {

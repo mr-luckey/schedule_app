@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/controllers/booking_controller.dart';
-import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
-import 'package:schedule_app/pages/schedule_page.dart';
-import 'package:schedule_app/widgets/Payment_Popup.dart';
+
 // import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import '../theme/app_colors.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/schedule_header.dart';
 import '../widgets/booking_summary.dart';
-import 'package:schedule_app/model/event_model.dart';
 import 'package:flutter/services.dart';
 
 class BookingPage extends StatelessWidget {
@@ -263,10 +259,7 @@ class BookingForm extends StatelessWidget {
                       controller: controller.contactController,
                       label: 'Contact#',
                       hint: '+44-XXX-XXX-XXX',
-                      // Add input formatters for phone number
-                      // inputFormatters: [
-                      //   FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-()\s]')), // Only allow digits, +, -, (, ), and spaces
-                      // ],
+
                       validator: (value) {
                         if (value != null && value.isNotEmpty) {
                           // Basic phone number validation - at least 6 digits
@@ -1196,43 +1189,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   ),
                 ),
 
-                // Quantity controls (visible when editing for both food & services)
-                // if (isEditing)
-                //   Container(
-                //     padding: const EdgeInsets.symmetric(horizontal: 4),
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Colors.black),
-                //       borderRadius: BorderRadius.circular(10),
-                //     ),
-                //     // child: Row(
-                //     //   children: [
-                //     //     IconButton(
-                //     //       icon: const Icon(Icons.remove_outlined, size: 20),
-                //     //       onPressed: () => decrement(dish),
-                //     //     ),
-                //     //     Text(
-                //     //       dish["qty"].toString(),
-                //     //       style: const TextStyle(fontSize: 16),
-                //     //     ),
-                //     //     IconButton(
-                //     //       icon: const Icon(Icons.add, size: 20),
-                //     //       onPressed: () => increment(dish),
-                //     //     ),
-                //     //     // Edit button to input number manually
-                //     //     IconButton(
-                //     //       icon: const Icon(Icons.edit, size: 18),
-                //     //       onPressed: () => _showEditDishQuantityDialog(dish),
-                //     //     ),
-                //     //   ],
-                //     // ),
-                //   )
-                // else
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 8),
-                //   child: Text("Qty: ${dish["qty"]}"),
-                // ),
-
-                // Remove button (only visible when editing)
                 if (isEditing)
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.red, size: 20),
