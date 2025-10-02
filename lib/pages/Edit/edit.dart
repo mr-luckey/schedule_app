@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:schedule_app/controllers/booking_controller.dart';
 import 'package:schedule_app/pages/Edit/EditController.dart';
+import 'package:schedule_app/pages/Edit/model.dart';
 // import 'package:schedule_app/controllers/edit_controller.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/booking_summary.dart';
@@ -1461,6 +1462,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                   endTime: endTime,
                                   guests: guests,
                                   requirement: requirement,
+                                  OrderPackage: OrderPackage(),
                                 );
 
                             // Hide loading
