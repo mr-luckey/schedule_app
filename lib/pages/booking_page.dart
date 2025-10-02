@@ -237,10 +237,17 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!value.contains('@'))
-                          return 'Please enter a valid email';
+                        // Improved email validation with regex
+                        final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        );
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
                         return null;
                       },
+
+                      // Add input formatters for email
                     ),
                   ),
                 ],
@@ -256,6 +263,22 @@ class BookingForm extends StatelessWidget {
                       controller: controller.contactController,
                       label: 'Contact#',
                       hint: '+44-XXX-XXX-XXX',
+                      // Add input formatters for phone number
+                      // inputFormatters: [
+                      //   FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-()\s]')), // Only allow digits, +, -, (, ), and spaces
+                      // ],
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          // Basic phone number validation - at least 6 digits
+                          final digitCount = value
+                              .replaceAll(RegExp(r'[^0-9]'), '')
+                              .length;
+                          if (digitCount < 15) {
+                            return 'Please enter a valid contact number';
+                          }
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -1373,6 +1396,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 ElevatedButton(
                   onPressed: () {
                     commitEditsToController();
+
                     setState(() {
                       isConfirmed = true;
                     });
@@ -1384,7 +1408,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Get.find<BookingController>().testOrderData();
+                // Get.find<BookingController>().testOrderData();
                 // setState(() {});
               },
               child: Text("testOrder"),

@@ -20,6 +20,13 @@ class BookingController extends GetxController {
   final contactController = TextEditingController();
   final messageController = TextEditingController();
   final specialRequirementsController = TextEditingController();
+  // Add this to your BookingController class
+  Map<String, List<Map<String, dynamic>>> getCurrentMenu() {
+    return menuForPackage(
+      selectedPackage.value,
+      guests.value > 0 ? guests.value : 1,
+    );
+  }
 
   // Form data
   final RxString selectedCity = ''.obs;
@@ -1487,10 +1494,10 @@ class BookingController extends GetxController {
 
     // Fallback to existing data
     return [
-      {"name": "Chicken Tikka", "price": 250.0},
-      {"name": "Paneer Tikka", "price": 250.0},
-      {"name": "Mutton Biryani", "price": 350.0},
-      {"name": "Butter Chicken", "price": 300.0},
+      // {"name": "Chicken Tikka", "price": 250.0},
+      // {"name": "Paneer Tikka", "price": 250.0},
+      // {"name": "Mutton Biryani", "price": 350.0},
+      // {"name": "Butter Chicken", "price": 300.0},
     ];
   }
 

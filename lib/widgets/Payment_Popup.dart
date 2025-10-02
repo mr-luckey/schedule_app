@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/get_core.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/controllers/booking_controller.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 
@@ -273,6 +274,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
                   ),
                 ),
                 onPressed: () {
+                  Get.find<BookingController>().completeBooking();
                   Get.back();
                   // Get.back();
                 },

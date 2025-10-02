@@ -103,7 +103,7 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
               showCurrentTimeIndicator: true,
               headerStyle: const CalendarHeaderStyle(
                 textAlign: TextAlign.center,
-                textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                textStyle: TextStyle(fontSize: 0, fontWeight: FontWeight.w600),
               ),
               viewHeaderHeight: 52,
               viewHeaderStyle: const ViewHeaderStyle(

@@ -397,7 +397,7 @@ class OrderPackageItem {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': id.toString(),
       'order_package_id': orderPackageId,
       'menu_item_id': menuItemId,
       'price': price,
@@ -440,7 +440,7 @@ class MenuItem {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': id.toString(),
       'title': title,
       'price': price,
       'description': description,
@@ -451,7 +451,7 @@ class MenuItem {
 }
 
 class OrderService {
-  int? id;
+  String? id;
   int? orderId;
   int? menuItemId;
   String? price;
@@ -489,7 +489,7 @@ class OrderService {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'order_id': orderId,
+      'order_id': orderId.toString(),
       'menu_item_id': menuItemId,
       'price': price,
       'is_deleted': isDeleted,
