@@ -295,8 +295,8 @@ class OrderPackage {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'order_id': orderId,
+      'id': id.toString(),
+      'order_id': orderId.toString(),
       'package_id': packageId,
       'amount': amount,
       'is_custom': isCustom,
@@ -344,7 +344,7 @@ class Package {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': id.toString(),
       'title': title,
       'price': price,
       'description': description,
@@ -357,7 +357,7 @@ class Package {
 }
 
 class OrderPackageItem {
-  int? id;
+  String? id;
   int? orderPackageId;
   int? menuItemId;
   String? price;
@@ -381,7 +381,7 @@ class OrderPackageItem {
 
   factory OrderPackageItem.fromJson(Map<String, dynamic> json) {
     return OrderPackageItem(
-      id: json['id'],
+      id: json['id'].toString(),
       orderPackageId: json['order_package_id'],
       menuItemId: json['menu_item_id'],
       price: json['price'],
@@ -399,7 +399,7 @@ class OrderPackageItem {
     return {
       'id': id.toString(),
       'order_package_id': orderPackageId,
-      'menu_item_id': menuItemId,
+      'menu_item_id': menuItemId.toString(),
       'price': price,
       'no_of_gust': noOfGust,
       'is_deleted': isDeleted,
@@ -411,7 +411,7 @@ class OrderPackageItem {
 }
 
 class MenuItem {
-  int? id;
+  String? id;
   String? title;
   String? price;
   String? description;
@@ -429,7 +429,7 @@ class MenuItem {
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
-      id: json['id'],
+      id: json['id'].toString(),
       title: json['title'],
       price: json['price'],
       description: json['description'],
@@ -452,8 +452,8 @@ class MenuItem {
 
 class OrderService {
   String? id;
-  int? orderId;
-  int? menuItemId;
+  String? orderId;
+  String? menuItemId;
   String? price;
   bool? isDeleted;
   String? createdAt;
@@ -473,8 +473,8 @@ class OrderService {
 
   factory OrderService.fromJson(Map<String, dynamic> json) {
     return OrderService(
-      id: json['id'],
-      orderId: json['order_id'],
+      id: json['id'].toString(),
+      orderId: json['order_id'].toString(),
       menuItemId: json['menu_item_id'],
       price: json['price'],
       isDeleted: json['is_deleted'],
@@ -488,7 +488,7 @@ class OrderService {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': id.toString(),
       'order_id': orderId.toString(),
       'menu_item_id': menuItemId,
       'price': price,

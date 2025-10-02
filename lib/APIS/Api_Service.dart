@@ -320,6 +320,8 @@ class ApiService {
       final response = await _handleRequest(
         http.put(uri, headers: await getHeaders(), body: jsonEncode(orderData)),
       );
+      print("UPDATED NEW BODY WILL BE HERE ");
+      print(orderData);
 
       return response;
     } catch (e) {
@@ -347,8 +349,8 @@ class ApiService {
     required String requirement,
     required bool isInquiry,
     required int paymentMethodId,
-    required List<Map<String, dynamic>> orderServices,
-    required List<Map<String, dynamic>> orderPackages,
+    required List<Map<dynamic, dynamic>> orderServices,
+    required List<Map<dynamic, dynamic>> orderPackages,
   }) {
     return {
       "order": {
@@ -369,8 +371,9 @@ class ApiService {
         "requirement": requirement,
         "is_inquiry": isInquiry,
         "payment_method_id": paymentMethodId,
-        "order_services": orderServices,
-        "order_packages": orderPackages,
+        // Use *_attributes for nested updates to align with create format
+        "order_services_attributes": orderServices,
+        "order_packages_attributes": orderPackages,
       },
     };
   }

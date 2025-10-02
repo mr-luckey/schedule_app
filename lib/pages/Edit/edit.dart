@@ -11,6 +11,7 @@ import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
 import 'package:schedule_app/widgets/schedule_header.dart';
 import 'package:schedule_app/widgets/sidebar.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 
 // ignore: must_be_immutable
 class EditPage extends StatefulWidget {
@@ -150,7 +151,6 @@ class _EditPageState extends State<EditPage> {
 
     // Get current menu from booking controller
     final currentMenu = bookingController.getCurrentMenu();
-
     // Convert to EditController format
     final List<OrderService> updatedServices = [];
     final List<OrderPackage> updatedPackages = [];
@@ -158,12 +158,16 @@ class _EditPageState extends State<EditPage> {
     // Process services
     if (currentMenu["Services"] != null) {
       for (var service in currentMenu["Services"]!) {
+        final dynamic rawId = service['menu_item_id'] ?? service['id'];
+        print(
+          '🧩 Map service for API: ${service['name']} (id: $rawId, price: ${service['price']})',
+        );
         updatedServices.add(
           OrderService(
-            menuItemId: service['id'] ?? 1,
+            menuItemId: rawId?.toString(),
             price: (service['price'] as num).toString(),
             menuItem: MenuItem(
-              id: service['id'] ?? 1,
+              id: rawId?.toString(),
               title: service['name'] ?? 'Service',
               price: (service['price'] as num).toString(),
               description: '',
@@ -176,16 +180,22 @@ class _EditPageState extends State<EditPage> {
     // Process food items (packages)
     if (currentMenu["Food Items"] != null &&
         currentMenu["Food Items"]!.isNotEmpty) {
+      print("Testing eror1");
+
       final List<OrderPackageItem> packageItems = [];
 
       for (var foodItem in currentMenu["Food Items"]!) {
+        final dynamic rawId = foodItem['menu_item_id'] ?? foodItem['id'];
+        print(
+          '🧩 Map food item for API: ${foodItem['name']} (id: $rawId, price: ${foodItem['price']}, qty: ${foodItem['qty']})',
+        );
         packageItems.add(
           OrderPackageItem(
-            menuItemId: foodItem['id'] ?? 1,
+            menuItemId: int.tryParse(rawId?.toString() ?? ''),
             price: (foodItem['price'] as num).toString(),
             noOfGust: (foodItem['qty'] as int).toString(),
             menuItem: MenuItem(
-              id: foodItem['id'] ?? 1,
+              id: rawId?.toString(),
               title: foodItem['name'] ?? 'Food Item',
               price: (foodItem['price'] as num).toString(),
               description: '',
@@ -199,14 +209,15 @@ class _EditPageState extends State<EditPage> {
         (p) => p['title'] == bookingController.selectedPackage.value,
         orElse: () => {},
       );
+      print("Testing eror1");
 
       updatedPackages.add(
         OrderPackage(
-          packageId: currentPackage['id'] ?? 1,
+          packageId: int.tryParse(currentPackage['id']?.toString() ?? ''),
           amount: _calculateTotalFromMenu(currentMenu).toString(),
           isCustom: bookingController.selectedPackage.value == 'Custom Package',
           package: Package(
-            id: currentPackage['id'] ?? 1,
+            id: int.tryParse(currentPackage['id']?.toString() ?? '') ?? 1,
             title: currentPackage['title'] ?? 'Package',
             price: currentPackage['price']?.toString() ?? '0.0',
             description: currentPackage['description'] ?? '',
@@ -1108,6 +1119,21 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   void _syncAvailableListsWithMenu() {
+    // Debug: show current menu snapshot
+    print('🧭 Syncing available lists with current menu snapshot');
+    print('   - Food Items:');
+    for (final it in menu['Food Items'] ?? []) {
+      print(
+        '     • ${it['name']} (id: ${it['id'] ?? it['menu_item_id']}, qty: ${it['qty']}, price: ${it['price']})',
+      );
+    }
+    print('   - Services:');
+    for (final it in menu['Services'] ?? []) {
+      print(
+        '     • ${it['name']} (id: ${it['id'] ?? it['menu_item_id']}, qty: ${it['qty']}, price: ${it['price']})',
+      );
+    }
+
     availableFoodLocal = List.from(controller.masterAvailableFood);
     availableServicesLocal = List.from(controller.masterAvailableServices);
 
@@ -1250,6 +1276,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void removeDish(String category, Map<String, dynamic> dish) {
     if (!mounted) return;
     setState(() {
+      print(
+        '🗑️ Removing from $category: ${dish['name']} (id: ${dish['id'] ?? dish['menu_item_id']})',
+      );
       menu[category]?.remove(dish);
 
       if (category == "Food Items") {
@@ -1260,6 +1289,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           "price": dish["price"],
         });
       }
+      // Debug after removal
+      print(
+        '📦 Menu after removal -> Food: ${menu['Food Items']?.length ?? 0} | Services: ${menu['Services']?.length ?? 0}',
+      );
     });
   }
 
@@ -1349,6 +1382,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                             final isApiPackage = _isApiPackage(
                                               controller.selectedPackage.value,
                                             );
+                                            // Pretty debug for selection
+                                            print('➕ Adding to $category:');
+                                            print(
+                                              '   • ${item['name']} (id: ${item['id']}, cat: $categoryName, price: ${item['price']})',
+                                            );
+                                            print(
+                                              '   • Current package: ${controller.selectedPackage.value} | API package: $isApiPackage',
+                                            );
+
+                                            // Guard against duplicate by id
                                             final baseQty =
                                                 category == "Food Items" &&
                                                     !isApiPackage
@@ -1357,12 +1400,30 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                                       : 1)
                                                 : 1;
 
-                                            menu[category]!.add({
-                                              "name": item["name"],
-                                              "price": item["price"],
-                                              "qty": baseQty,
-                                              "id": item["id"],
-                                            });
+                                            final exists = menu[category]!.any(
+                                              (m) =>
+                                                  m['id']?.toString() ==
+                                                  item['id']?.toString(),
+                                            );
+                                            if (!exists) {
+                                              menu[category]!.add({
+                                                "name": item["name"],
+                                                "price": item["price"],
+                                                "qty": baseQty,
+                                                "id": item["id"],
+                                              });
+                                            } else {
+                                              print(
+                                                '⚠️ Skipped duplicate ${item['name']} (id: ${item['id']}) in $category',
+                                              );
+                                            }
+
+                                            print(
+                                              '✅ Added to $category: ${item['name']} (id: ${item['id']}), qty: $baseQty',
+                                            );
+                                            print(
+                                              '📦 Menu now -> Food: ${menu['Food Items']?.length ?? 0} | Services: ${menu['Services']?.length ?? 0}',
+                                            );
 
                                             // Remove from available list
                                             if (category == "Food Items") {
@@ -1565,6 +1626,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   void commitEditsToController() {
     controller.updateCustomPackageItems(controller.selectedPackage.value, menu);
+    // editController.updatePackage(controller.selectedPackage.value.length, );
     Get.snackbar('Saved', 'Package updated');
   }
 
@@ -1674,6 +1736,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 ElevatedButton(
                   onPressed: controller.isFormValid.value
                       ? () async {
+                          // CRITICAL FIX: Sync the current menu data to EditController BEFORE updating
+                          // Get the parent EditPage state to call the sync method
+                          final editPageState = context
+                              .findAncestorStateOfType<_EditPageState>();
+                          if (editPageState != null) {
+                            editPageState._syncMenuDataToEditController();
+                          } else {
+                            print('❌ Could not find EditPage state');
+                          }
+
                           // Show loading
                           showDialog(
                             context: context,
@@ -1684,8 +1756,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                           );
 
                           try {
-                            // SYNC: First sync the current menu data to EditController
-
                             // Get form data
                             final fullName = controller.nameController.text;
                             final names = editController.splitName(fullName);
@@ -1755,9 +1825,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             }
 
                             if (success) {
-                              // Show success dialog only if widget is still mounted
+                              // Show success dialog then navigate to main screen
                               if (mounted) {
-                                showDialog(
+                                await showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     title: const Text('Success'),
@@ -1774,6 +1844,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                     ],
                                   ),
                                 );
+                                if (!mounted) return;
+                                Get.offAll(() => SchedulePage());
                               }
                             } else {
                               // Show error only if widget is still mounted

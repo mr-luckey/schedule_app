@@ -1455,7 +1455,8 @@ class BookingController extends GetxController {
         'name': name,
         'price': price,
         'qty': finalQty,
-        'menu_item_id': item['menu_item_id'],
+        'menu_item_id': item['menu_item_id'] ?? item['id'],
+        'id': item['id'],
       };
 
       if (isFood) {
@@ -1484,6 +1485,8 @@ class BookingController extends GetxController {
               "price": _parsePriceString(item['price']?.toString()),
               "id": item['id']?.toString(),
               "category": category['title']?.toString() ?? 'Uncategorized',
+              // Preserve menu_item_id alias for consistent mapping
+              "menu_item_id": item['id']?.toString(),
             });
           }
         }
@@ -1513,6 +1516,8 @@ class BookingController extends GetxController {
               "price": _parsePriceString(item['price']?.toString()),
               "id": item['id']?.toString(),
               "category": category['title']?.toString() ?? 'Uncategorized',
+              // Preserve menu_item_id alias for consistent mapping
+              "menu_item_id": item['id']?.toString(),
             });
           }
         }
@@ -1572,6 +1577,8 @@ class BookingController extends GetxController {
         'name': f['name'],
         'price': (f['price'] as num).toDouble(),
         'qty': (f['qty'] as int),
+        'id': f['id'] ?? f['menu_item_id'],
+        'menu_item_id': f['menu_item_id'] ?? f['id'],
       });
     }
     for (var s in newMenu['Services'] ?? []) {
@@ -1579,6 +1586,8 @@ class BookingController extends GetxController {
         'name': s['name'],
         'price': (s['price'] as num).toDouble(),
         'qty': (s['qty'] as int),
+        'id': s['id'] ?? s['menu_item_id'],
+        'menu_item_id': s['menu_item_id'] ?? s['id'],
       });
     }
 
