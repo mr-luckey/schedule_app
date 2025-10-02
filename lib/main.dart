@@ -13,9 +13,10 @@ import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   await ApiService.init();
-  await EditApiService.init();
+  // await EditApiService.init();
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     WebViewPlatform.instance = WebWebViewPlatform();
   }

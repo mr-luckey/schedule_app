@@ -217,6 +217,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/editApi.dart';
 // import 'package:schedule_app/APIS/EditApiService.dart';
 // import 'package:schedule_app/model/edit_order_model.dart';
@@ -235,7 +236,7 @@ class EditController extends GetxController {
 
       print('🔄 Loading order data for ID: $orderId');
 
-      final EditOrderModel? order = await EditApiService.getOrderById(orderId);
+      final EditOrderModel? order = await ApiService.getOrderById(orderId);
 
       if (order != null) {
         currentEditOrder.value = order;
@@ -284,16 +285,16 @@ class EditController extends GetxController {
       final orderId = currentEditOrder.value!.id!;
 
       // Format dates and times for API
-      final formattedEventDate = EditApiService.formatDateForApi(eventDate);
-      final formattedEventTime = EditApiService.formatTimeOfDayForApi(
+      final formattedEventDate = ApiService.formatDateForApi(eventDate);
+      final formattedEventTime = ApiService.formatTimeOfDayForApi(
         startTime,
         eventDate,
       );
-      final formattedStartTime = EditApiService.formatTimeOfDayForApi(
+      final formattedStartTime = ApiService.formatTimeOfDayForApi(
         startTime,
         eventDate,
       );
-      final formattedEndTime = EditApiService.formatTimeOfDayForApi(
+      final formattedEndTime = ApiService.formatTimeOfDayForApi(
         endTime,
         eventDate,
       );
@@ -305,7 +306,7 @@ class EditController extends GetxController {
       print('   - Guests: $noOfGust');
 
       // Prepare the order data according to your example
-      final orderData = EditApiService.formatUpdateOrderData(
+      final orderData = ApiService.formatUpdateOrderData(
         orderId: orderId,
         firstname: firstname,
         lastname: lastname,
@@ -329,7 +330,7 @@ class EditController extends GetxController {
 
       print('🔄 Sending PUT request to update order...');
 
-      final response = await EditApiService.updateOrder(
+      final response = await ApiService.updateOrder(
         orderId: orderId.toString(),
         orderData: orderData,
       );

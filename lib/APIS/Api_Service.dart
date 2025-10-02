@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
+import 'package:schedule_app/pages/Edit/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -279,6 +281,124 @@ class ApiService {
 
   //   return result;
   // }
+  // static String _parseError(http.Response response) {
+  //   try {
+  //     final responseBody = jsonDecode(response.body);
+  //     return responseBody['message'] ??
+  //         responseBody['error'] ??
+  //         'Server returned status ${response.statusCode}';
+  //   } catch (e) {
+  //     return 'Server returned status ${response.statusCode}: ${response.body}';
+  //   }
+  // }
+
+  // Get Single Order by ID
+  static Future<EditOrderModel?> getOrderById(String orderId) async {
+    try {
+      final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
+      print('🔄 Fetching order by ID: $uri');
+
+      final response = await _handleRequest(
+        http.get(uri, headers: await getHeaders()),
+      );
+
+      if (response['success'] == true) {
+        final data = response['data'];
+        if (data is Map) {
+          final order = EditOrderModel.fromJson(data);
+          print('✅ Successfully parsed order: ${order.id}');
+          return order;
+        } else {
+          throw Exception('Unexpected API response format: $data');
+        }
+      } else {
+        throw Exception('Failed to load order: ${response['error']}');
+      }
+    } catch (e) {
+      print('❌ Error fetching order by ID: $e');
+      throw Exception('Error fetching order: $e');
+    }
+  }
+
+  // Update Order - PUT API
+  static Future<Map<String, dynamic>> updateOrder({
+    required String orderId,
+    required Map<String, dynamic> orderData,
+  }) async {
+    try {
+      final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
+      print('🔄 Updating order at: $uri');
+      print('📦 Update data: ${jsonEncode(orderData)}');
+
+      final response = await _handleRequest(
+        http.put(uri, headers: await getHeaders(), body: jsonEncode(orderData)),
+      );
+
+      return response;
+    } catch (e) {
+      print('❌ Error updating order: $e');
+      return {'success': false, 'error': 'Error updating order: $e'};
+    }
+  }
+
+  // Format order data for update according to your example
+  static Map<String, dynamic> formatUpdateOrderData({
+    required int orderId,
+    required String firstname,
+    required String lastname,
+    required String email,
+    required String phone,
+    required String nin,
+    required int cityId,
+    required String address,
+    required int eventId,
+    required String noOfGust,
+    required String eventDate,
+    required String eventTime,
+    required String startTime,
+    required String endTime,
+    required String requirement,
+    required bool isInquiry,
+    required int paymentMethodId,
+    required List<Map<String, dynamic>> orderServices,
+    required List<Map<String, dynamic>> orderPackages,
+  }) {
+    return {
+      "order": {
+        "id": orderId,
+        "firstname": firstname,
+        "lastname": lastname,
+        "email": email,
+        "phone": phone,
+        "nin": nin,
+        "city_id": cityId,
+        "address": address,
+        "event_id": eventId,
+        "no_of_gust": noOfGust,
+        "event_date": eventDate,
+        "event_time": eventTime,
+        "start_time": startTime,
+        "end_time": endTime,
+        "requirement": requirement,
+        "is_inquiry": isInquiry,
+        "payment_method_id": paymentMethodId,
+        "order_services": orderServices,
+        "order_packages": orderPackages,
+      },
+    };
+  }
+
+  // Helper method to convert DateTime to API date format
+  static String formatDateForApi(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  // Helper method to convert TimeOfDay to API time format
+  static String formatTimeOfDayForApi(TimeOfDay time, DateTime eventDate) {
+    final hourStr = time.hour.toString().padLeft(2, '0');
+    final minuteStr = time.minute.toString().padLeft(2, '0');
+    return '${formatDateForApi(eventDate)}T${hourStr}:${minuteStr}:00.000Z';
+  }
 
   // ---------------------------
   // Get Cities
