@@ -1275,14 +1275,15 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   "Food Items",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.add_circle, color: Colors.green),
-                      onPressed: () => addDish("Food Items"),
-                    ),
-                  ],
-                ),
+                if (isEditing)
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.green),
+                        onPressed: () => addDish("Food Items"),
+                      ),
+                    ],
+                  ),
               ],
             ),
             const Divider(),
@@ -1300,14 +1301,15 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   "Services",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.add_circle, color: Colors.green),
-                      onPressed: () => addDish("Services"),
-                    ),
-                  ],
-                ),
+                if (isEditing)
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.green),
+                        onPressed: () => addDish("Services"),
+                      ),
+                    ],
+                  ),
               ],
             ),
             const Divider(),

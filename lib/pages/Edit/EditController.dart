@@ -708,6 +708,8 @@ import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/model.dart';
 import 'package:schedule_app/pages/Edit/edit_order_body.dart' as body;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditController extends GetxController {
   final Rx<EditOrderModel?> currentEditOrder = Rx<EditOrderModel?>(null);
@@ -733,6 +735,8 @@ class EditController extends GetxController {
         // Initialize current lists with data from server
         currentOrderServices.value = List.from(order.orderServices ?? []);
         currentOrderPackages.value = List.from(order.orderPackages ?? []);
+        // Try applying any saved menu selection for this order
+        await _applySavedSelection(orderId);
         print('✅ Order loaded successfully: ${order.id}');
         print(
           '📦 Loaded ${currentOrderServices.length} services and ${currentOrderPackages.length} packages',
@@ -759,6 +763,116 @@ class EditController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ---------------------------
+  // Persistence for edited menu (per orderId)
+  // ---------------------------
+  static String _prefsKeyForOrder(String orderId) => 'edit_menu_\$orderId';
+
+  Future<void> saveSelectionMenu(
+    String orderId,
+    Map<String, List<Map<String, dynamic>>> menu,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKeyForOrder(orderId), jsonEncode(menu));
+    } catch (_) {}
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>?> _loadSelectionMenu(
+    String orderId,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_prefsKeyForOrder(orderId));
+      if (jsonStr == null || jsonStr.isEmpty) return null;
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic>) {
+        final result = <String, List<Map<String, dynamic>>>{};
+        for (final entry in decoded.entries) {
+          final list = (entry.value as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+          result[entry.key] = list;
+        }
+        return result;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<void> _applySavedSelection(String orderId) async {
+    final saved = await _loadSelectionMenu(orderId);
+    if (saved == null) return;
+
+    // Build services from "Services"
+    final List<OrderService> services = [];
+    for (final svc in (saved['Services'] ?? [])) {
+      final String? idStr = (svc['menu_item_id'] ?? svc['id'])?.toString();
+      services.add(
+        OrderService(
+          menuItemId: idStr,
+          price: (svc['price'] is num)
+              ? (svc['price'] as num).toString()
+              : (svc['price']?.toString() ?? '0'),
+          isDeleted: false,
+          menuItem: MenuItem(
+            id: idStr,
+            title: svc['name']?.toString() ?? 'Service',
+            price: (svc['price'] is num)
+                ? (svc['price'] as num).toString()
+                : (svc['price']?.toString() ?? '0'),
+            description: '',
+          ),
+        ),
+      );
+    }
+
+    // Build one package with items from "Food Items"
+    final List<OrderPackageItem> items = [];
+    for (final food in (saved['Food Items'] ?? [])) {
+      final String? idStr = (food['menu_item_id'] ?? food['id'])?.toString();
+      final String qtyStr = (food['qty'] is int)
+          ? (food['qty'] as int).toString()
+          : (food['qty']?.toString() ?? '1');
+      items.add(
+        OrderPackageItem(
+          menuItemId: int.tryParse(idStr ?? ''),
+          price: (food['price'] is num)
+              ? (food['price'] as num).toString()
+              : (food['price']?.toString() ?? '0'),
+          noOfGust: qtyStr,
+          isDeleted: false,
+          menuItem: MenuItem(
+            id: idStr,
+            title: food['name']?.toString() ?? 'Food Item',
+            price: (food['price'] is num)
+                ? (food['price'] as num).toString()
+                : (food['price']?.toString() ?? '0'),
+            description: '',
+          ),
+        ),
+      );
+    }
+
+    // Keep existing package meta if available, but replace items/amount
+    OrderPackage base = currentOrderPackages.isNotEmpty
+        ? currentOrderPackages.first
+        : OrderPackage(packageId: 1, amount: '0', isCustom: true);
+
+    final updatedPackage = OrderPackage(
+      id: base.id,
+      orderId: base.orderId,
+      packageId: base.packageId ?? base.package?.id ?? 1,
+      amount: base.amount ?? '0',
+      isCustom: true,
+      package: base.package,
+      orderPackageItems: items,
+    );
+
+    currentOrderServices.value = services;
+    currentOrderPackages.value = [updatedPackage];
   }
 
   // Add new service to current list

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,6 +51,45 @@ class BookingController extends GetxController {
 
   // Track whether a package has been edited (committed) by the user.
   final Map<String, bool> packageEdited = {};
+
+  // Persisted per-package custom selections (Food Items/Services -> items)
+  final Map<String, Map<String, List<Map<String, dynamic>>>> _customSelections =
+      {};
+
+  static String _prefsKeyForPackage(String title) => 'menu_selection_\$title';
+
+  Future<void> _saveSelectionToPrefs(
+    String packageTitle,
+    Map<String, List<Map<String, dynamic>>> menu,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = jsonEncode(menu);
+      await prefs.setString(_prefsKeyForPackage(packageTitle), jsonStr);
+    } catch (_) {}
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>?> _loadSelectionFromPrefs(
+    String packageTitle,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_prefsKeyForPackage(packageTitle));
+      if (jsonStr == null || jsonStr.isEmpty) return null;
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic>) {
+        final result = <String, List<Map<String, dynamic>>>{};
+        for (final entry in decoded.entries) {
+          final list = (entry.value as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+          result[entry.key] = list;
+        }
+        return result;
+      }
+    } catch (_) {}
+    return null;
+  }
 
   // API Data
   final RxList<Map<String, dynamic>> apiCities = <Map<String, dynamic>>[].obs;
@@ -832,6 +872,15 @@ class BookingController extends GetxController {
       orElse: () => {},
     );
     selectedPackageId.value = packageData['id']?.toString() ?? '';
+
+    // Try to load any previously saved selection for this package
+    _loadSelectionFromPrefs(packageTitle).then((saved) {
+      if (saved != null) {
+        _customSelections[packageTitle] = saved;
+        packageEdited[packageTitle] = true;
+        isPackageEditing.value = true;
+      }
+    });
   }
 
   void setDate(DateTime date) => selectedDate.value = date;
@@ -982,6 +1031,7 @@ class BookingController extends GetxController {
 
       // Get the current menu for the selected package
       final menu = menuForPackage(selectedPackage.value, guests.value);
+      final bool isCustomFlag = packageEdited[selectedPackage.value] == true;
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
@@ -1015,30 +1065,70 @@ class BookingController extends GetxController {
       if (packageData.isNotEmpty) {
         List<Map<String, dynamic>> packageItems = [];
 
-        // Add food items from the menu
-        for (var foodItem in menu['Food Items']!) {
-          final menuItem = apiMenuItems
-              .expand(
-                (category) => (category['menu_items'] as List<dynamic>? ?? []),
-              )
-              .firstWhere(
-                (item) => item['title'] == foodItem['name'],
-                orElse: () => null,
-              );
-
-          if (menuItem != null) {
-            packageItems.add({
-              "menu_item_id": menuItem['id'],
-              "price": foodItem['price'].toString(),
-              "no_of_gust": guests.value.toString(),
-            });
+        int? _resolveMenuItemId(Map<String, dynamic> entry) {
+          final dynamic direct = entry['menu_item_id'] ?? entry['id'];
+          if (direct != null) {
+            final parsed = int.tryParse(direct.toString());
+            if (parsed != null) return parsed;
           }
+          final String name = entry['name']?.toString() ?? '';
+          // Search in foods
+          final foodFound = apiMenuItems
+              .expand((cat) => (cat['menu_items'] as List<dynamic>? ?? []))
+              .cast<Map>()
+              .firstWhere(
+                (it) => (it['title']?.toString() ?? '') == name,
+                orElse: () => {},
+              );
+          if (foodFound.isNotEmpty) {
+            return int.tryParse(foodFound['id']?.toString() ?? '');
+          }
+          // Search in services
+          final svcFound = apiServiceItems
+              .expand((cat) => (cat['menu_items'] as List<dynamic>? ?? []))
+              .cast<Map>()
+              .firstWhere(
+                (it) => (it['title']?.toString() ?? '') == name,
+                orElse: () => {},
+              );
+          if (svcFound.isNotEmpty) {
+            return int.tryParse(svcFound['id']?.toString() ?? '');
+          }
+          return null;
+        }
+
+        void _addEntryToPackageItems(
+          Map<String, dynamic> entry, {
+          required bool isFood,
+        }) {
+          final int? menuItemId = _resolveMenuItemId(entry);
+          if (menuItemId == null) return;
+          final num priceNum = (entry['price'] as num?) ?? 0;
+          final int qty = (entry['qty'] is int)
+              ? entry['qty'] as int
+              : int.tryParse(entry['qty']?.toString() ?? '') ??
+                    (isFood ? guests.value : 1);
+          packageItems.add({
+            "menu_item_id": menuItemId,
+            "price": priceNum.toString(),
+            "no_of_gust": qty.toString(),
+            "is_deleted": false,
+          });
+        }
+
+        // Add all food items
+        for (final food in menu['Food Items']!) {
+          _addEntryToPackageItems(food, isFood: true);
+        }
+        // Add all services as items as well
+        for (final svc in menu['Services']!) {
+          _addEntryToPackageItems(svc, isFood: false);
         }
 
         orderPackages.add({
           "package_id": selectedPackageId.value,
           "amount": calculateSubtotal().toStringAsFixed(2),
-          "is_custom": isPackageEditing.value,
+          "is_custom": isCustomFlag,
           "order_package_items_attributes": packageItems,
         });
       }
@@ -1141,6 +1231,7 @@ class BookingController extends GetxController {
 
       // Get the current menu for the selected package
       final menu = menuForPackage(selectedPackage.value, guests.value);
+      final bool isCustomFlag = packageEdited[selectedPackage.value] == true;
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
@@ -1174,30 +1265,70 @@ class BookingController extends GetxController {
       if (packageData.isNotEmpty) {
         List<Map<String, dynamic>> packageItems = [];
 
-        // Add food items from the menu
-        for (var foodItem in menu['Food Items']!) {
-          final menuItem = apiMenuItems
-              .expand(
-                (category) => (category['menu_items'] as List<dynamic>? ?? []),
-              )
-              .firstWhere(
-                (item) => item['title'] == foodItem['name'],
-                orElse: () => null,
-              );
-
-          if (menuItem != null) {
-            packageItems.add({
-              "menu_item_id": menuItem['id'],
-              "price": foodItem['price'].toString(),
-              "no_of_gust": guests.value.toString(),
-            });
+        int? _resolveMenuItemId(Map<String, dynamic> entry) {
+          final dynamic direct = entry['menu_item_id'] ?? entry['id'];
+          if (direct != null) {
+            final parsed = int.tryParse(direct.toString());
+            if (parsed != null) return parsed;
           }
+          final String name = entry['name']?.toString() ?? '';
+          // Search in foods
+          final foodFound = apiMenuItems
+              .expand((cat) => (cat['menu_items'] as List<dynamic>? ?? []))
+              .cast<Map>()
+              .firstWhere(
+                (it) => (it['title']?.toString() ?? '') == name,
+                orElse: () => {},
+              );
+          if (foodFound.isNotEmpty) {
+            return int.tryParse(foodFound['id']?.toString() ?? '');
+          }
+          // Search in services
+          final svcFound = apiServiceItems
+              .expand((cat) => (cat['menu_items'] as List<dynamic>? ?? []))
+              .cast<Map>()
+              .firstWhere(
+                (it) => (it['title']?.toString() ?? '') == name,
+                orElse: () => {},
+              );
+          if (svcFound.isNotEmpty) {
+            return int.tryParse(svcFound['id']?.toString() ?? '');
+          }
+          return null;
+        }
+
+        void _addEntryToPackageItems(
+          Map<String, dynamic> entry, {
+          required bool isFood,
+        }) {
+          final int? menuItemId = _resolveMenuItemId(entry);
+          if (menuItemId == null) return;
+          final num priceNum = (entry['price'] as num?) ?? 0;
+          final int qty = (entry['qty'] is int)
+              ? entry['qty'] as int
+              : int.tryParse(entry['qty']?.toString() ?? '') ??
+                    (isFood ? guests.value : 1);
+          packageItems.add({
+            "menu_item_id": menuItemId,
+            "price": priceNum.toString(),
+            "no_of_gust": qty.toString(),
+            "is_deleted": false,
+          });
+        }
+
+        // Add all food items
+        for (final food in menu['Food Items']!) {
+          _addEntryToPackageItems(food, isFood: true);
+        }
+        // Add all services as items as well
+        for (final svc in menu['Services']!) {
+          _addEntryToPackageItems(svc, isFood: false);
         }
 
         orderPackages.add({
           "package_id": selectedPackageId.value,
           "amount": calculateSubtotal().toStringAsFixed(2),
-          "is_custom": isPackageEditing.value,
+          "is_custom": isCustomFlag,
           "order_package_items_attributes": packageItems,
         });
       }
@@ -1426,6 +1557,31 @@ class BookingController extends GetxController {
     String packageTitle,
     int guestCount,
   ) {
+    // If user has a saved custom selection for this package, use it first
+    final saved = _customSelections[packageTitle];
+    if (saved != null && (packageEdited[packageTitle] == true)) {
+      // Normalize quantities: ensure qty present; for food default to guestCount
+      final food = <Map<String, dynamic>>[];
+      final services = <Map<String, dynamic>>[];
+      for (final item in (saved['Food Items'] ?? [])) {
+        final int qty = (item['qty'] is int)
+            ? item['qty'] as int
+            : int.tryParse(item['qty']?.toString() ?? '') ?? guestCount;
+        final normalized = Map<String, dynamic>.from(item);
+        normalized['qty'] = qty;
+        food.add(normalized);
+      }
+      for (final item in (saved['Services'] ?? [])) {
+        final int qty = (item['qty'] is int)
+            ? item['qty'] as int
+            : int.tryParse(item['qty']?.toString() ?? '') ?? 1;
+        final normalized = Map<String, dynamic>.from(item);
+        normalized['qty'] = qty;
+        services.add(normalized);
+      }
+      return {'Food Items': food, 'Services': services};
+    }
+
     final pkg = _findPackage(packageTitle);
     if (pkg == null) {
       return {'Food Items': [], 'Services': []};
@@ -1471,6 +1627,51 @@ class BookingController extends GetxController {
 
   void toggleEditMode(bool editing) {
     isPackageEditing.value = editing;
+  }
+
+  // Determine if menu has diverged from the predefined package items
+  bool hasMenuChangedFromPackage(
+    String packageTitle,
+    Map<String, List<Map<String, dynamic>>> currentMenu,
+    int guestCount,
+  ) {
+    final baseline = menuForPackage(packageTitle, guestCount);
+
+    bool listEqualsByIdQty(
+      List<Map<String, dynamic>> a,
+      List<Map<String, dynamic>> b,
+    ) {
+      if (a.length != b.length) return false;
+      // Compare by menu_item_id/id and qty
+      final normalize = (List<Map<String, dynamic>> list) =>
+          list
+              .map(
+                (e) => {
+                  'id': (e['menu_item_id'] ?? e['id']).toString(),
+                  'qty': (e['qty'] as int),
+                },
+              )
+              .toList()
+            ..sort((x, y) => (x['id'] as String).compareTo(y['id'] as String));
+      final na = normalize(a);
+      final nb = normalize(b);
+      for (var i = 0; i < na.length; i++) {
+        if (na[i]['id'] != nb[i]['id'] || na[i]['qty'] != nb[i]['qty']) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    final changedFood = !listEqualsByIdQty(
+      baseline['Food Items'] ?? [],
+      currentMenu['Food Items'] ?? [],
+    );
+    final changedServices = !listEqualsByIdQty(
+      baseline['Services'] ?? [],
+      currentMenu['Services'] ?? [],
+    );
+    return changedFood || changedServices;
   }
 
   List<Map<String, dynamic>> get masterAvailableFood {
@@ -1593,6 +1794,21 @@ class BookingController extends GetxController {
 
     packages[idx]['items'] = newItems;
     packageEdited[packageTitle] = true;
+    _customSelections[packageTitle] = {
+      'Food Items': (newMenu['Food Items'] ?? [])
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList(),
+      'Services': (newMenu['Services'] ?? [])
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList(),
+    };
+    // Persist selection
+    _saveSelectionToPrefs(packageTitle, _customSelections[packageTitle]!);
+  }
+
+  void clearSavedSelection(String packageTitle) {
+    _customSelections.remove(packageTitle);
+    packageEdited[packageTitle] = false;
   }
 
   // Inquiry flow

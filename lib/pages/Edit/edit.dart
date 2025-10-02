@@ -1626,7 +1626,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   void commitEditsToController() {
     controller.updateCustomPackageItems(controller.selectedPackage.value, menu);
-    // editController.updatePackage(controller.selectedPackage.value.length, );
+    // Persist selection for this order
+    final editCtrl = Get.find<EditController>();
+    final orderId = editCtrl.editOrder?.id?.toString();
+    if (orderId != null) {
+      editCtrl.saveSelectionMenu(orderId, menu);
+    }
     Get.snackbar('Saved', 'Package updated');
   }
 
@@ -1828,6 +1833,15 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             if (success) {
                               // Show success dialog then navigate to main screen
                               if (mounted) {
+                                // Persist selection after successful update
+                                final id = editController.editOrder?.id
+                                    ?.toString();
+                                if (id != null) {
+                                  await editController.saveSelectionMenu(
+                                    id,
+                                    menu,
+                                  );
+                                }
                                 await showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
