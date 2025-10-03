@@ -129,24 +129,7 @@ class _EditPageState extends State<EditPage> {
           }
         }
       }
-      // Load services from order services
-      // if (order.orderServices != null) {
-      //   for (var orderService in order.orderServices!) {
-      //     if (orderService.menuItem != null &&
-      //         !(orderService.isDeleted ?? false)) {
-      //       apiMenu["Services"]!.add({
-      //         "name": orderService.menuItem!.title ?? "Unknown Service",
-      //         "price":
-      //             double.tryParse(orderService.menuItem!.price ?? "0") ?? 0.0,
-      //         "qty": 1,
-      //         "id": orderService.menuItem!.id,
-      //       });
-      //       print('🔧 Synced service: ${orderService.menuItem!.title}');
-      //     }
-      //   }
-      // }
 
-      // Update booking controller with API data
       bookingController.updateCustomPackageItems(
         bookingController.selectedPackage.value,
         apiMenu,
@@ -257,194 +240,6 @@ class _EditPageState extends State<EditPage> {
       '   - Package Items: ${updatedPackages.isNotEmpty ? updatedPackages.first.orderPackageItems?.length ?? 0 : 0}',
     );
   }
-  // NEW METHOD: Convert current BookingController menu to EditController format
-  // void _syncMenuDataToEditController() {
-  //   print('🔄 Syncing menu data to edit controller');
-
-  //   // Get current menu from booking controller
-  //   final currentMenu = bookingController.getCurrentMenu();
-
-  //   // Convert to EditController format
-  //   final List<OrderService> updatedServices = [];
-  //   final List<OrderPackage> updatedPackages = [];
-
-  //   // Process services
-  //   if (currentMenu["Services"] != null) {
-  //     for (var service in currentMenu["Services"]!) {
-  //       final dynamic rawId = service['menu_item_id'] ?? service['id'];
-  //       print(
-  //         '🧩 Map service for API: ${service['name']} (id: $rawId, price: ${service['price']})',
-  //       );
-
-  //       updatedServices.add(
-  //         OrderService(
-  //           menuItemId: rawId?.toString(),
-  //           price: (service['price'] as num).toString(),
-  //           menuItem: MenuItem(
-  //             id: rawId?.toString(),
-  //             title: service['name'] ?? 'Service',
-  //             price: (service['price'] as num).toString(),
-  //             description: '',
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //   }
-
-  //   // Process food items (packages)
-  //   if (currentMenu["Food Items"] != null &&
-  //       currentMenu["Food Items"]!.isNotEmpty) {
-  //     final List<OrderPackageItem> packageItems = [];
-
-  //     for (var foodItem in currentMenu["Food Items"]!) {
-  //       final dynamic rawId = foodItem['menu_item_id'] ?? foodItem['id'];
-  //       print(
-  //         '🧩 Map food item for API: ${foodItem['name']} (id: $rawId, price: ${foodItem['price']}, qty: ${foodItem['qty']})',
-  //       );
-
-  //       packageItems.add(
-  //         OrderPackageItem(
-  //           menuItemId: rawId,
-  //           price: (foodItem['price'] as num).toString(),
-  //           noOfGust: (foodItem['qty'] as int).toString(),
-  //           menuItem: MenuItem(
-  //             id: rawId?.toString(),
-  //             title: foodItem['name'] ?? 'Food Item',
-  //             price: (foodItem['price'] as num).toString(),
-  //             description: '',
-  //           ),
-  //         ),
-  //       );
-  //     }
-
-  //     // Get current package info
-  //     final currentPackage = bookingController.packages.firstWhere(
-  //       (p) => p['title'] == bookingController.selectedPackage.value,
-  //       orElse: () => {},
-  //     );
-
-  //     updatedPackages.add(
-  //       OrderPackage(
-  //         packageId: currentPackage['id'],
-  //         amount: _calculateTotalFromMenu(currentMenu).toString(),
-  //         isCustom: bookingController.selectedPackage.value == 'Custom Package',
-  //         package: Package(
-  //           id: currentPackage['id'],
-  //           title: currentPackage['title'] ?? 'Package',
-  //           price: currentPackage['price']?.toString() ?? '0.0',
-  //           description: currentPackage['description'] ?? '',
-  //         ),
-  //         orderPackageItems: packageItems,
-  //       ),
-  //     );
-  //   }
-
-  //   // Update edit controller
-  //   editController.currentOrderServices.value = updatedServices;
-  //   editController.currentOrderPackages.value = updatedPackages;
-
-  //   print('✅ Menu data synced to edit controller:');
-  //   print('   - Services: ${updatedServices.length}');
-  //   print('   - Packages: ${updatedPackages.length}');
-  //   if (updatedPackages.isNotEmpty) {
-  //     print(
-  //       '   - Package Items: ${updatedPackages.first.orderPackageItems?.length ?? 0}',
-  //     );
-  //   }
-  // }
-  // // NEW METHOD: Convert current BookingController menu to EditController format
-  // void _syncMenuDataToEditController() {
-  //   print('🔄 Syncing menu data to edit controller');
-
-  //   // Get current menu from booking controller
-  //   final currentMenu = bookingController.getCurrentMenu();
-  //   // Convert to EditController format
-  //   final List<OrderService> updatedServices = [];
-  //   final List<OrderPackage> updatedPackages = [];
-
-  //   // Process services
-  //   if (currentMenu["Services"] != null) {
-  //     for (var service in currentMenu["Services"]!) {
-  //       final dynamic rawId = service['menu_item_id'] ?? service['id'];
-  //       print(
-  //         '🧩 Map service for API: ${service['name']} (id: $rawId, price: ${service['price']})',
-  //       );
-  //       updatedServices.add(
-  //         OrderService(
-  //           menuItemId: rawId?.toString(),
-  //           price: (service['price'] as num).toString(),
-  //           menuItem: MenuItem(
-  //             id: rawId?.toString(),
-  //             title: service['name'] ?? 'Service',
-  //             price: (service['price'] as num).toString(),
-  //             description: '',
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //   }
-
-  //   // Process food items (packages)
-  //   if (currentMenu["Food Items"] != null &&
-  //       currentMenu["Food Items"]!.isNotEmpty) {
-  //     print("Testing eror1");
-
-  //     final List<OrderPackageItem> packageItems = [];
-
-  //     for (var foodItem in currentMenu["Food Items"]!) {
-  //       final dynamic rawId = foodItem['menu_item_id'] ?? foodItem['id'];
-  //       print(
-  //         '🧩 Map food item for API: ${foodItem['name']} (id: $rawId, price: ${foodItem['price']}, qty: ${foodItem['qty']})',
-  //       );
-  //       packageItems.add(
-  //         OrderPackageItem(
-  //           menuItemId: int.tryParse(rawId?.toString() ?? ''),
-  //           price: (foodItem['price'] as num).toString(),
-  //           noOfGust: (foodItem['qty'] as int).toString(),
-  //           menuItem: MenuItem(
-  //             id: rawId?.toString(),
-  //             title: foodItem['name'] ?? 'Food Item',
-  //             price: (foodItem['price'] as num).toString(),
-  //             description: '',
-  //           ),
-  //         ),
-  //       );
-  //     }
-
-  //     // Get current package info
-  //     final currentPackage = bookingController.packages.firstWhere(
-  //       (p) => p['title'] == bookingController.selectedPackage.value,
-  //       orElse: () => {},
-  //     );
-  //     print("Testing eror1");
-
-  //     updatedPackages.add(
-  //       OrderPackage(
-  //         packageId: int.tryParse(currentPackage['id']?.toString() ?? ''),
-  //         amount: _calculateTotalFromMenu(currentMenu).toString(),
-  //         isCustom: bookingController.selectedPackage.value == 'Custom Package',
-  //         package: Package(
-  //           id: int.tryParse(currentPackage['id']?.toString() ?? '') ?? 1,
-  //           title: currentPackage['title'] ?? 'Package',
-  //           price: currentPackage['price']?.toString() ?? '0.0',
-  //           description: currentPackage['description'] ?? '',
-  //         ),
-  //         orderPackageItems: packageItems,
-  //       ),
-  //     );
-  //   }
-
-  //   // Update edit controller
-  //   editController.currentOrderServices.value = updatedServices;
-  //   editController.currentOrderPackages.value = updatedPackages;
-
-  //   print('✅ Menu data synced to edit controller:');
-  //   print('   - Services: ${updatedServices.length}');
-  //   print('   - Packages: ${updatedPackages.length}');
-  //   print(
-  //     '   - Package Items: ${updatedPackages.isNotEmpty ? updatedPackages.first.orderPackageItems?.length ?? 0 : 0}',
-  //   );
-  // }
 
   double _calculateTotalFromMenu(Map<String, List<Map<String, dynamic>>> menu) {
     double total = 0.0;
@@ -1276,21 +1071,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           }
         }
       }
-      // Load services from order services
-      // if (order.orderServices != null) {
-      //   for (var orderService in order.orderServices!) {
-      //     if (orderService.menuItem != null) {
-      //       apiMenu["Services"]!.add({
-      //         "name": orderService.menuItem!.title ?? "Unknown Service",
-      //         "price":
-      //             double.tryParse(orderService.menuItem!.price ?? "0") ?? 0.0,
-      //         "qty": 1, // Services typically have quantity 1
-      //         "id": orderService.menuItem!.id,
-      //       });
-      //       print('🔧 Added service: ${orderService.menuItem!.title}');
-      //     }
-      //   }
-      // }
 
       print('📊 Final menu loaded:');
       print('   - Food Items: ${apiMenu["Food Items"]!.length}');
@@ -2015,35 +1795,28 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             }
 
                             // Call update API - it will use the synced menu data from EditController
-                            final success = await editController
-                                .updateOrderWithData(
-                                  firstname: firstname,
-                                  lastname: lastname,
-                                  email: email,
-                                  phone: phone,
-                                  nin:
-                                      editController.editOrder?.nin ??
-                                      '123456789',
-                                  cityId: editController.editOrder?.cityId ?? 1,
-                                  address:
-                                      editController.editOrder?.address ??
-                                      'Address not provided',
-                                  eventId:
-                                      editController.editOrder?.eventId ?? 1,
-                                  noOfGust: guests.toString(),
-                                  eventDate: eventDate,
-                                  startTime: startTime,
-                                  endTime: endTime,
-                                  requirement: requirement,
-                                  isInquiry:
-                                      editController.editOrder?.isInquiry ??
-                                      false,
-                                  paymentMethodId:
-                                      editController
-                                          .editOrder
-                                          ?.paymentMethodId ??
-                                      1,
-                                );
+                            final success = await editController.updateOrder(
+                              firstname: firstname,
+                              lastname: lastname,
+                              email: email,
+                              phone: phone,
+                              nin: editController.editOrder?.nin ?? '123456789',
+                              cityId: editController.editOrder?.cityId ?? 1,
+                              address:
+                                  editController.editOrder?.address ??
+                                  'Address not provided',
+                              eventId: editController.editOrder?.eventId ?? 1,
+                              noOfGust: guests.toString(),
+                              eventDate: eventDate,
+                              startTime: startTime,
+                              endTime: endTime,
+                              requirement: requirement,
+                              isInquiry:
+                                  editController.editOrder?.isInquiry ?? false,
+                              paymentMethodId:
+                                  editController.editOrder?.paymentMethodId ??
+                                  1,
+                            );
                             print('My check is herer');
                             print(availableFoodLocal);
                             // Hide loading only if widget is still mounted
