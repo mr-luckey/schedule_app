@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
-import 'package:schedule_app/pages/Edit/model.dart';
+import 'package:schedule_app/pages/Edit/model.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -238,11 +238,10 @@ class ApiService {
     }
   }
 
-  // Get Single Order by ID
-  static Future<EditOrderModel?> getOrderById(String orderId) async {
+  // In Api_Service.dart, update getOrderById method
+  static Future<EditOrderModel?> getOrderById(var orderId) async {
     try {
-      int orderIdInt = int.parse(orderId);
-      final Uri uri = Uri.parse('$baseUrl/orders/$orderIdInt');
+      final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
       print('🔄 Fetching order by ID: $uri');
 
       final response = await _handleRequest(
@@ -266,22 +265,63 @@ class ApiService {
       throw Exception('Error fetching order: $e');
     }
   }
+  // Get Single Order by ID
+  // static Future<EditOrderModel?> getOrderById(var orderId) async {
+  //   try {
+  //     // int orderIdInt = int.parse(orderId);
+  //     final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
+  //     print('🔄 Fetching order by ID: $uri');
 
-  // Update Order - PUT API
+  //     final response = await _handleRequest(
+  //       http.get(uri, headers: await getHeaders()),
+  //     );
+  //     print('printing responce');
+  //     print(response['data']['id'].toString() == orderId);
+  //     var id = response['data']['id'].toString();
+  //     print(id);
+  //     print(id);
+  //     if (id == orderId) {
+  //       final data = response['data'];
+  //       print(data);
+  //       if (data is Map) {
+  //         // print("Testing ");
+  //         // print(EditOrderModel().runtimeType);
+
+  //         final order = EditOrderModel.fromJson(data);
+  //         print('✅ Successfully parsed order: ${order.id}');
+
+  //         return order;
+  //       } else {
+  //         throw Exception('Unexpected API response format: $data');
+  //       }
+  //     } else {
+  //       throw Exception('Failed to load order: ${response['error']}');
+  //     }
+  //   } catch (e) {
+  //     print('❌ Error fetching order by ID: $e');
+  //     throw Exception('Error fetching order: $e');
+  //   }
+  // }
+
+  // // Update Order - PUT API
   static Future<Map<String, dynamic>> updateOrder({
     required String orderId,
-    required Map<String, dynamic> orderData,
+    required Map<String, dynamic> EditOrderModel,
   }) async {
     try {
       final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
       print('🔄 Updating order at: $uri');
-      print('📦 Update data: ${jsonEncode(orderData)}');
+      print('📦 Update data: ${jsonEncode(EditOrderModel)}');
 
       final response = await _handleRequest(
-        http.put(uri, headers: await getHeaders(), body: jsonEncode(orderData)),
+        http.put(
+          uri,
+          headers: await getHeaders(),
+          body: jsonEncode(EditOrderModel),
+        ),
       );
       print("UPDATED NEW BODY WILL BE HERE ");
-      print(jsonEncode(orderData));
+      print(jsonEncode(EditOrderModel));
 
       return response;
     } catch (e) {
