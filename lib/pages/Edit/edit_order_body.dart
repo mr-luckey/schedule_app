@@ -1,3 +1,5 @@
+import 'package:schedule_app/pages/Edit/model.dart';
+
 class EditOrderBody {
   Order? order;
 
@@ -138,6 +140,7 @@ class OrderServices {
     this.menuItemId,
     this.price,
     this.isDeleted,
+    required service,
   });
 
   OrderServices.fromJson(Map<String, dynamic> json) {
@@ -174,6 +177,7 @@ class OrderPackages {
     this.amount,
     this.isCustom,
     this.orderPackageItems,
+    required Package package,
   });
 
   OrderPackages.fromJson(Map<String, dynamic> json) {
