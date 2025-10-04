@@ -6,18 +6,23 @@ import 'package:schedule_app/pages/Edit/models/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EditController extends GetxController {
+  // ===========================================================================
+  // SECTION 1: REACTIVE STATE VARIABLES
+  // ===========================================================================
+
+  // Current order being edited
   final Rx<EditOrderModel?> currentEditOrder = Rx<EditOrderModel?>(null);
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
-  // Form controllers for Edit page
+  // Form controllers
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final contactController = TextEditingController();
   final messageController = TextEditingController();
   final specialRequirementsController = TextEditingController();
 
-  // Form data for Edit page
+  // Form reactive data
   final RxString selectedCity = ''.obs;
   final RxString selectedCityId = ''.obs;
   final Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
@@ -29,27 +34,25 @@ class EditController extends GetxController {
   final RxString selectedPackage = ''.obs;
   final RxString selectedPackageId = ''.obs;
 
-  // Menu data
+  // Current order data from API
   final RxList<OrderServices> currentOrderServices = <OrderServices>[].obs;
   final RxList<OrderPackages> currentOrderPackages = <OrderPackages>[].obs;
 
-  // API Data for Edit page
-  final RxList<Map<String, dynamic>> apiCities = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> apiEvents = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> apiPackages = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> apiMenuItems =
-      <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> apiServiceItems =
-      <Map<String, dynamic>>[].obs;
+  // API Data collections
+  final RxList<City> apiCities = <City>[].obs;
+  final RxList<Event> apiEvents = <Event>[].obs;
+  final RxList<Package> apiPackages = <Package>[].obs;
+  final RxList<Service> apiMenuItems = <Service>[].obs;
+  final RxList<Service> apiServiceItems = <Service>[].obs;
 
-  // Selected items lists (new)
-  final RxList<Map<String, dynamic>> selectedMenuItems =
-      <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> selectedServiceItems =
-      <Map<String, dynamic>>[].obs; // services
+  // Selected items for UI (using proper models)
+  final RxList<SelectedMenuItem> selectedMenuItems = <SelectedMenuItem>[].obs;
+  final RxList<SelectedServiceItem> selectedServiceItems =
+      <SelectedServiceItem>[].obs;
 
-  // Persistence
-  static String _prefsKeyForOrder(String orderId) => 'edit_menu_$orderId';
+  // ===========================================================================
+  // SECTION 2: LIFECYCLE METHODS
+  // ===========================================================================
 
   @override
   void onInit() {
@@ -59,6 +62,7 @@ class EditController extends GetxController {
 
   @override
   void onClose() {
+    // Dispose all text controllers
     nameController.dispose();
     emailController.dispose();
     contactController.dispose();
@@ -67,65 +71,21 @@ class EditController extends GetxController {
     super.onClose();
   }
 
-  // Load API data for Edit page
+  // ===========================================================================
+  // SECTION 3: API DATA LOADING METHODS
+  // ===========================================================================
+
+  /// Loads all required API data for the edit page
   Future<void> loadApiData() async {
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
-      // Load cities
-      final citiesResult = await ApiService.getCities();
-      if (citiesResult['success'] == true) {
-        final citiesData = citiesResult['data'];
-        if (citiesData is List) {
-          apiCities.value = citiesData.cast<Map<String, dynamic>>();
-        } else if (citiesData is Map && citiesData['cities'] is List) {
-          apiCities.value = (citiesData['cities'] as List)
-              .cast<Map<String, dynamic>>();
-        }
-      }
-
-      // Load events
-      final eventsResult = await ApiService.getEvents();
-      if (eventsResult['success'] == true) {
-        final eventsData = eventsResult['data'];
-        if (eventsData is List) {
-          apiEvents.value = eventsData.cast<Map<String, dynamic>>();
-        } else if (eventsData is Map && eventsData['events'] is List) {
-          apiEvents.value = (eventsData['events'] as List)
-              .cast<Map<String, dynamic>>();
-        }
-      }
-
-      // Load packages from api to show as options..
-      final packagesResult = await ApiService.getPackages();
-      if (packagesResult['success'] == true) {
-        final packagesData = packagesResult['data'];
-        if (packagesData is List) {
-          apiPackages.value = packagesData.cast<Map<String, dynamic>>();
-        } else if (packagesData is Map && packagesData['packages'] is List) {
-          apiPackages.value = (packagesData['packages'] as List)
-              .cast<Map<String, dynamic>>();
-        }
-      }
-
-      // Load menus list from api to show the item for choice
-      final menusResult = await ApiService.getMenus();
-      if (menusResult['success'] == true) {
-        final menusData = menusResult['data'];
-        if (menusData is List) {
-          apiMenuItems.value = menusData.cast<Map<String, dynamic>>();
-        }
-      }
-
-      // Load services list from api to show the items for choice
-      final servicesResult = await ApiService.getServices();
-      if (servicesResult['success'] == true) {
-        final servicesData = servicesResult['data'];
-        if (servicesData is List) {
-          apiServiceItems.value = servicesData.cast<Map<String, dynamic>>();
-        }
-      }
+      await _loadCities();
+      await _loadEvents();
+      await _loadPackages();
+      await _loadMenuItems();
+      await _loadServiceItems();
     } catch (e) {
       errorMessage.value = 'Error loading data: $e';
     } finally {
@@ -133,40 +93,105 @@ class EditController extends GetxController {
     }
   }
 
-  // Get cities for dropdown from api to show
+  /// Load cities from API
+  Future<void> _loadCities() async {
+    final citiesResult = await ApiService.getCities();
+    if (citiesResult['success'] == true) {
+      final citiesData = citiesResult['data'];
+      if (citiesData is List) {
+        apiCities.value = citiesData
+            .map((cityJson) => City.fromJson(cityJson))
+            .toList();
+      } else if (citiesData is Map && citiesData['cities'] is List) {
+        apiCities.value = (citiesData['cities'] as List)
+            .map((cityJson) => City.fromJson(cityJson))
+            .toList();
+      }
+    }
+  }
+
+  /// Load events from API
+  Future<void> _loadEvents() async {
+    final eventsResult = await ApiService.getEvents();
+    if (eventsResult['success'] == true) {
+      final eventsData = eventsResult['data'];
+      if (eventsData is List) {
+        apiEvents.value = eventsData
+            .map((eventJson) => Event.fromJson(eventJson))
+            .toList();
+      } else if (eventsData is Map && eventsData['events'] is List) {
+        apiEvents.value = (eventsData['events'] as List)
+            .map((eventJson) => Event.fromJson(eventJson))
+            .toList();
+      }
+    }
+  }
+
+  /// Load packages from API
+  Future<void> _loadPackages() async {
+    final packagesResult = await ApiService.getPackages();
+    if (packagesResult['success'] == true) {
+      final packagesData = packagesResult['data'];
+      if (packagesData is List) {
+        apiPackages.value = packagesData
+            .map((pkgJson) => Package.fromJson(pkgJson))
+            .toList();
+      } else if (packagesData is Map && packagesData['packages'] is List) {
+        apiPackages.value = (packagesData['packages'] as List)
+            .map((pkgJson) => Package.fromJson(pkgJson))
+            .toList();
+      }
+    }
+  }
+
+  /// Load menu items from API
+  Future<void> _loadMenuItems() async {
+    final menusResult = await ApiService.getMenus();
+    if (menusResult['success'] == true) {
+      final menusData = menusResult['data'];
+      if (menusData is List) {
+        apiMenuItems.value = menusData
+            .map((menuJson) => Service.fromJson(menuJson))
+            .toList();
+      }
+    }
+  }
+
+  /// Load service items from API
+  Future<void> _loadServiceItems() async {
+    final servicesResult = await ApiService.getServices();
+    if (servicesResult['success'] == true) {
+      final servicesData = servicesResult['data'];
+      if (servicesData is List) {
+        apiServiceItems.value = servicesData
+            .map((serviceJson) => Service.fromJson(serviceJson))
+            .toList();
+      }
+    }
+  }
+
+  // ===========================================================================
+  // SECTION 4: DATA GETTERS FOR UI
+  // ===========================================================================
+
+  /// Get cities for dropdown
   List<String> get cities {
-    return apiCities.map((city) {
-      return city['name']?.toString() ??
-          city['title']?.toString() ??
-          'Unknown City';
-    }).toList();
+    return apiCities.map((city) => city.name ?? 'Unknown City').toList();
   }
 
-  // Get event types for dropdown
+  /// Get event types for dropdown
   List<String> get eventTypes {
-    return apiEvents.map((event) {
-      return event['name']?.toString() ??
-          event['title']?.toString() ??
-          'Unknown Event';
-    }).toList();
+    return apiEvents.map((event) => event.title ?? 'Unknown Event').toList();
   }
 
-  // Get packages for selection
-  List<Map<String, dynamic>> get packages {
-    return apiPackages.map((pkg) {
-      return {
-        'id': pkg['id']?.toString() ?? '',
-        'title':
-            pkg['name']?.toString() ??
-            pkg['title']?.toString() ??
-            'Unknown Package',
-        'description': pkg['description']?.toString() ?? '',
-        'price': pkg['price']?.toString() ?? pkg['amount']?.toString() ?? '0',
-      };
-    }).toList();
-  } //TODO: Until here i am getting data from api to show
+  /// Get packages for selection in UI format
+  List<Package> get packages => apiPackages.toList();
 
-  // Load order data by ID then add deatils or remove details to add edited order
+  // ===========================================================================
+  // SECTION 5: ORDER LOADING AND POPULATION
+  // ===========================================================================
+
+  /// Load order data by ID for editing
   Future<void> loadOrderById(String orderId) async {
     try {
       isLoading.value = true;
@@ -178,15 +203,13 @@ class EditController extends GetxController {
 
       if (order != null) {
         currentEditOrder.value = order;
-
-        // Populate form data from order
         _populateFormFromOrder(order);
 
         // Initialize current lists with data from server
         currentOrderServices.value = List.from(order.orderServices ?? []);
         currentOrderPackages.value = List.from(order.orderPackages ?? []);
 
-        // build selected lists so UI can reflect current selections
+        // Build selected lists for UI
         _buildSelectedListsFromCurrentOrder();
 
         print('✅ Order loaded successfully: ${order.id}');
@@ -200,19 +223,20 @@ class EditController extends GetxController {
     }
   }
 
-  // Set UI fields from model
+  /// Populate form fields from order model
   void _populateFormFromOrder(EditOrderModel order) {
-    // Set personal information
+    // Personal information
     nameController.text = '${order.firstname ?? ''} ${order.lastname ?? ''}'
         .trim();
     emailController.text = order.email ?? '';
     contactController.text = order.phone ?? '';
     specialRequirementsController.text = order.requirement ?? '';
 
-    // Set event details
+    // Event details
     selectedEventType.value = order.event?.title ?? '';
     selectedEventId.value = order.eventId?.toString() ?? '';
 
+    // Date and time
     if (order.eventDate != null && order.eventDate!.isNotEmpty) {
       try {
         selectedDate.value = DateTime.parse(order.eventDate!);
@@ -228,7 +252,7 @@ class EditController extends GetxController {
 
     guests.value = int.tryParse(order.noOfGust ?? '1') ?? 1;
 
-    // Set city
+    // City
     if (order.city != null) {
       selectedCity.value = order.city!.name ?? '';
       selectedCityId.value = order.cityId?.toString() ?? '';
@@ -237,7 +261,7 @@ class EditController extends GetxController {
       selectedCityId.value = '';
     }
 
-    // Set package from first package
+    // Package
     if (order.orderPackages != null && order.orderPackages!.isNotEmpty) {
       final package = order.orderPackages!.first.package;
       if (package != null) {
@@ -250,6 +274,7 @@ class EditController extends GetxController {
     }
   }
 
+  /// Parse time string to TimeOfDay
   TimeOfDay? _parseTimeFromString(String? timeString) {
     if (timeString == null || timeString.isEmpty) return null;
     try {
@@ -266,86 +291,31 @@ class EditController extends GetxController {
     return null;
   }
 
-  // Selected-items helpers (add/remove/clear)
-  void addSelectedMenuItem({
-    required dynamic menuItemId,
-    String? name,
-    String? price,
-    int qty = 1,
-    dynamic id,
-  }) {
-    final exists = selectedMenuItems.any(
-      (m) => m['menu_item_id'].toString() == menuItemId.toString(),
-    );
-    if (!exists) {
-      selectedMenuItems.add({
-        "menu_item_id": menuItemId,
-        "name": name ?? '',
-        "price": price ?? '0',
-        "qty": qty,
-        if (id != null) "id": id,
-        "is_deleted": false,
-      });
-    }
-  }
+  // ===========================================================================
+  // SECTION 6: SELECTED ITEMS MANAGEMENT
+  // ===========================================================================
 
-  void removeSelectedMenuItemByMenuItemId(dynamic menuItemId) {
-    selectedMenuItems.removeWhere(
-      (m) => m['menu_item_id'].toString() == menuItemId.toString(),
-    );
-  }
-
-  void clearSelectedMenuItems() => selectedMenuItems.clear();
-
-  void addSelectedServiceItem({
-    required dynamic serviceId,
-    String? title,
-    String? price,
-    int qty = 1,
-    dynamic id,
-  }) {
-    final exists = selectedServiceItems.any(
-      (s) => s['menu_item_id'].toString() == serviceId.toString(),
-    );
-    if (!exists) {
-      selectedServiceItems.add({
-        "menu_item_id": serviceId,
-        "title": title ?? '',
-        "price": price ?? '0',
-        "qty": qty,
-        if (id != null) "id": id,
-        "is_deleted": false,
-      });
-    }
-  }
-
-  void removeSelectedServiceItemById(dynamic serviceId) {
-    selectedServiceItems.removeWhere(
-      (s) => s['menu_item_id'].toString() == serviceId.toString(),
-    );
-  }
-
-  void clearSelectedServiceItems() => selectedServiceItems.clear();
-
-  /// Build selected lists from the currently loaded order (call after loadOrderById)
+  /// Build selected lists from current order data
   void _buildSelectedListsFromCurrentOrder() {
     selectedMenuItems.clear();
     selectedServiceItems.clear();
 
-    // Build food items from packages (same logic you used earlier)
+    // Build food items from packages
     for (var orderPackage in currentOrderPackages) {
       if (orderPackage.orderPackageItems != null) {
         for (var packageItem in orderPackage.orderPackageItems!) {
           if (packageItem.menuItem != null &&
               !(packageItem.isDeleted ?? false)) {
-            selectedMenuItems.add({
-              "menu_item_id": packageItem.menuItem!.id,
-              "name": packageItem.menuItem!.title ?? '',
-              "price": packageItem.menuItem!.price ?? '0',
-              "qty": int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
-              "id": packageItem.id,
-              "is_deleted": packageItem.isDeleted ?? false,
-            });
+            selectedMenuItems.add(
+              SelectedMenuItem(
+                menuItemId: packageItem.menuItem!.id,
+                name: packageItem.menuItem!.title ?? '',
+                price: packageItem.menuItem!.price ?? '0',
+                qty: int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
+                id: packageItem.id,
+                isDeleted: packageItem.isDeleted ?? false,
+              ),
+            );
           }
         }
       }
@@ -354,19 +324,87 @@ class EditController extends GetxController {
     // Build services
     for (var orderService in currentOrderServices) {
       if (orderService.service != null && !(orderService.isDeleted ?? false)) {
-        selectedServiceItems.add({
-          "menu_item_id": orderService.service!.id,
-          "title": orderService.service!.title ?? '',
-          "price": orderService.service!.price ?? '0',
-          "qty": 1,
-          "id": orderService.id,
-          "is_deleted": orderService.isDeleted ?? false,
-        });
+        selectedServiceItems.add(
+          SelectedServiceItem(
+            serviceId: orderService.service!.id,
+            title: orderService.service!.title ?? '',
+            price: orderService.service!.price ?? '0',
+            qty: 1,
+            id: orderService.id,
+            isDeleted: orderService.isDeleted ?? false,
+          ),
+        );
       }
     }
   }
 
-  // Replace your existing completeEdit() with this:
+  /// Add menu item to selection
+  void addSelectedMenuItem({
+    required int? menuItemId,
+    required String name,
+    required String price,
+    int qty = 1,
+    int? id,
+  }) {
+    final exists = selectedMenuItems.any((m) => m.menuItemId == menuItemId);
+    if (!exists) {
+      selectedMenuItems.add(
+        SelectedMenuItem(
+          menuItemId: menuItemId,
+          name: name,
+          price: price,
+          qty: qty,
+          id: id,
+          isDeleted: false,
+        ),
+      );
+    }
+  }
+
+  /// Remove menu item from selection
+  void removeSelectedMenuItemByMenuItemId(int? menuItemId) {
+    selectedMenuItems.removeWhere((m) => m.menuItemId == menuItemId);
+  }
+
+  /// Clear all selected menu items
+  void clearSelectedMenuItems() => selectedMenuItems.clear();
+
+  /// Add service item to selection
+  void addSelectedServiceItem({
+    required int? serviceId,
+    required String title,
+    required String price,
+    int qty = 1,
+    int? id,
+  }) {
+    final exists = selectedServiceItems.any((s) => s.serviceId == serviceId);
+    if (!exists) {
+      selectedServiceItems.add(
+        SelectedServiceItem(
+          serviceId: serviceId,
+          title: title,
+          price: price,
+          qty: qty,
+          id: id,
+          isDeleted: false,
+        ),
+      );
+    }
+  }
+
+  /// Remove service item from selection
+  void removeSelectedServiceItemById(int? serviceId) {
+    selectedServiceItems.removeWhere((s) => s.serviceId == serviceId);
+  }
+
+  /// Clear all selected service items
+  void clearSelectedServiceItems() => selectedServiceItems.clear();
+
+  // ===========================================================================
+  // SECTION 7: ORDER UPDATE AND API COMMUNICATION
+  // ===========================================================================
+
+  /// Complete the edit process and update order via API
   Future<bool> completeEdit() async {
     try {
       if (currentEditOrder.value == null) {
@@ -378,95 +416,15 @@ class EditController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      // Helper formatters (kept from your original)
-      String formatDateForApi(DateTime? date) {
-        if (date == null) return '';
-        return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-      }
+      // Update the model instance with form data
+      final updatedOrder = _prepareOrderForUpdate();
 
-      String formatTimeForApi(TimeOfDay? time) {
-        if (time == null) return '';
-        return "2000-01-01T${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00.000Z";
-      }
-
-      // Get the model instance and update its fields from the form
-      final edit = currentEditOrder.value!;
-
-      // Name split logic (keeps your existing behavior)
-      final nameParts = splitName(nameController.text.trim());
-      edit.firstname = nameParts[0];
-      edit.lastname = nameParts[1];
-
-      // Basic contact info
-      edit.email = emailController.text;
-      edit.phone = contactController.text;
-
-      // Keep existing nin if present; or keep your fallback (you can change)
-      edit.nin = edit.nin ?? "123456789";
-
-      // Numeric IDs (convert string -> int when possible)
-      edit.cityId = int.tryParse(selectedCityId.value) ?? edit.cityId ?? 1;
-      edit.address = selectedCity.value;
-      edit.eventId = int.tryParse(selectedEventId.value) ?? edit.eventId ?? 1;
-
-      // Guests and requirement
-      edit.noOfGust = guests.value.toString();
-      edit.requirement = specialRequirementsController.text.isEmpty
-          ? "No special requirements"
-          : specialRequirementsController.text;
-
-      // Dates and times (store as formatted strings as your model expects)
-      edit.eventDate = formatDateForApi(selectedDate.value);
-      edit.eventTime = formatTimeForApi(startTime.value);
-      edit.startTime = formatTimeForApi(startTime.value);
-      edit.endTime = formatTimeForApi(endTime.value);
-
-      // Payment / inquiry flags
-      edit.paymentMethodId = 1;
-      // preserve existing isInquiry if present
-      edit.isInquiry = edit.isInquiry ?? false;
-
-      // Attach the current order services & packages (these are model instances)
-      // Ensure currentOrderServices/currentOrderPackages are the same model types as the model file.
-      edit.orderServices = List<OrderServices>.from(currentOrderServices);
-      edit.orderPackages = List<OrderPackages>.from(currentOrderPackages);
-
-      // Prepare payload lists from selected items (fallback to helpers if empty)
-      final List<Map<String, dynamic>> orderServicesData =
-          selectedMenuItems.isNotEmpty
-          ? selectedMenuItems.map((m) {
-              return {
-                if (m['id'] != null) "id": m['id'],
-                "menu_item_id": m['menu_item_id']?.toString() ?? '',
-                "price": m['price']?.toString() ?? '0',
-                "qty": m['qty'] ?? 1,
-                "is_deleted": m['is_deleted'] ?? false,
-              };
-            }).toList()
-          : _getOrderServicesForApi();
-
-      final List<Map<String, dynamic>> orderPackagesData =
-          selectedServiceItems.isNotEmpty
-          ? selectedServiceItems.map((s) {
-              return {
-                if (s['id'] != null) "id": s['id'],
-                "menu_item_id": s['menu_item_id']?.toString() ?? '',
-                "price": s['price']?.toString() ?? '0',
-                "qty": s['qty'] ?? 1,
-                "is_deleted": s['is_deleted'] ?? false,
-              };
-            }).toList()
-          : _getOrderPackagesForApi();
-
-      // Build final body from model.toJson() and inject the selected lists (override)
-      final Map<String, dynamic> editJson = edit.toJson();
-      editJson['order_services_attributes'] = orderServicesData;
-      editJson['order_packages_attributes'] = orderPackagesData;
-      final body = {"order": editJson};
+      // Prepare API payload
+      final body = _prepareApiPayload(updatedOrder);
 
       print('Sending update order data: ${jsonEncode(body)}');
 
-      // Call API (keeps your parameter name the same)
+      // Call API to update order
       final response = await ApiService.updateOrder(
         orderId: orderId,
         EditOrderModel: body,
@@ -474,7 +432,7 @@ class EditController extends GetxController {
 
       if (response['success'] == true) {
         print('✅ Order updated successfully');
-        // reload to reflect any server-side mutations
+        // Reload to reflect server-side changes
         await loadOrderById(orderId.toString());
         return true;
       } else {
@@ -491,21 +449,83 @@ class EditController extends GetxController {
     }
   }
 
-  // Helper method to get order services for API (existing)
+  /// Prepare order model with updated form data
+  EditOrderModel _prepareOrderForUpdate() {
+    final order = currentEditOrder.value!;
+
+    // Name handling
+    final nameParts = splitName(nameController.text.trim());
+    order.firstname = nameParts[0];
+    order.lastname = nameParts[1];
+
+    // Contact information
+    order.email = emailController.text;
+    order.phone = contactController.text;
+    order.nin = order.nin ?? "123456789";
+
+    // Location and event
+    order.cityId = int.tryParse(selectedCityId.value) ?? order.cityId ?? 1;
+    order.address = selectedCity.value;
+    order.eventId = int.tryParse(selectedEventId.value) ?? order.eventId ?? 1;
+
+    // Event details
+    order.noOfGust = guests.value.toString();
+    order.requirement = specialRequirementsController.text.isEmpty
+        ? "No special requirements"
+        : specialRequirementsController.text;
+
+    // Date and time formatting
+    order.eventDate = _formatDateForApi(selectedDate.value);
+    order.eventTime = _formatTimeForApi(startTime.value);
+    order.startTime = _formatTimeForApi(startTime.value);
+    order.endTime = _formatTimeForApi(endTime.value);
+
+    // System fields
+    order.paymentMethodId = 1;
+    order.isInquiry = order.isInquiry ?? false;
+
+    return order;
+  }
+
+  /// Prepare API payload with order data and selected items
+  Map<String, dynamic> _prepareApiPayload(EditOrderModel order) {
+    final orderJson = order.toJson();
+
+    // Convert selected items to API format
+    orderJson['order_services_attributes'] = _getOrderServicesForApi();
+    orderJson['order_packages_attributes'] = _getOrderPackagesForApi();
+
+    return {"order": orderJson};
+  }
+
+  /// Format date for API
+  String _formatDateForApi(DateTime? date) {
+    if (date == null) return '';
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  /// Format time for API
+  String _formatTimeForApi(TimeOfDay? time) {
+    if (time == null) return '';
+    return "2000-01-01T${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00.000Z";
+  }
+
+  /// Convert selected menu items to API format
   List<Map<String, dynamic>> _getOrderServicesForApi() {
+    if (selectedMenuItems.isNotEmpty) {
+      return selectedMenuItems.map((item) => item.toApiMap()).toList();
+    }
+
+    // Fallback to current order services
     return currentOrderServices
         .where((service) => service.isDeleted != true)
         .map((service) {
-          final String? menuItemId = service.menuItemId?.toString();
-          if (menuItemId == null) return <String, dynamic>{};
-
-          final String? id = service.id?.toString();
-          final int price = service.price ?? 0;
+          if (service.menuItemId == null) return <String, dynamic>{};
 
           return {
-            if (id != null && id.isNotEmpty) "id": id,
-            "menu_item_id": menuItemId,
-            "price": price,
+            if (service.id != null) "id": service.id,
+            "menu_item_id": service.menuItemId,
+            "price": service.price ?? 0,
             "is_deleted": service.isDeleted ?? false,
           };
         })
@@ -513,42 +533,38 @@ class EditController extends GetxController {
         .toList();
   }
 
-  // Helper method to get order packages for API (existing)
+  /// Convert selected service items to API format
   List<Map<String, dynamic>> _getOrderPackagesForApi() {
+    if (selectedServiceItems.isNotEmpty) {
+      return selectedServiceItems.map((item) => item.toApiMap()).toList();
+    }
+
+    // Fallback to current order packages
     return currentOrderPackages
         .where((package) => package.isCustom != true)
         .map((package) {
-          final String? packageId = package.packageId?.toString();
-          if (packageId == null) return <String, dynamic>{};
-
-          final String? pkgId = package.id?.toString();
+          if (package.packageId == null) return <String, dynamic>{};
 
           // Convert package items
           final List<Map<String, dynamic>> packageItems = [];
           if (package.orderPackageItems != null) {
             for (var item in package.orderPackageItems!) {
               if (item.isDeleted == true) continue;
-
-              final String? menuItemId = item.menuItemId?.toString();
-              if (menuItemId == null) continue;
-
-              final int? itemId = item.id;
-              final String priceStr = item.price ?? '0';
-              final String qtyStr = item.noOfGust ?? '1';
+              if (item.menuItemId == null) continue;
 
               packageItems.add({
-                if (itemId != null) "id": itemId,
-                "menu_item_id": menuItemId,
-                "price": priceStr,
-                "no_of_gust": qtyStr,
+                if (item.id != null) "id": item.id,
+                "menu_item_id": item.menuItemId,
+                "price": item.price ?? '0',
+                "no_of_gust": item.noOfGust ?? '1',
                 "is_deleted": item.isDeleted ?? false,
               });
             }
           }
 
           return {
-            if (pkgId != null && pkgId.isNotEmpty) "id": pkgId,
-            "package_id": packageId,
+            if (package.id != null) "id": package.id,
+            "package_id": package.packageId,
             "amount": package.amount ?? "0",
             "is_custom": package.isCustom ?? false,
             "order_package_items_attributes": packageItems,
@@ -558,34 +574,41 @@ class EditController extends GetxController {
         .toList();
   }
 
-  // Form setters
+  // ===========================================================================
+  // SECTION 8: FORM SETTERS AND HELPERS
+  // ===========================================================================
+
+  /// Set selected city and update ID
   void setCity(String city) {
     selectedCity.value = city;
     final cityData = apiCities.firstWhere(
-      (c) => (c['name']?.toString() ?? c['title']?.toString()) == city,
-      orElse: () => {},
+      (c) => c.name == city,
+      orElse: () => City(),
     );
-    selectedCityId.value = cityData['id']?.toString() ?? '';
+    selectedCityId.value = cityData.id?.toString() ?? '';
   }
 
+  /// Set selected event type and update ID
   void setEventType(String eventType) {
     selectedEventType.value = eventType;
     final eventData = apiEvents.firstWhere(
-      (e) => (e['name']?.toString() ?? e['title']?.toString()) == eventType,
-      orElse: () => {},
+      (e) => e.title == eventType,
+      orElse: () => Event(),
     );
-    selectedEventId.value = eventData['id']?.toString() ?? '';
+    selectedEventId.value = eventData.id?.toString() ?? '';
   }
 
+  /// Set selected package and update ID
   void setPackage(String packageTitle) {
     selectedPackage.value = packageTitle;
-    final packageData = packages.firstWhere(
-      (p) => p['title'] == packageTitle,
-      orElse: () => {},
+    final packageData = apiPackages.firstWhere(
+      (p) => p.title == packageTitle,
+      orElse: () => Package(),
     );
-    selectedPackageId.value = packageData['id']?.toString() ?? '';
+    selectedPackageId.value = packageData.id?.toString() ?? '';
   }
 
+  // Date and time setters
   void setDate(DateTime date) => selectedDate.value = date;
   void setStartTime(TimeOfDay time) => startTime.value = time;
   void setEndTime(TimeOfDay time) => endTime.value = time;
@@ -593,7 +616,7 @@ class EditController extends GetxController {
   void incrementGuests() => guests.value += 1;
   void decrementGuests() => guests.value = (guests.value - 1).clamp(1, 10000);
 
-  // Helper methods
+  /// Split full name into first and last name
   List<String> splitName(String fullName) {
     final names = fullName.split(' ');
     if (names.length >= 2) {
@@ -602,7 +625,11 @@ class EditController extends GetxController {
     return [fullName, ''];
   }
 
-  // Clear current edit order
+  // ===========================================================================
+  // SECTION 9: CLEANUP METHODS
+  // ===========================================================================
+
+  /// Clear all edit data and reset form
   void clearEditOrder() {
     currentEditOrder.value = null;
     currentOrderServices.clear();
@@ -611,12 +638,14 @@ class EditController extends GetxController {
     selectedServiceItems.clear();
     errorMessage.value = '';
 
-    // Clear form
+    // Clear form controllers
     nameController.clear();
     emailController.clear();
     contactController.clear();
     messageController.clear();
     specialRequirementsController.clear();
+
+    // Reset reactive values
     selectedCity.value = '';
     selectedCityId.value = '';
     selectedDate.value = null;
@@ -627,5 +656,69 @@ class EditController extends GetxController {
     selectedEventId.value = '';
     selectedPackage.value = '';
     selectedPackageId.value = '';
+  }
+}
+
+// ===========================================================================
+// SUPPORTING MODELS FOR SELECTED ITEMS
+// ===========================================================================
+
+/// Model for selected menu items in UI
+class SelectedMenuItem {
+  final int? menuItemId;
+  final String name;
+  final String price;
+  final int qty;
+  final int? id;
+  final bool isDeleted;
+
+  SelectedMenuItem({
+    required this.menuItemId,
+    required this.name,
+    required this.price,
+    required this.qty,
+    this.id,
+    required this.isDeleted,
+  });
+
+  /// Convert to API format
+  Map<String, dynamic> toApiMap() {
+    return {
+      if (id != null) "id": id,
+      "menu_item_id": menuItemId?.toString() ?? '',
+      "price": price,
+      "qty": qty,
+      "is_deleted": isDeleted,
+    };
+  }
+}
+
+/// Model for selected service items in UI
+class SelectedServiceItem {
+  final int? serviceId;
+  final String title;
+  final String price;
+  final int qty;
+  final int? id;
+  final bool isDeleted;
+
+  SelectedServiceItem({
+    required this.serviceId,
+    required this.title,
+    required this.price,
+    required this.qty,
+    this.id,
+    required this.isDeleted,
+  });
+
+  /// Convert to API format
+  Map<String, dynamic> toApiMap() {
+    return {
+      if (id != null) "id": id,
+      "menu_item_id": serviceId?.toString() ?? '',
+      "price": price,
+      "qty": qty,
+      "is_deleted": isDeleted,
+    };
   }
 }
