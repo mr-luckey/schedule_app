@@ -268,7 +268,7 @@ class Service {
   int? id;
   String? title;
   String? price;
-  Null? description;
+  var description;
   String? createdAt;
   String? updatedAt;
 
