@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
-import 'package:schedule_app/pages/Edit/model.dart' hide Event;
+import 'package:schedule_app/pages/Edit/models/model.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
