@@ -4,6 +4,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:schedule_app/pages/Edit/EditController.dart';
 import 'package:schedule_app/pages/Edit/models/MenuItem.dart';
+// import 'package:schedule_app/pages/Edit/models/ServiceModel.dart';
 import 'package:schedule_app/pages/Edit/models/model.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
@@ -1107,7 +1108,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                 color: Colors.green,
                               ),
                               onPressed: () {
-                                addServiceItem(service);
+                                addServiceItem(service as Service);
                                 Navigator.pop(ctx);
                               },
                             ),
