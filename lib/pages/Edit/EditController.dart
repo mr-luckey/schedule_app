@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
-import 'package:schedule_app/pages/Edit/models/MenuItem.dart';
+import 'package:schedule_app/pages/Edit/models/EditModel.dart';
+import 'package:schedule_app/pages/Edit/models/MenuItem.dart' hide MenuItem;
 import 'package:schedule_app/pages/Edit/models/model.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,7 +49,7 @@ class EditController extends GetxController {
   final RxList<MenuCategory> apiMenuCategories = <MenuCategory>[].obs;
 
   // Services remain the same
-  final RxList<Service> apiServiceItems = <Service>[].obs;
+  final RxList<ServiceMode> apiServiceItems = <ServiceMode>[].obs;
 
   // Selected items for UI
   final RxList<SelectedMenuItem> selectedMenuItems = <SelectedMenuItem>[].obs;
@@ -63,6 +64,7 @@ class EditController extends GetxController {
   void onInit() {
     super.onInit();
     loadApiData();
+    // _loadServiceItems();
   }
 
   @override
@@ -90,7 +92,7 @@ class EditController extends GetxController {
       await _loadEvents();
       await _loadPackages();
       await _loadMenuCategories(); // UPDATED: Load menu categories
-      await _loadServiceItems();
+      await loadServiceItems();
     } catch (e) {
       errorMessage.value = 'Error loading data: $e';
     } finally {
@@ -163,15 +165,75 @@ class EditController extends GetxController {
   }
 
   /// Load service items from API
-  Future<void> _loadServiceItems() async {
-    final servicesResult = await ApiService.getServices();
-    if (servicesResult['success'] == true) {
-      final servicesData = servicesResult['data'];
-      if (servicesData is List) {
-        apiServiceItems.value = servicesData
-            .map((serviceJson) => Service.fromJson(serviceJson))
-            .toList();
+
+  ///
+  // Future<List<MenuItem>> _loadServiceItems() async {
+  //   final servicesResult = await ApiService.getServices();
+  final isLoadingServices = false.obs;
+  void _loadServiceItemsFallback(Map<String, dynamic> servicesResult) {
+    try {
+      final List<ServiceMode> fallbackServices = [];
+      final dynamic raw = servicesResult['data'];
+      final List<dynamic> serviceList = raw is List
+          ? List<dynamic>.from(raw)
+          : (raw is Map && raw['data'] is List)
+          ? List<dynamic>.from(raw['data'] as List)
+          : [];
+
+      for (var svc in serviceList) {
+        try {
+          final Map<String, dynamic> svcMap = Map<String, dynamic>.from(svc);
+          final service = ServiceMode.fromJson(svcMap);
+          fallbackServices.add(service);
+        } catch (inner) {
+          print('Skipping a service due to parse error: $inner');
+        }
       }
+
+      apiServiceItems.assignAll(fallbackServices);
+    } catch (e) {
+      print('Fallback parsing also failed: $e');
+    }
+  }
+
+  // Method to load service items
+  Future<void> loadServiceItems() async {
+    try {
+      isLoadingServices(true);
+      final servicesResult = await ApiService.getServices();
+
+      if (servicesResult['success'] != true) {
+        print('Failed to load services: ${servicesResult['message']}');
+        return;
+      }
+
+      final dynamic raw = servicesResult['data'];
+      final List<dynamic> serviceList = raw is List
+          ? List<dynamic>.from(raw)
+          : (raw is Map && raw['data'] is List)
+          ? List<dynamic>.from(raw['data'] as List)
+          : [];
+
+      // Map to ServiceMode
+      final List<ServiceMode> serviceItems = serviceList
+          .map((e) => ServiceMode.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+
+      apiServiceItems.assignAll(serviceItems);
+
+      // Print loaded services for debugging
+      for (var service in serviceItems) {
+        print(
+          'Service: ${service.title}, Menu Items: ${service.menuItems?.length ?? 0}',
+        );
+      }
+      return apiServiceItems.assignAll(serviceItems);
+    } catch (e, st) {
+      print('Error loading services: $e\n$st');
+      // Fallback parsing if needed
+      _loadServiceItemsFallback(apiServiceItems as Map<String, dynamic>);
+    } finally {
+      isLoadingServices(false);
     }
   }
 
