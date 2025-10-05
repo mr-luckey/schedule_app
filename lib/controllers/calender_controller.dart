@@ -6,7 +6,7 @@ import '../model/Calender_model.dart';
 
 class CalendarsController extends GetxController {
   final List<Event> apiEvents = [];
-  final List<CalendarEvent> events = <CalendarEvent>[];
+  final RxList<CalendarEvent> events = <CalendarEvent>[].obs;
 
   // Edit event related properties
   final Rx<Event?> currentEditEvent = Rx<Event?>(null);

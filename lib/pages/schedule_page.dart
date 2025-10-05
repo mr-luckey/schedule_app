@@ -737,7 +737,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/controllers/calender_controller.dart';
-import 'package:schedule_app/pages/Calender_Main/Sample_Data.dart';
 import 'package:schedule_app/pages/Calender_Main/Week_Calender.dart';
 
 import '../theme/app_colors.dart';
@@ -760,6 +759,13 @@ class _SchedulePageState extends State<SchedulePage> {
   bool showEmptyContainer = false; // New state variable to toggle container
 
   CalendarsController calendarsController = Get.put(CalendarsController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure events are loaded whenever this page is opened
+    calendarsController.loadEventsFromApi();
+  }
 
   // Methods from ScheduleHeader
   void _goToToday() {
@@ -971,17 +977,20 @@ class _SchedulePageState extends State<SchedulePage> {
               _buildScheduleHeader(),
 
               Expanded(
-                child: WeekTimeCalendar(
-                  events: calendarsController.events,
-                  currentDate: _currentDate,
-                  // initialWeek: DateTime(2025, 4, 28),
-                  startHour: 9,
-                  endHour: 24,
-                  showWeekend: true,
-                  onEventTap: (e) {
-                    // handle tap
-                  },
-                ),
+                child: Obx(() {
+                  final events = calendarsController.events.toList();
+                  return WeekTimeCalendar(
+                    events: events,
+                    currentDate: _currentDate,
+                    // initialWeek: DateTime(2025, 4, 28),
+                    startHour: 9,
+                    endHour: 24,
+                    showWeekend: true,
+                    onEventTap: (e) {
+                      // handle tap
+                    },
+                  );
+                }),
               ),
             ],
           ),
@@ -1007,17 +1016,20 @@ class _SchedulePageState extends State<SchedulePage> {
                       child: BookingPage(),
                     ) // Empty container when button is pressed
                   : Expanded(
-                      child: WeekTimeCalendar(
-                        events: calendarsController.events,
-                        currentDate:
-                            _currentDate, // Use the current date from state
-                        startHour: 8,
-                        endHour: 24,
-                        showWeekend: true,
-                        onEventTap: (e) {
-                          // handle tap
-                        },
-                      ),
+                      child: Obx(() {
+                        final events = calendarsController.events.toList();
+                        return WeekTimeCalendar(
+                          events: events,
+                          currentDate:
+                              _currentDate, // Use the current date from state
+                          startHour: 8,
+                          endHour: 24,
+                          showWeekend: true,
+                          onEventTap: (e) {
+                            // handle tap
+                          },
+                        );
+                      }),
                     ),
             ],
           ),
