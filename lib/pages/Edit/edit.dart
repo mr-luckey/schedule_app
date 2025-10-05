@@ -805,7 +805,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               id: mi.id,
               menuId: mi.menuId,
               title: mi.title,
-              price: mi.price?.toString(),
+              price: mi.price.toString(),
               description: mi.description,
               createdAt: mi.createdAt?.toIso8601String(),
               updatedAt: mi.updatedAt?.toIso8601String(),
@@ -1540,13 +1540,23 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       setState(() {
                         isEditing = !isEditing;
                         editController.isEditingItems.value = isEditing;
-                        // Toggle custom editing mode when entering edit
+                        // Enable custom editing mode but keep currently selected package
                         if (isEditing) {
                           editController.isCustomEditing.value = true;
-                          // Switch package to a synthetic custom ID but keep items
-                          editController.selectedPackageId.value = 'custom';
+                          // Always sync selected package to current order package when entering edit mode
+                          final pkgs = editController.currentOrderPackages;
+                          if (pkgs.isNotEmpty && pkgs.first.packageId != null) {
+                            editController.selectedPackageId.value = pkgs
+                                .first
+                                .packageId!
+                                .toString();
+                            final pkgTitle = pkgs.first.package?.title ?? '';
+                            if (pkgTitle.isNotEmpty) {
+                              editController.selectedPackage.value = pkgTitle;
+                            }
+                          }
                         } else {
-                          // Leaving edit mode retains items; still custom
+                          // Leaving edit mode retains items
                           editController.isCustomEditing.value = true;
                         }
                       });
