@@ -484,6 +484,8 @@ class EditController extends GetxController {
   /// Complete the edit process and update order via API
   Future<bool> completeEdit() async {
     try {
+      // Debug: snapshot incoming editable state
+      _debugPrintState('START completeEdit');
       if (currentEditOrder.value == null) {
         errorMessage.value = 'No order data loaded';
         return false;
@@ -499,6 +501,11 @@ class EditController extends GetxController {
       // Prepare API payload
       final body = _prepareApiPayload(updatedOrder);
 
+      // Debug: outgoing payload
+      print('=== DEBUG: OUTGOING UPDATE PAYLOAD (order) ===');
+      try {
+        print(jsonEncode(body));
+      } catch (_) {}
       print('Sending update order data: ${jsonEncode(body)}');
 
       // Call API to update order
@@ -507,10 +514,15 @@ class EditController extends GetxController {
         EditOrderModel: body,
       );
 
+      // Debug: response snapshot
+      print('=== DEBUG: UPDATE RESPONSE ===');
+      print(response);
+
       if (response['success'] == true) {
         print('✅ Order updated successfully');
         // Reload to reflect server-side changes
         await loadOrderById(orderId.toString());
+        _debugPrintState('AFTER reload - server state reloaded');
         return true;
       } else {
         errorMessage.value = response['error'] ?? 'Failed to update order';
@@ -561,6 +573,21 @@ class EditController extends GetxController {
     order.paymentMethodId = 1;
     order.isInquiry = order.isInquiry ?? false;
 
+    // Debug: show the prepared order fields
+    print('=== DEBUG: _prepareOrderForUpdate ===');
+    print('firstname=' + (order.firstname ?? 'null'));
+    print('lastname=' + (order.lastname ?? 'null'));
+    print('email=' + (order.email ?? 'null'));
+    print('phone=' + (order.phone ?? 'null'));
+    print('cityId=' + (order.cityId?.toString() ?? 'null'));
+    print('address=' + (order.address ?? 'null'));
+    print('eventId=' + (order.eventId?.toString() ?? 'null'));
+    print('noOfGust=' + (order.noOfGust ?? 'null'));
+    print('requirement=' + (order.requirement ?? 'null'));
+    print('eventDate=' + (order.eventDate ?? 'null'));
+    print('startTime=' + (order.startTime ?? 'null'));
+    print('endTime=' + (order.endTime ?? 'null'));
+
     return order;
   }
 
@@ -572,7 +599,84 @@ class EditController extends GetxController {
     orderJson['order_services_attributes'] = _getOrderServicesForApi();
     orderJson['order_packages_attributes'] = _getOrderPackagesForApi();
 
+    // Debug: nested attributes preview
+    print('=== DEBUG: order_services_attributes ===');
+    try {
+      print(jsonEncode(orderJson['order_services_attributes']));
+    } catch (_) {}
+    print('=== DEBUG: order_packages_attributes ===');
+    try {
+      print(jsonEncode(orderJson['order_packages_attributes']));
+    } catch (_) {}
+
     return {"order": orderJson};
+  }
+
+  void _debugPrintState(String stage) {
+    print('=== DEBUG: $stage ===');
+    print(
+      'currentEditOrder.id=' +
+          (currentEditOrder.value?.id?.toString() ?? 'null'),
+    );
+    print(
+      'name=' +
+          nameController.text +
+          ', email=' +
+          emailController.text +
+          ', phone=' +
+          contactController.text,
+    );
+    print('city=' + selectedCity.value + ' (id=' + selectedCityId.value + ')');
+    print(
+      'event=' +
+          selectedEventType.value +
+          ' (id=' +
+          selectedEventId.value +
+          ')',
+    );
+    print('date=' + (selectedDate.value?.toIso8601String() ?? 'null'));
+    try {
+      final ctx = Get.context ?? Get.overlayContext;
+      final st = startTime.value?.format(ctx!) ?? 'null';
+      final et = endTime.value?.format(ctx!) ?? 'null';
+      print('startTime=' + st + ', endTime=' + et);
+    } catch (_) {}
+    print('guests=' + guests.value.toString());
+    print(
+      'selectedPackage=' +
+          selectedPackage.value +
+          ' (id=' +
+          selectedPackageId.value +
+          ')',
+    );
+    print('selectedMenuItems.count=' + selectedMenuItems.length.toString());
+    for (final m in selectedMenuItems) {
+      print(
+        '  MENU id=' +
+            (m.menuItemId?.toString() ?? 'null') +
+            ' name=' +
+            m.name +
+            ' price=' +
+            m.price +
+            ' qty=' +
+            m.qty.toString(),
+      );
+    }
+    print(
+      'selectedServiceItems.count=' + selectedServiceItems.length.toString(),
+    );
+    for (final s in selectedServiceItems) {
+      print(
+        '  SERVICE id=' +
+            (s.serviceId?.toString() ?? 'null') +
+            ' title=' +
+            s.title +
+            ' price=' +
+            s.price +
+            ' qty=' +
+            s.qty.toString(),
+      );
+    }
   }
 
   /// Format date for API
