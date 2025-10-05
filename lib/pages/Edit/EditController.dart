@@ -56,6 +56,10 @@ class EditController extends GetxController {
   final RxList<SelectedServiceItem> selectedServiceItems =
       <SelectedServiceItem>[].obs;
 
+  // Edit mode flags
+  final RxBool isEditingItems = false.obs;
+  final RxBool isCustomEditing = false.obs;
+
   // ===========================================================================
   // SECTION 2: LIFECYCLE METHODS
   // ===========================================================================
@@ -691,68 +695,123 @@ class EditController extends GetxController {
     return "2000-01-01T${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00.000Z";
   }
 
-  /// Convert selected menu items to API format
+  /// Build order_services_attributes from selected services, including deletions
   List<Map<String, dynamic>> _getOrderServicesForApi() {
-    if (selectedMenuItems.isNotEmpty) {
-      return selectedMenuItems.map((item) => item.toApiMap()).toList();
+    final List<Map<String, dynamic>> results = [];
+
+    // Index current services by menu_item_id for quick lookup
+    final Map<String, OrderServices> existingByMenuItemId = {
+      for (final svc in currentOrderServices)
+        if (svc.menuItemId != null) svc.menuItemId!.toString(): svc,
+    };
+
+    // Add/Update selected services
+    final Set<String> selectedIds = {};
+    for (final sel in selectedServiceItems) {
+      final key = (sel.serviceId?.toString() ?? '');
+      if (key.isEmpty) continue;
+      selectedIds.add(key);
+      final existing = existingByMenuItemId[key];
+      results.add({
+        if (existing?.id != null) "id": existing!.id,
+        "menu_item_id": key,
+        "price": sel.price,
+        "qty": sel.qty,
+        "is_deleted": false,
+      });
     }
 
-    // Fallback to current order services
-    return currentOrderServices
-        .where((service) => service.isDeleted != true)
-        .map((service) {
-          if (service.menuItemId == null) return <String, dynamic>{};
+    // Mark deletions for services that existed but are no longer selected
+    for (final entry in existingByMenuItemId.entries) {
+      if (!selectedIds.contains(entry.key)) {
+        final svc = entry.value;
+        results.add({
+          if (svc.id != null) "id": svc.id,
+          "menu_item_id": entry.key,
+          "price": (svc.price ?? '0').toString(),
+          "qty": 1,
+          "is_deleted": true,
+        });
+      }
+    }
 
-          return {
-            if (service.id != null) "id": service.id,
-            "menu_item_id": service.menuItemId,
-            "price": service.price ?? 0,
-            "is_deleted": service.isDeleted ?? false,
-          };
-        })
-        .where((item) => item.isNotEmpty)
-        .toList();
+    return results;
   }
 
-  /// Convert selected service items to API format
+  /// Build order_packages_attributes using selected menu items for the existing package, including deletions
   List<Map<String, dynamic>> _getOrderPackagesForApi() {
-    if (selectedServiceItems.isNotEmpty) {
-      return selectedServiceItems.map((item) => item.toApiMap()).toList();
+    if (currentOrderPackages.isEmpty) return <Map<String, dynamic>>[];
+    final pkg = currentOrderPackages.first;
+    if (pkg.packageId == null) return <Map<String, dynamic>>[];
+
+    final String currentPkgId = pkg.packageId!.toString();
+    final String selectedPkgId = selectedPackageId.value;
+
+    // Case 1: User picked a different package -> push only package_id; let server attach defaults
+    if (selectedPkgId.isNotEmpty &&
+        selectedPkgId != currentPkgId &&
+        !isCustomEditing.value) {
+      return [
+        {
+          if (pkg.id != null) "id": pkg.id,
+          "package_id": selectedPkgId,
+          // amount and items omitted; server will apply package defaults
+          "is_custom": false,
+        },
+      ];
     }
 
-    // Fallback to current order packages
-    return currentOrderPackages
-        .where((package) => package.isCustom != true)
-        .map((package) {
-          if (package.packageId == null) return <String, dynamic>{};
+    // Index existing package items by menu_item_id
+    final Map<String, dynamic> existingByMenuItemId = {};
+    if (pkg.orderPackageItems != null) {
+      for (final item in pkg.orderPackageItems!) {
+        if (item.menuItemId != null) {
+          existingByMenuItemId[item.menuItemId!.toString()] = item;
+        }
+      }
+    }
 
-          // Convert package items
-          final List<Map<String, dynamic>> packageItems = [];
-          if (package.orderPackageItems != null) {
-            for (var item in package.orderPackageItems!) {
-              if (item.isDeleted == true) continue;
-              if (item.menuItemId == null) continue;
+    final List<Map<String, dynamic>> packageItems = [];
+    final Set<String> selectedIds = {};
 
-              packageItems.add({
-                if (item.id != null) "id": item.id,
-                "menu_item_id": item.menuItemId,
-                "price": item.price ?? '0',
-                "no_of_gust": item.noOfGust ?? '1',
-                "is_deleted": item.isDeleted ?? false,
-              });
-            }
-          }
+    // Add/Update currently selected food items
+    for (final m in selectedMenuItems) {
+      final key = (m.menuItemId?.toString() ?? '');
+      if (key.isEmpty) continue;
+      selectedIds.add(key);
+      final existing = existingByMenuItemId[key];
+      packageItems.add({
+        if (existing?.id != null) "id": existing.id,
+        "menu_item_id": key,
+        "price": m.price,
+        "no_of_gust": m.qty.toString(),
+        "is_deleted": false,
+      });
+    }
 
-          return {
-            if (package.id != null) "id": package.id,
-            "package_id": package.packageId,
-            "amount": package.amount ?? "0",
-            "is_custom": package.isCustom ?? false,
-            "order_package_items_attributes": packageItems,
-          };
-        })
-        .where((item) => item.isNotEmpty)
-        .toList();
+    // Mark deletions for items removed from selection
+    for (final entry in existingByMenuItemId.entries) {
+      if (!selectedIds.contains(entry.key)) {
+        final item = entry.value;
+        packageItems.add({
+          if (item.id != null) "id": item.id,
+          "menu_item_id": entry.key,
+          "price": (item.price ?? '0').toString(),
+          "no_of_gust": (item.noOfGust ?? '1').toString(),
+          "is_deleted": true,
+        });
+      }
+    }
+
+    return [
+      {
+        if (pkg.id != null) "id": pkg.id,
+        "package_id": currentPkgId,
+        "amount": pkg.amount ?? "0",
+        "is_custom": isCustomEditing.value || (pkg.isCustom ?? false),
+        "order_package_items_attributes": packageItems,
+      },
+    ];
   }
 
   // ===========================================================================

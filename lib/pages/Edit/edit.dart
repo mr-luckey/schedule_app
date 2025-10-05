@@ -1539,6 +1539,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     onPressed: () {
                       setState(() {
                         isEditing = !isEditing;
+                        editController.isEditingItems.value = isEditing;
+                        // Toggle custom editing mode when entering edit
+                        if (isEditing) {
+                          editController.isCustomEditing.value = true;
+                          // Switch package to a synthetic custom ID but keep items
+                          editController.selectedPackageId.value = 'custom';
+                        } else {
+                          // Leaving edit mode retains items; still custom
+                          editController.isCustomEditing.value = true;
+                        }
                       });
                     },
                     child: Text(isEditing ? "Done Editing" : "Edit Items"),
