@@ -773,6 +773,8 @@ class EditController extends GetxController {
 
     final List<Map<String, dynamic>> packageItems = [];
     final Set<String> selectedIds = {};
+    final Set<String> existingIds = existingByMenuItemId.keys.toSet();
+    bool hasQuantityChange = false;
 
     // Add/Update currently selected food items
     for (final m in selectedMenuItems) {
@@ -780,6 +782,17 @@ class EditController extends GetxController {
       if (key.isEmpty) continue;
       selectedIds.add(key);
       final existing = existingByMenuItemId[key];
+      // Track quantity change relative to existing item
+      if (existing != null) {
+        final String existingQtyStr = (existing.noOfGust ?? '1').toString();
+        final int existingQty = int.tryParse(existingQtyStr) ?? 1;
+        if (existingQty != m.qty) {
+          hasQuantityChange = true;
+        }
+      } else {
+        // New item added which didn't exist before
+        hasQuantityChange = true;
+      }
       packageItems.add({
         if (existing?.id != null) "id": existing.id,
         "menu_item_id": key,
@@ -803,12 +816,23 @@ class EditController extends GetxController {
       }
     }
 
+    // Decide if this order's package should be treated as custom to prevent server from re-applying defaults
+    final bool itemsSetChanged =
+        selectedIds.length != existingIds.length ||
+        !selectedIds.containsAll(existingIds) ||
+        !existingIds.containsAll(selectedIds);
+    final bool shouldMarkCustom =
+        isCustomEditing.value ||
+        (pkg.isCustom ?? false) ||
+        itemsSetChanged ||
+        hasQuantityChange;
+
     return [
       {
         if (pkg.id != null) "id": pkg.id,
         "package_id": currentPkgId,
         "amount": pkg.amount ?? "0",
-        "is_custom": isCustomEditing.value || (pkg.isCustom ?? false),
+        "is_custom": shouldMarkCustom,
         "order_package_items_attributes": packageItems,
       },
     ];
