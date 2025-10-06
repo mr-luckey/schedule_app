@@ -381,22 +381,30 @@ class EditController extends GetxController {
     selectedMenuItems.clear();
     selectedServiceItems.clear();
 
-    // Build food items from packages
+    // Build food items from packages (exclude service items)
     for (var orderPackage in currentOrderPackages) {
       if (orderPackage.orderPackageItems != null) {
         for (var packageItem in orderPackage.orderPackageItems!) {
           if (packageItem.menuItem != null &&
               !(packageItem.isDeleted ?? false)) {
-            selectedMenuItems.add(
-              SelectedMenuItem(
-                menuItemId: packageItem.menuItem!.id,
-                name: packageItem.menuItem!.title ?? '',
-                price: packageItem.menuItem!.price ?? '0',
-                qty: int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
-                id: packageItem.id,
-                isDeleted: packageItem.isDeleted ?? false,
-              ),
+            // Check if this is a service item by looking at the service items list
+            // If it exists in services, it's a service item, not a food item
+            bool isServiceItem = currentOrderServices.any(
+              (service) => service.service?.id == packageItem.menuItem?.id,
             );
+
+            if (!isServiceItem) {
+              selectedMenuItems.add(
+                SelectedMenuItem(
+                  menuItemId: packageItem.menuItem!.id,
+                  name: packageItem.menuItem!.title ?? '',
+                  price: packageItem.menuItem!.price ?? '0',
+                  qty: int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
+                  id: packageItem.id,
+                  isDeleted: packageItem.isDeleted ?? false,
+                ),
+              );
+            }
           }
         }
       }
