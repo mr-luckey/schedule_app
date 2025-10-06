@@ -18,21 +18,21 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   late Map<String, List<Map<String, dynamic>>> menu;
 
   final List<Map<String, dynamic>> availableFood = [
-    {"name": "Chicken Tikka", "price": 250.0},
-    {"name": "Paneer Tikka", "price": 250.0},
-    {"name": "Mutton Biryani", "price": 350.0},
-    {"name": "Butter Chicken", "price": 300.0},
-    {"name": "Gulab Jamun", "price": 150.0},
-    {"name": "Ice Cream", "price": 200.0},
-    {"name": "Soft Drinks", "price": 100.0},
-    {"name": "Mocktails", "price": 180.0},
+    // {"name": "Chicken Tikka", "price": 250.0},
+    // {"name": "Paneer Tikka", "price": 250.0},
+    // {"name": "Mutton Biryani", "price": 350.0},
+    // {"name": "Butter Chicken", "price": 300.0},
+    // {"name": "Gulab Jamun", "price": 150.0},
+    // {"name": "Ice Cream", "price": 200.0},
+    // {"name": "Soft Drinks", "price": 100.0},
+    // {"name": "Mocktails", "price": 180.0},
   ];
 
   final List<Map<String, dynamic>> availableServices = [
-    {"name": "Waiter Service", "price": 1000.0},
-    {"name": "Decoration", "price": 2000.0},
-    {"name": "DJ", "price": 3000.0},
-    {"name": "Lighting", "price": 1500.0},
+    // {"name": "Waiter Service", "price": 1000.0},
+    // {"name": "Decoration", "price": 2000.0},
+    // {"name": "DJ", "price": 3000.0},
+    // {"name": "Lighting", "price": 1500.0},
   ];
 
   @override
@@ -41,11 +41,11 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     // Initialize menu with guestCount as qty for food items, services default to qty 1
     menu = {
       "Food Items": [
-        {"name": "Chicken Tikka", "price": 250.0, "qty": widget.guestCount},
-        {"name": "Paneer Tikka", "price": 250.0, "qty": widget.guestCount},
+        // {"name": "Chicken Tikka", "price": 250.0, "qty": widget.guestCount},
+        // {"name": "Paneer Tikka", "price": 250.0, "qty": widget.guestCount},
       ],
       "Services": [
-        {"name": "Waiter Service", "price": 1000.0, "qty": 1},
+        // {"name": "Waiter Service", "price": 1000.0, "qty": 1},
       ],
     };
 

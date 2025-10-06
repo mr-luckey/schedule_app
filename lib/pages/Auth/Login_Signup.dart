@@ -184,7 +184,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      'GreenPortal',
+                      'QUAID E AZAM GRAND BALLROOM',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -195,7 +195,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const Spacer(),
                 const Text(
-                  'Welcome to\nGreenPortal',
+                  'Welcome to\nQUAID E AZAM GRAND BALLROOM',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -205,7 +205,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Secure, fast and modern authentication experience for your digital life.',
+                  'Secure, fast and modern Event Booking experience for your digital life.',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 16,
@@ -223,7 +223,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  '© ${DateTime.now().year} GreenPortal Inc.',
+                  '© ${DateTime.now().year} QUAID E AZAM GRAND BALLROOM Inc.',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 14,
@@ -288,7 +288,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      'GreenPortal',
+                      'QUAID E AZAM GRAND BALLROOM',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -299,7 +299,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Welcome to GreenPortal',
+                  'Welcome to QUAID E AZAM GRAND BALLROOM',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,

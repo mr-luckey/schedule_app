@@ -1185,11 +1185,11 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   ),
                 ),
 
-                if (isEditing)
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                    onPressed: () => removeDish(category, dish),
-                  ),
+                // Remove button for services - ALWAYS VISIBLE (removed isEditing condition)
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                  onPressed: () => removeDish(category, dish),
+                ),
               ],
             ),
           );
@@ -1297,15 +1297,15 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   "Services",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                if (isEditing)
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add_circle, color: Colors.green),
-                        onPressed: () => addDish("Services"),
-                      ),
-                    ],
-                  ),
+                // Services add button - ALWAYS VISIBLE (removed isEditing condition)
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: Colors.green),
+                      onPressed: () => addDish("Services"),
+                    ),
+                  ],
+                ),
               ],
             ),
             const Divider(),
@@ -1317,7 +1317,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             const SizedBox(height: 10),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -1339,14 +1339,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   },
                   child: Text("Inquiry"),
                 ),
-                //TODO:change test here
-                // ElevatedButton(
-                //   onPressed: () {
-                //     commitEditsToController();
-                //     controller.showInquiry();
-                //   },
-                //   child: const Text("test"),
-                // ),
+
                 ElevatedButton(
                   onPressed: () {
                     commitEditsToController();
@@ -1361,16 +1354,649 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               ],
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Get.find<BookingController>().testOrderData();
-                // setState(() {});
-              },
-              child: Text("testOrder"),
-            ),
           ],
         ),
       ),
     );
   }
-}
+} // class FoodBeverageSelection extends StatefulWidget {
+//   const FoodBeverageSelection({super.key});
+
+//   @override
+//   _FoodBeverageSelectionState createState() => _FoodBeverageSelectionState();
+// }
+
+// class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
+//   bool isConfirmed = false;
+//   bool isEditing = false;
+
+//   late Map<String, List<Map<String, dynamic>>> menu;
+//   late BookingController controller;
+
+//   late List<Map<String, dynamic>> availableFoodLocal;
+//   late List<Map<String, dynamic>> availableServicesLocal;
+
+//   String previousPackage = '';
+//   final List<Worker> _workers = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     controller = Get.find<BookingController>();
+
+//     previousPackage = controller.selectedPackage.value;
+
+//     menu = controller.menuForPackage(
+//       previousPackage,
+//       controller.guests.value > 0 ? controller.guests.value : 1,
+//     );
+
+//     availableFoodLocal = List.from(controller.masterAvailableFood);
+//     availableServicesLocal = List.from(controller.masterAvailableServices);
+
+//     _syncAvailableListsWithMenu();
+
+//     _workers.add(
+//       ever(controller.selectedPackage, (val) {
+//         final newPkg = val;
+//         if (isEditing) {
+//           controller.updateCustomPackageItems(previousPackage, menu);
+//         }
+//         if (!mounted) return;
+//         setState(() {
+//           isEditing = false;
+//           controller.toggleEditMode(false);
+//           menu = controller.menuForPackage(
+//             newPkg,
+//             controller.guests.value > 0 ? controller.guests.value : 1,
+//           );
+//           previousPackage = newPkg;
+//           _syncAvailableListsWithMenu();
+//         });
+//       }),
+//     );
+
+//     _workers.add(
+//       ever(controller.guests, (g) {
+//         final guestsCount = (g);
+//         if (!mounted) return;
+//         setState(() {
+//           menu = controller.menuForPackage(
+//             controller.selectedPackage.value,
+//             guestsCount > 0 ? guestsCount : 1,
+//           );
+//           _syncAvailableListsWithMenu();
+//         });
+//       }),
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     for (final worker in _workers) {
+//       worker.dispose();
+//     }
+//     super.dispose();
+//   }
+
+//   bool _isApiPackage(String packageTitle) {
+//     final pkg = controller.packages.firstWhere(
+//       (p) => p['title'] == packageTitle,
+//       orElse: () => {},
+//     );
+//     return pkg['id']?.toString().isNotEmpty == true &&
+//         pkg['id']?.toString() != 'custom';
+//   }
+
+//   void _syncAvailableListsWithMenu() {
+//     availableFoodLocal = List.from(controller.masterAvailableFood);
+//     availableServicesLocal = List.from(controller.masterAvailableServices);
+
+//     final foodNames = menu['Food Items']!.map((d) => d['name']).toSet();
+//     final serviceNames = menu['Services']!.map((d) => d['name']).toSet();
+
+//     availableFoodLocal.removeWhere((f) => foodNames.contains(f['name']));
+//     availableServicesLocal.removeWhere((s) => serviceNames.contains(s['name']));
+//   }
+
+//   // Group available items by category for the add dialogs
+//   Map<String, List<Map<String, dynamic>>> _groupItemsByCategory(
+//     List<Map<String, dynamic>> items,
+//   ) {
+//     final Map<String, List<Map<String, dynamic>>> grouped = {};
+
+//     for (var item in items) {
+//       final category = item['category']?.toString() ?? 'Other';
+//       if (!grouped.containsKey(category)) {
+//         grouped[category] = [];
+//       }
+//       grouped[category]!.add(item);
+//     }
+
+//     return grouped;
+//   }
+
+//   double get foodAndBeverageCost {
+//     final isApiPackage = _isApiPackage(controller.selectedPackage.value);
+
+//     if (!isEditing && isApiPackage) {
+//       // Non-edit mode: Package price * guests (no services included)
+//       final pkg = controller.packages.firstWhere(
+//         (p) => p['title'] == controller.selectedPackage.value,
+//         orElse: () => {},
+//       );
+//       final packagePrice = _parsePriceString(pkg['price']?.toString());
+//       final guestCount = controller.guests.value;
+//       return packagePrice * guestCount;
+//     } else {
+//       // Edit mode: Sum of all items (no services included)
+//       return _calculateTotalFromItems();
+//     }
+//   }
+
+//   double _parsePriceString(String? priceStr) {
+//     if (priceStr == null) return 0.0;
+//     final cleaned = priceStr.replaceAll(RegExp(r'[^0-9.]'), '');
+//     if (cleaned.isEmpty) return 0.0;
+//     return double.tryParse(cleaned) ?? 0.0;
+//   }
+
+//   double _calculateServicesCost() {
+//     double servicesCost = 0.0;
+//     for (var service in menu['Services']!) {
+//       servicesCost += (service['price'] as num).toDouble();
+//     }
+//     return servicesCost;
+//   }
+
+//   double _calculateTotalFromItems() {
+//     double total = 0.0;
+//     for (var section in menu.values) {
+//       for (var dish in section) {
+//         total += (dish['price'] as num).toDouble() * (dish['qty'] as int);
+//       }
+//     }
+//     return total;
+//   }
+
+//   /// Get service cost (sum of selected services)
+//   double get serviceCost => _calculateServicesCost();
+
+//   /// Get VAT (20% of food and beverage cost)
+//   double get vat => 0.20 * foodAndBeverageCost;
+
+//   /// Get total amount
+//   double get totalAmount => foodAndBeverageCost + serviceCost + vat;
+
+//   void increment(Map<String, dynamic> dish) {
+//     setState(() => dish["qty"] = (dish["qty"] ?? 0) + 1);
+//   }
+
+//   void decrement(Map<String, dynamic> dish) {
+//     setState(() {
+//       if ((dish["qty"] ?? 0) > 0) {
+//         dish["qty"] = (dish["qty"] ?? 0) - 1;
+//       }
+//     });
+//   }
+
+//   void removeDish(String category, Map<String, dynamic> dish) {
+//     setState(() {
+//       menu[category]?.remove(dish);
+
+//       if (category == "Food Items") {
+//         availableFoodLocal.add({"name": dish["name"], "price": dish["price"]});
+//       } else if (category == "Services") {
+//         availableServicesLocal.add({
+//           "name": dish["name"],
+//           "price": dish["price"],
+//         });
+//       }
+//     });
+//   }
+
+//   void addDish(String category) {
+//     final options = category == "Food Items"
+//         ? availableFoodLocal
+//         : availableServicesLocal;
+//     final groupedOptions = _groupItemsByCategory(options);
+
+//     showModalBottomSheet(
+//       context: context,
+//       isScrollControlled: true,
+//       builder: (ctx) {
+//         return StatefulBuilder(
+//           builder: (context, setStateDialog) {
+//             return SafeArea(
+//               child: Container(
+//                 constraints: BoxConstraints(
+//                   maxHeight: MediaQuery.of(context).size.height * 0.8,
+//                 ),
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.min,
+//                   children: [
+//                     ListTile(
+//                       title: Text(
+//                         'Add $category',
+//                         style: TextStyle(
+//                           fontWeight: FontWeight.bold,
+//                           fontSize: 18,
+//                         ),
+//                       ),
+//                       trailing: IconButton(
+//                         icon: const Icon(Icons.close),
+//                         onPressed: () => Navigator.pop(ctx),
+//                       ),
+//                     ),
+//                     if (options.isEmpty)
+//                       Padding(
+//                         padding: const EdgeInsets.all(16),
+//                         child: Text(
+//                           'No more ${category.toLowerCase()} available.',
+//                           style: TextStyle(color: Colors.grey[600]),
+//                         ),
+//                       )
+//                     else
+//                       Expanded(
+//                         child: ListView(
+//                           shrinkWrap: true,
+//                           children: [
+//                             for (var categoryName in groupedOptions.keys)
+//                               Column(
+//                                 crossAxisAlignment: CrossAxisAlignment.start,
+//                                 children: [
+//                                   Padding(
+//                                     padding: const EdgeInsets.fromLTRB(
+//                                       16,
+//                                       16,
+//                                       16,
+//                                       8,
+//                                     ),
+//                                     child: Text(
+//                                       categoryName,
+//                                       style: TextStyle(
+//                                         fontWeight: FontWeight.bold,
+//                                         fontSize: 16,
+//                                         color: Colors.blue[700],
+//                                       ),
+//                                     ),
+//                                   ),
+//                                   ...groupedOptions[categoryName]!.map((item) {
+//                                     return ListTile(
+//                                       title: Text(item["name"]),
+//                                       subtitle: Text(
+//                                         '£${(item["price"] as num).toStringAsFixed(2)}',
+//                                       ),
+//                                       trailing: IconButton(
+//                                         icon: const Icon(
+//                                           Icons.add_circle,
+//                                           color: Colors.green,
+//                                         ),
+//                                         onPressed: () {
+//                                           setState(() {
+//                                             // Add item to menu
+
+//                                             menu[category]!.add({
+//                                               "name": item["name"],
+//                                               "price": item["price"],
+//                                               "qty": controller.guests.value,
+//                                               "id": item["id"],
+//                                             });
+
+//                                             // Remove from available list
+//                                             if (category == "Food Items") {
+//                                               availableFoodLocal.removeWhere(
+//                                                 (f) =>
+//                                                     f['name'] == item['name'],
+//                                               );
+//                                             } else {
+//                                               availableServicesLocal
+//                                                   .removeWhere(
+//                                                     (s) =>
+//                                                         s['name'] ==
+//                                                         item['name'],
+//                                                   );
+//                                             }
+//                                           });
+//                                           _syncAvailableListsWithMenu();
+//                                           Navigator.pop(ctx);
+//                                         },
+//                                       ),
+//                                     );
+//                                   }).toList(),
+//                                   const Divider(),
+//                                 ],
+//                               ),
+//                           ],
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//               ),
+//             );
+//           },
+//         );
+//       },
+//     );
+//   }
+
+//   void _showEditDishQuantityDialog(Map<String, dynamic> dish) {
+//     final txt = TextEditingController(text: dish['qty'].toString());
+//     showDialog(
+//       context: context,
+//       builder: (ctx) {
+//         return AlertDialog(
+//           title: Text('Set quantity for ${dish['name']}'),
+//           content: TextField(
+//             controller: txt,
+//             keyboardType: TextInputType.number,
+//             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+//             decoration: const InputDecoration(
+//               hintText: 'Enter quantity (numeric)',
+//             ),
+//             autofocus: true,
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.pop(ctx),
+//               child: const Text('Cancel'),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 final val = int.tryParse(txt.text);
+//                 if (val != null && val >= 0) {
+//                   setState(() {
+//                     dish['qty'] = val;
+//                   });
+//                   Navigator.pop(ctx);
+//                 } else {
+//                   ScaffoldMessenger.of(ctx).showSnackBar(
+//                     const SnackBar(
+//                       content: Text('Please enter a valid number'),
+//                     ),
+//                   );
+//                 }
+//               },
+//               child: const Text('Set'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   Widget buildItemRow(String category, Map<String, dynamic> dish) {
+//     final isFoodItem = category == "Food Items";
+
+//     return isFoodItem
+//         ? Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 // Dish name + price
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(dish["name"], style: const TextStyle(fontSize: 15)),
+//                       Text(
+//                         "£${(dish["price"] as num).toStringAsFixed(2)} per unit",
+//                         style: const TextStyle(
+//                           color: Colors.grey,
+//                           fontSize: 10,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+
+//                 // Quantity controls (visible when editing for both food & services)
+//                 if (isEditing)
+//                   Container(
+//                     padding: const EdgeInsets.symmetric(horizontal: 4),
+//                     decoration: BoxDecoration(
+//                       border: Border.all(color: Colors.black),
+//                       borderRadius: BorderRadius.circular(10),
+//                     ),
+//                     child: Row(
+//                       children: [
+//                         IconButton(
+//                           icon: const Icon(Icons.remove_outlined, size: 20),
+//                           onPressed: () => decrement(dish),
+//                         ),
+//                         Text(
+//                           dish["qty"].toString(),
+//                           style: const TextStyle(fontSize: 16),
+//                         ),
+//                         IconButton(
+//                           icon: const Icon(Icons.add, size: 20),
+//                           onPressed: () => increment(dish),
+//                         ),
+//                         // Edit button to input number manually
+//                         IconButton(
+//                           icon: const Icon(Icons.edit, size: 18),
+//                           onPressed: () => _showEditDishQuantityDialog(dish),
+//                         ),
+//                       ],
+//                     ),
+//                   )
+//                 else
+//                   Padding(
+//                     padding: const EdgeInsets.symmetric(horizontal: 8),
+//                     child: Text("Qty: ${dish["qty"]}"),
+//                   ),
+
+//                 // Remove button (only visible when editing)
+//                 if (isEditing)
+//                   IconButton(
+//                     icon: const Icon(Icons.close, color: Colors.red, size: 20),
+//                     onPressed: () => removeDish(category, dish),
+//                   ),
+//               ],
+//             ),
+//           )
+//         : Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 // Dish name + price
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(dish["name"], style: const TextStyle(fontSize: 15)),
+//                       Text(
+//                         "£${(dish["price"] as num).toStringAsFixed(2)} per unit",
+//                         style: const TextStyle(
+//                           color: Colors.grey,
+//                           fontSize: 10,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+
+//                 if (isEditing)
+//                   IconButton(
+//                     icon: const Icon(Icons.close, color: Colors.red, size: 20),
+//                     onPressed: () => removeDish(category, dish),
+//                   ),
+//               ],
+//             ),
+//           );
+//   }
+
+//   Widget buildSummary() {
+//     return Card(
+//       margin: const EdgeInsets.all(12),
+//       child: Padding(
+//         padding: const EdgeInsets.all(12),
+//         child: Column(
+//           children: [
+//             summaryRow("Food & Beverage", foodAndBeverageCost),
+//             summaryRow("Service Cost", serviceCost),
+//             summaryRow("VAT (20%)", vat),
+//             const Divider(),
+//             summaryRow("Total Amount", totalAmount, isBold: true, fontSize: 18),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget summaryRow(
+//     String label,
+//     double value, {
+//     bool isBold = false,
+//     double fontSize = 16,
+//   }) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 4),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Text(
+//             label,
+//             style: TextStyle(
+//               fontSize: fontSize,
+//               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+//             ),
+//           ),
+//           Text(
+//             "£${value.toStringAsFixed(2)}",
+//             style: TextStyle(
+//               fontSize: fontSize,
+//               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   void commitEditsToController() {
+//     controller.updateCustomPackageItems(controller.selectedPackage.value, menu);
+//     Get.snackbar('Saved', 'Package updated');
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     if (isConfirmed) ;
+
+//     return Container(
+//       width: 340,
+//       padding: const EdgeInsets.all(24),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(12),
+//         border: Border.all(color: Colors.grey[300]!),
+//       ),
+//       child: SingleChildScrollView(
+//         child: Column(
+//           children: [
+//             // Food Section
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 const Text(
+//                   "Food Items",
+//                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//                 ),
+//                 if (isEditing)
+//                   Row(
+//                     children: [
+//                       IconButton(
+//                         icon: const Icon(Icons.add_circle, color: Colors.green),
+//                         onPressed: () => addDish("Food Items"),
+//                       ),
+//                     ],
+//                   ),
+//               ],
+//             ),
+//             const Divider(),
+//             ...menu["Food Items"]!.map(
+//               (dish) => buildItemRow("Food Items", dish),
+//             ),
+
+//             const SizedBox(height: 20),
+
+//             // Services Section
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 const Text(
+//                   "Services",
+//                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//                 ),
+//                 // if (isEditing)
+//                 Row(
+//                   children: [
+//                     IconButton(
+//                       icon: const Icon(Icons.add_circle, color: Colors.green),
+//                       onPressed: () => addDish("Services"),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//             const Divider(),
+//             ...menu["Services"]!.map(
+//               (service) => buildItemRow("Services", service),
+//             ),
+
+//             buildSummary(),
+//             const SizedBox(height: 10),
+
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceAround,
+//               children: [
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     setState(() {
+//                       isEditing = !isEditing;
+//                       controller.toggleEditMode(isEditing);
+//                     });
+//                     if (!isEditing) {
+//                       commitEditsToController();
+//                     }
+//                   },
+//                   child: Text(isEditing ? "Done" : "Edit"),
+//                 ),
+
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     Get.find<BookingController>().testInquiryData();
+//                     setState(() {});
+//                   },
+//                   child: Text("Inquiry"),
+//                 ),
+
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     commitEditsToController();
+//                     controller.showBookingConfirmation();
+
+//                     setState(() {
+//                       // isConfirmed = true;
+//                     });
+//                   },
+//                   child: const Text("Confirm Booking"),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 20),
+//             // ElevatedButton(
+//             //   onPressed: () {
+//             //     // Get.find<BookingController>().testOrderData();
+//             //     // setState(() {});
+//             //   },
+//             //   child: Text("testOrder"),
+//             // ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

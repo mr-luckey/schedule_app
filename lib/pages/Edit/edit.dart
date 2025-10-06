@@ -1616,6 +1616,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             try {
                               final success = await editController
                                   .completeEdit();
+                              Get.offAll(() => SchedulePage());
 
                               // Hide loading
                               if (mounted) {
@@ -1643,7 +1644,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                     ),
                                   );
                                   if (!mounted) return;
-                                  Get.offAll(() => SchedulePage());
+                                  ;
                                 }
                               } else {
                                 // Show error

@@ -887,7 +887,10 @@ class BookingController extends GetxController {
   void setStartTime(TimeOfDay time) => startTime.value = time;
   void setEndTime(TimeOfDay time) => endTime.value = time;
   void setGuests(int count) => guests.value = count;
-  void incrementGuests() => guests.value += 1;
+  void incrementGuests() {
+    guests.value += 1;
+  }
+
   void decrementGuests() => guests.value = (guests.value - 1).clamp(1, 10000);
 
   // --- Pricing helpers ---
@@ -1729,9 +1732,7 @@ class BookingController extends GetxController {
 
     // Fallback to existing data
     return [
-      {"name": "Waiter Service", "price": 1000.0},
-      {"name": "Decoration", "price": 2000.0},
-      {"name": "DJ", "price": 3000.0},
+      // {"name": "Please Select a", "price": 1000.0},
     ];
   }
 
