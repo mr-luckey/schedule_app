@@ -840,19 +840,56 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // COST CALCULATION METHODS
   // ===========================================================================
 
-  /// Calculate total food and beverage cost
+  /// Calculate total food and beverage cost (excluding services)
   double get foodAndBeverageCost {
+    // Check if we're in edit mode (custom editing or editing items)
+    final bool isEditMode =
+        editController.isCustomEditing.value ||
+        editController.isEditingItems.value;
+
+    if (!isEditMode) {
+      // Non-edit mode: Package price * number of guests (no services included)
+      final guests = editController.guests.value;
+      final packagePrice = _getPackagePrice();
+      return packagePrice * guests;
+    } else {
+      // Edit mode: Individual item prices * quantities (no services included)
+      double total = 0.0;
+      for (var item in editController.selectedMenuItems) {
+        final price = double.tryParse(item.price) ?? 0.0;
+        total += price * item.qty;
+      }
+      return total;
+    }
+  }
+
+  /// Get package price from current order
+  double _getPackagePrice() {
+    if (editController.currentOrderPackages.isNotEmpty) {
+      final pkg = editController.currentOrderPackages.first;
+      return double.tryParse(pkg.amount ?? '0') ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  /// Get total cost of selected services
+  double _getServicesCost() {
     double total = 0.0;
-    for (var item in editController.selectedMenuItems) {
-      final price = double.tryParse(item.price) ?? 0.0;
-      total += price * item.qty;
+    for (var service in editController.selectedServiceItems) {
+      final price = double.tryParse(service.price) ?? 0.0;
+      total += price * service.qty;
     }
     return total;
   }
 
-  double get serviceCharges => 0.10 * foodAndBeverageCost;
-  double get tax => 0.13 * (foodAndBeverageCost + serviceCharges);
-  double get totalAmount => foodAndBeverageCost + serviceCharges + tax;
+  /// Get service cost (sum of selected services)
+  double get serviceCost => _getServicesCost();
+
+  /// Get VAT (20% of food and beverage cost)
+  double get vat => 0.20 * foodAndBeverageCost;
+
+  /// Get total amount
+  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
 
   // ===========================================================================
   // ITEM MANAGEMENT METHODS
@@ -1374,8 +1411,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         child: Column(
           children: [
             _summaryRow("Food & Beverage", foodAndBeverageCost),
-            _summaryRow("Service Charges (10%)", serviceCharges),
-            _summaryRow("Tax (13%)", tax),
+            _summaryRow("Service Cost", serviceCost),
+            _summaryRow("VAT (20%)", vat),
             const Divider(),
             _summaryRow(
               "Total Amount",

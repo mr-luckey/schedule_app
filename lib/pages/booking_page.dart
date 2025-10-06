@@ -765,7 +765,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
     _workers.add(
       ever(controller.selectedPackage, (val) {
-        final newPkg = val as String;
+        final newPkg = val;
         if (isEditing) {
           controller.updateCustomPackageItems(previousPackage, menu);
         }
@@ -847,16 +847,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     final isApiPackage = _isApiPackage(controller.selectedPackage.value);
 
     if (!isEditing && isApiPackage) {
-      // Non-edit mode: Package price from API + services
+      // Non-edit mode: Package price * guests (no services included)
       final pkg = controller.packages.firstWhere(
         (p) => p['title'] == controller.selectedPackage.value,
         orElse: () => {},
       );
       final packagePrice = _parsePriceString(pkg['price']?.toString());
-      final servicesCost = _calculateServicesCost();
-      return packagePrice + servicesCost;
+      final guestCount = controller.guests.value;
+      return packagePrice * guestCount;
     } else {
-      // Edit mode: Sum of all items
+      // Edit mode: Sum of all items (no services included)
       return _calculateTotalFromItems();
     }
   }
@@ -886,9 +886,14 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     return total;
   }
 
-  double get serviceCharges => 0.10 * (foodAndBeverageCost);
-  double get tax => 0.13 * (foodAndBeverageCost + serviceCharges);
-  double get totalAmount => foodAndBeverageCost + serviceCharges + tax;
+  /// Get service cost (sum of selected services)
+  double get serviceCost => _calculateServicesCost();
+
+  /// Get VAT (20% of food and beverage cost)
+  double get vat => 0.20 * foodAndBeverageCost;
+
+  /// Get total amount
+  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
 
   void increment(Map<String, dynamic> dish) {
     setState(() => dish["qty"] = (dish["qty"] ?? 0) + 1);
@@ -996,16 +1001,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                         ),
                                         onPressed: () {
                                           setState(() {
-                                            final isApiPackage = _isApiPackage(
-                                              controller.selectedPackage.value,
-                                            );
-                                            final baseQty =
-                                                category == "Food Items" &&
-                                                    !isApiPackage
-                                                ? (controller.guests.value > 0
-                                                      ? controller.guests.value
-                                                      : 1)
-                                                : 1;
+                                            // Add item to menu
 
                                             menu[category]!.add({
                                               "name": item["name"],
@@ -1207,8 +1203,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         child: Column(
           children: [
             summaryRow("Food & Beverage", foodAndBeverageCost),
-            summaryRow("Service Charges (10%)", serviceCharges),
-            summaryRow("Tax (13%)", tax),
+            summaryRow("Service Cost", serviceCost),
+            summaryRow("VAT (20%)", vat),
             const Divider(),
             summaryRow("Total Amount", totalAmount, isBold: true, fontSize: 18),
           ],
