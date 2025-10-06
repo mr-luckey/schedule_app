@@ -1250,7 +1250,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   @override
   Widget build(BuildContext context) {
-    if (isConfirmed) return const BookingSummary();
+    if (isConfirmed) ;
 
     return Container(
       width: 340,
@@ -1350,9 +1350,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 ElevatedButton(
                   onPressed: () {
                     commitEditsToController();
+                    controller.showBookingConfirmation();
 
                     setState(() {
-                      isConfirmed = true;
+                      // isConfirmed = true;
                     });
                   },
                   child: const Text("Confirm Booking"),
