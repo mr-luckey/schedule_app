@@ -95,14 +95,21 @@ class Event {
   }
 
   CalendarEvent toCalendarEvent() {
+    // Use customer name as main title; include event name and guests in subtitle
+    final String guestText = guests != null ? '$guests guests' : '';
+    final String subtitleText = [
+      title,
+      guestText,
+    ].where((s) => s.toString().trim().isNotEmpty).join(' • ');
+
     return CalendarEvent(
       id: id,
-      title: title,
+      title: customerName,
       start: startTime,
       end: endTime,
       eventDate: eventDate,
-      guests: guests.toString(),
-      subtitle: '${guests != null ? ' • $guests guests' : ''}',
+      guests: guestText,
+      subtitle: subtitleText,
       color: color,
     );
   }

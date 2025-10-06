@@ -69,14 +69,14 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
       print(e.start);
       print(e.end);
       print(e.title);
-      print(e.subtitle);
+      print(e.guests);
 
       return Appointment(
         id: e.id,
         startTime: e.start,
         endTime: e.end,
         subject: e.title,
-        notes: e.subtitle,
+        notes: e.guests,
         color: e.color.withOpacity(.18),
       );
     }).toList();

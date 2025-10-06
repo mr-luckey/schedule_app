@@ -40,7 +40,7 @@ class _SidebarState extends State<Sidebar> {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'Booking',
+                  'Bookings',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -134,17 +134,7 @@ class _SidebarState extends State<Sidebar> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: FilterButton(
-                    label: 'Inquiry',
-                    isSelected: _selectedFilter == 'Inquiry',
-                    onTap: () {
-                      setState(() {
-                        _selectedFilter = 'Inquiry';
-                      });
-                    },
-                  ),
-                ),
+                // Inquiry tab removed per request
               ],
             ),
           ),
@@ -159,22 +149,17 @@ class _SidebarState extends State<Sidebar> {
                 children: [
                   NavItem(
                     icon: Icons.receipt_long,
-                    label: 'Invoice',
+                    label: 'Bookings',
                     isSelected: true,
                     onTap: () {},
                   ),
                   NavItem(
                     icon: Icons.bar_chart,
-                    label: 'Reports',
+                    label: 'Orders',
                     isSelected: false,
                     onTap: () {},
                   ),
-                  NavItem(
-                    icon: Icons.help_outline,
-                    label: 'Inquires',
-                    isSelected: false,
-                    onTap: () {},
-                  ),
+                  // Inquiry nav item removed per request
                   NavItem(
                     icon: Icons.group,
                     label: 'Users',
