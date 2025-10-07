@@ -76,7 +76,7 @@ class BookingPage extends StatelessWidget {
   Widget _buildTabletLayout() {
     return Row(
       children: [
-        SizedBox(width: 240, child: const Sidebar()),
+        // SizedBox(width: 240, child: const Sidebar()),
         Expanded(
           child: Column(
             children: [

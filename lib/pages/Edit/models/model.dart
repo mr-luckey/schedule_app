@@ -306,7 +306,7 @@ class OrderPackages {
   int? id;
   int? orderId;
   int? packageId;
-  String? amount;
+  dynamic amount;
   bool? isCustom;
   String? createdAt;
   String? updatedAt;

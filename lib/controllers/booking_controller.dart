@@ -1129,8 +1129,9 @@ class BookingController extends GetxController {
         }
 
         orderPackages.add({
-          "package_id": selectedPackageId.value,
-          "amount": calculateSubtotal().toStringAsFixed(2),
+          "package_id": selectedPackageId
+              .value, //TODO: we need to pass geand total of the system
+          "amount": calculateTotal().toStringAsFixed(2),
           "is_custom": isCustomFlag,
           "order_package_items_attributes": packageItems,
         });

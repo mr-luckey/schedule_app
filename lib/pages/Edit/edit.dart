@@ -12,7 +12,7 @@ import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
 import 'package:schedule_app/widgets/schedule_header.dart';
 import 'package:schedule_app/widgets/sidebar.dart';
-import 'package:schedule_app/pages/schedule_page.dart';
+import 'package:schedule_app/pages/schedule_page.dart' hide Sidebar;
 
 // ===========================================================================
 // MAIN EDIT PAGE
@@ -137,7 +137,7 @@ class _EditPageState extends State<EditPage> {
   Widget _buildTabletLayout() {
     return Row(
       children: [
-        SizedBox(width: 240, child: Sidebar()),
+        // SizedBox(width: 240, child: Sidebar()),
         Expanded(
           child: Column(
             children: [
@@ -744,6 +744,7 @@ class FoodBeverageSelection extends StatefulWidget {
 class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   final EditController editController = Get.find<EditController>();
   bool isEditing = false;
+  bool isEdited = false;
 
   // ===========================================================================
   // LIFECYCLE METHODS
@@ -1428,7 +1429,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   Widget _summaryRow(
     String label,
-    double value, {
+    dynamic value, {
     bool isBold = false,
     double fontSize = 16,
   }) {
@@ -1445,7 +1446,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
           ),
           Text(
-            "£${value.toStringAsFixed(2)}",
+            "£${value}",
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
@@ -1478,6 +1479,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   @override
   Widget build(BuildContext context) {
+    print("testing AMount");
+    print(editController.currentOrderPackages.first.amount);
+    // print(editController.apiPackages);
     return Obx(
       () => Container(
         width: 340,
@@ -1565,7 +1569,23 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   (item) => buildItemRow(item, false),
                 ),
 
-              buildSummary(),
+              //  isEditing?_summaryRow(
+              //       "Total Amount",
+              //  editController.currentOrderPackages.first.amount,
+              //       isBold: true,
+              //       fontSize: 18,
+              //     ):;
+              _summaryRow("Food & Beverage", foodAndBeverageCost),
+              _summaryRow("Service Cost", serviceCost),
+              _summaryRow("VAT (20%)", vat),
+              _summaryRow(
+                "Total Amount",
+                isEdited
+                    ? totalAmount
+                    : editController.currentOrderPackages.first.amount,
+              ),
+              const Divider(),
+
               const SizedBox(height: 10),
 
               // Action Buttons
@@ -1576,6 +1596,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     onPressed: () {
                       setState(() {
                         isEditing = !isEditing;
+                        isEdited = !isEdited;
                         editController.isEditingItems.value = isEditing;
                         // Enable custom editing mode but keep currently selected package
                         if (isEditing) {
@@ -1593,6 +1614,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             }
                           }
                         } else {
+                          isEdited = true;
                           // Leaving edit mode retains items
                           editController.isCustomEditing.value = true;
                         }
