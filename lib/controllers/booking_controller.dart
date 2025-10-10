@@ -29,6 +29,33 @@ class BookingController extends GetxController {
     );
   }
 
+  void markPackageAsEdited() {
+    if (selectedPackage.value.isNotEmpty) {
+      packageEdited[selectedPackage.value] = true;
+      isPackageEditing.value = true;
+
+      // Save the current selection immediately when edited
+      final currentMenu = getCurrentMenu();
+      _customSelections[selectedPackage.value] = currentMenu;
+      _saveSelectionToPrefs(selectedPackage.value, currentMenu);
+    }
+  }
+
+  bool hasPackageBeenModified() {
+    return packageEdited[selectedPackage.value] == true;
+  }
+  // void markPackageAsEdited() {
+  //   if (selectedPackage.value.isNotEmpty) {
+  //     packageEdited[selectedPackage.value] = true;
+  //     isPackageEditing.value = true;
+
+  //     // Save the current selection immediately when edited
+  //     final currentMenu = getCurrentMenu();
+  //     _customSelections[selectedPackage.value] = currentMenu;
+  //     _saveSelectionToPrefs(selectedPackage.value, currentMenu);
+  //   }
+  // }
+
   // Form data
   final RxString selectedCity = ''.obs;
   final RxString selectedCityId = ''.obs; // Store city ID for API
@@ -865,7 +892,15 @@ class BookingController extends GetxController {
   }
 
   void setPackage(String packageTitle) {
+    // Save current package state before switching
+    if (selectedPackage.value.isNotEmpty &&
+        selectedPackage.value != packageTitle &&
+        isPackageEditing.value) {
+      updateCustomPackageItems(selectedPackage.value, getCurrentMenu());
+    }
+
     selectedPackage.value = packageTitle;
+
     // Find and set the package ID
     final packageData = packages.firstWhere(
       (p) => p['title'] == packageTitle,
@@ -873,20 +908,57 @@ class BookingController extends GetxController {
     );
     selectedPackageId.value = packageData['id']?.toString() ?? '';
 
-    // Try to load any previously saved selection for this package
+    // Initialize edit state for this package if not exists
+    if (!packageEdited.containsKey(packageTitle)) {
+      packageEdited[packageTitle] = false;
+    }
+
+    // Load any previously saved selection for this package
     _loadSelectionFromPrefs(packageTitle).then((saved) {
       if (saved != null) {
         _customSelections[packageTitle] = saved;
         packageEdited[packageTitle] = true;
         isPackageEditing.value = true;
+      } else {
+        // Reset to non-edited state if no saved selection
+        packageEdited[packageTitle] = false;
+        isPackageEditing.value = false;
       }
+      update(); // Refresh UI
     });
   }
 
   void setDate(DateTime date) => selectedDate.value = date;
   void setStartTime(TimeOfDay time) => startTime.value = time;
   void setEndTime(TimeOfDay time) => endTime.value = time;
-  void setGuests(int count) => guests.value = count;
+  void setGuests(int count) {
+    final oldCount = guests.value;
+    guests.value = count;
+
+    // Update food quantities in custom selections if package is edited
+    if (isPackageEditing.value && selectedPackage.value.isNotEmpty) {
+      final currentMenu = getCurrentMenu();
+      final updatedFoodItems = <Map<String, dynamic>>[];
+
+      // Update quantities for all food items
+      for (var foodItem in currentMenu['Food Items']!) {
+        final updatedItem = Map<String, dynamic>.from(foodItem);
+        updatedItem['qty'] = count; // Set to new guest count
+        updatedFoodItems.add(updatedItem);
+      }
+
+      // Update the custom selection
+      if (_customSelections.containsKey(selectedPackage.value)) {
+        _customSelections[selectedPackage.value]!['Food Items'] =
+            updatedFoodItems;
+        _saveSelectionToPrefs(
+          selectedPackage.value,
+          _customSelections[selectedPackage.value]!,
+        );
+      }
+    }
+  }
+
   void incrementGuests() {
     guests.value += 1;
   }
@@ -906,17 +978,33 @@ class BookingController extends GetxController {
     if (pkg == null) return 0.0;
 
     final isApiPackage = _isApiPackage(selectedPackage.value);
+    final isEdited = packageEdited[selectedPackage.value] == true;
 
-    if (!isPackageEditing.value && isApiPackage) {
-      // Non-edit mode for API package: package price + services
+    if (!isEdited && isApiPackage) {
+      // Non-modified mode: Package price * guests
       final packagePrice = _parsePriceString(pkg['price']?.toString());
-      final servicesCost = calculateServicesCost();
-      return packagePrice + servicesCost;
+      return packagePrice * guests.value;
     } else {
-      // Edit mode or custom package: sum of all items
+      // Modified mode: Sum of all food items
       return calculateSubtotalFromItems();
     }
   }
+  // double calculateSubtotal() {
+  //   final pkg = _findPackage(selectedPackage.value);
+  //   if (pkg == null) return 0.0;
+
+  //   final isApiPackage = _isApiPackage(selectedPackage.value);
+
+  //   if (!isPackageEditing.value && isApiPackage) {
+  //     // Non-edit mode for API package: package price + services
+  //     final packagePrice = _parsePriceString(pkg['price']?.toString());
+  //     final servicesCost = calculateServicesCost();
+  //     return packagePrice + servicesCost;
+  //   } else {
+  //     // Edit mode or custom package: sum of all items
+  //     return calculateSubtotalFromItems();
+  //   }
+  // }
 
   double calculateServicesCost() {
     final menu = menuForPackage(
@@ -939,10 +1027,9 @@ class BookingController extends GetxController {
     );
 
     double total = 0.0;
-    for (var section in menu.values) {
-      for (var item in section) {
-        total += (item['price'] as num).toDouble() * (item['qty'] as int);
-      }
+    // Only calculate food items, not services
+    for (var item in menu['Food Items']!) {
+      total += (item['price'] as num).toDouble() * (item['qty'] as int);
     }
     return total;
   }
@@ -974,11 +1061,21 @@ class BookingController extends GetxController {
     }
   }
 
+  bool isCurrentPackageCustomized() {
+    return packageEdited[selectedPackage.value] == true;
+  }
+
   String getPackageDisplay() {
+    final isEdited = packageEdited[selectedPackage.value] == true;
     final subtotal = calculateSubtotal();
     final perGuestCost = (subtotal / (guests.value > 0 ? guests.value : 1))
         .toStringAsFixed(0);
-    return '${selectedPackage.value} (£$perGuestCost/Guest)';
+
+    if (isEdited) {
+      return '${selectedPackage.value} (Customized) - £$perGuestCost/Guest';
+    } else {
+      return '${selectedPackage.value} (£$perGuestCost/Guest)';
+    }
   }
 
   // Confirmation UI
@@ -1439,6 +1536,79 @@ class BookingController extends GetxController {
     selectedPackageId.value = '';
     isPackageEditing.value = false;
     confirmPressCount.value = 0;
+
+    // Reset package edited states but keep custom package
+    final keys = packageEdited.keys.toList();
+    for (var key in keys) {
+      if (key != 'Custom Package') {
+        packageEdited[key] = false;
+      }
+    }
+  }
+
+  void resetPackageToOriginal(String packageTitle) {
+    if (packageTitle.isEmpty) return;
+
+    // Clear any saved custom selections
+    clearSavedSelection(packageTitle);
+
+    // Reset the edited state
+    packageEdited[packageTitle] = false;
+    isPackageEditing.value = false;
+
+    // Force reload the original package menu
+    final currentGuests = guests.value > 0 ? guests.value : 1;
+    final originalMenu = _getOriginalPackageMenu(packageTitle, currentGuests);
+
+    _customSelections.remove(packageTitle);
+    _saveSelectionToPrefs(packageTitle, originalMenu);
+
+    // Refresh the UI
+    update();
+  }
+
+  Map<String, List<Map<String, dynamic>>> _getOriginalPackageMenu(
+    String packageTitle,
+    int guestCount,
+  ) {
+    final pkg = _findPackage(packageTitle);
+    if (pkg == null) {
+      return {'Food Items': [], 'Services': []};
+    }
+
+    final List<Map<String, dynamic>> rawItems = ((pkg['items'] ?? []) as List)
+        .map((i) => Map<String, dynamic>.from(i as Map))
+        .toList();
+
+    final food = <Map<String, dynamic>>[];
+    final services = <Map<String, dynamic>>[];
+
+    for (var item in rawItems) {
+      final name = item['name'] as String;
+      final price = (item['price'] as num).toDouble();
+      final qtyStored = (item['qty'] is int)
+          ? item['qty'] as int
+          : (item['qty'] is double ? (item['qty'] as double).toInt() : 1);
+
+      final isFood = masterAvailableFood.any((f) => f['name'] == name);
+      final finalQty = isFood ? guestCount : qtyStored;
+
+      final entry = {
+        'name': name,
+        'price': price,
+        'qty': finalQty,
+        'menu_item_id': item['menu_item_id'] ?? item['id'],
+        'id': item['id'],
+      };
+
+      if (isFood) {
+        food.add(Map<String, dynamic>.from(entry));
+      } else {
+        services.add(Map<String, dynamic>.from(entry));
+      }
+    }
+
+    return {'Food Items': food, 'Services': services};
   }
   // Future<void> completeBooking() async {
   //   try {
@@ -1563,18 +1733,22 @@ class BookingController extends GetxController {
   ) {
     // If user has a saved custom selection for this package, use it first
     final saved = _customSelections[packageTitle];
-    if (saved != null && (packageEdited[packageTitle] == true)) {
-      // Normalize quantities: ensure qty present; for food default to guestCount
+    final isEdited = packageEdited[packageTitle] == true;
+
+    if (saved != null && isEdited) {
+      // For edited packages, update food quantities based on guest count
       final food = <Map<String, dynamic>>[];
       final services = <Map<String, dynamic>>[];
+
+      // Update food items with new guest count
       for (final item in (saved['Food Items'] ?? [])) {
-        final int qty = (item['qty'] is int)
-            ? item['qty'] as int
-            : int.tryParse(item['qty']?.toString() ?? '') ?? guestCount;
+        final int qty = guestCount; // Always use current guest count for food
         final normalized = Map<String, dynamic>.from(item);
         normalized['qty'] = qty;
         food.add(normalized);
       }
+
+      // Keep service quantities as they were
       for (final item in (saved['Services'] ?? [])) {
         final int qty = (item['qty'] is int)
             ? item['qty'] as int
@@ -1583,51 +1757,85 @@ class BookingController extends GetxController {
         normalized['qty'] = qty;
         services.add(normalized);
       }
+
       return {'Food Items': food, 'Services': services};
     }
 
-    final pkg = _findPackage(packageTitle);
-    if (pkg == null) {
-      return {'Food Items': [], 'Services': []};
-    }
-
-    final List<Map<String, dynamic>> rawItems = ((pkg['items'] ?? []) as List)
-        .map((i) => Map<String, dynamic>.from(i as Map))
-        .toList();
-
-    final food = <Map<String, dynamic>>[];
-    final services = <Map<String, dynamic>>[];
-
-    for (var item in rawItems) {
-      final name = item['name'] as String;
-      final price = (item['price'] as num).toDouble();
-      final qtyStored = (item['qty'] is int)
-          ? item['qty'] as int
-          : (item['qty'] is double ? (item['qty'] as double).toInt() : 1);
-
-      final isApiPackage = _isApiPackage(packageTitle);
-
-      // Quantity calculation: always use guest count for food, stored quantity for services
-      final isFood = masterAvailableFood.any((f) => f['name'] == name);
-      final finalQty = isFood ? guestCount : qtyStored;
-
-      final entry = {
-        'name': name,
-        'price': price,
-        'qty': finalQty,
-        'menu_item_id': item['menu_item_id'] ?? item['id'],
-        'id': item['id'],
-      };
-
-      if (isFood) {
-        food.add(Map<String, dynamic>.from(entry));
-      } else {
-        services.add(Map<String, dynamic>.from(entry));
-      }
-    }
-
-    return {'Food Items': food, 'Services': services};
+    // Return original package menu
+    return _getOriginalPackageMenu(packageTitle, guestCount);
   }
+
+  // Map<String, List<Map<String, dynamic>>> menuForPackage(
+  //   String packageTitle,
+  //   int guestCount,
+  // ) {
+  //   // If user has a saved custom selection for this package, use it first
+  //   final saved = _customSelections[packageTitle];
+  //   if (saved != null && (packageEdited[packageTitle] == true)) {
+  //     // Normalize quantities: ensure qty present; for food default to guestCount
+  //     final food = <Map<String, dynamic>>[];
+  //     final services = <Map<String, dynamic>>[];
+  //     for (final item in (saved['Food Items'] ?? [])) {
+  //       final int qty = (item['qty'] is int)
+  //           ? item['qty'] as int
+  //           : int.tryParse(item['qty']?.toString() ?? '') ?? guestCount;
+  //       final normalized = Map<String, dynamic>.from(item);
+  //       normalized['qty'] = qty;
+  //       food.add(normalized);
+  //     }
+  //     for (final item in (saved['Services'] ?? [])) {
+  //       final int qty = (item['qty'] is int)
+  //           ? item['qty'] as int
+  //           : int.tryParse(item['qty']?.toString() ?? '') ?? 1;
+  //       final normalized = Map<String, dynamic>.from(item);
+  //       normalized['qty'] = qty;
+  //       services.add(normalized);
+  //     }
+  //     return {'Food Items': food, 'Services': services};
+  //   }
+
+  //   final pkg = _findPackage(packageTitle);
+  //   if (pkg == null) {
+  //     return {'Food Items': [], 'Services': []};
+  //   }
+
+  //   final List<Map<String, dynamic>> rawItems = ((pkg['items'] ?? []) as List)
+  //       .map((i) => Map<String, dynamic>.from(i as Map))
+  //       .toList();
+
+  //   final food = <Map<String, dynamic>>[];
+  //   final services = <Map<String, dynamic>>[];
+
+  //   for (var item in rawItems) {
+  //     final name = item['name'] as String;
+  //     final price = (item['price'] as num).toDouble();
+  //     final qtyStored = (item['qty'] is int)
+  //         ? item['qty'] as int
+  //         : (item['qty'] is double ? (item['qty'] as double).toInt() : 1);
+
+  //     final isApiPackage = _isApiPackage(packageTitle);
+
+  //     // Quantity calculation: always use guest count for food, stored quantity for services
+  //     final isFood = masterAvailableFood.any((f) => f['name'] == name);
+  //     final finalQty = isFood ? guestCount : qtyStored;
+
+  //     final entry = {
+  //       'name': name,
+  //       'price': price,
+  //       'qty': finalQty,
+  //       'menu_item_id': item['menu_item_id'] ?? item['id'],
+  //       'id': item['id'],
+  //     };
+
+  //     if (isFood) {
+  //       food.add(Map<String, dynamic>.from(entry));
+  //     } else {
+  //       services.add(Map<String, dynamic>.from(entry));
+  //     }
+  //   }
+
+  //   return {'Food Items': food, 'Services': services};
+  // }
 
   void toggleEditMode(bool editing) {
     isPackageEditing.value = editing;
@@ -1804,9 +2012,52 @@ class BookingController extends GetxController {
           .map((e) => Map<String, dynamic>.from(e))
           .toList(),
     };
+
     // Persist selection
     _saveSelectionToPrefs(packageTitle, _customSelections[packageTitle]!);
+    update(); // Refresh UI
   }
+  // void updateCustomPackageItems(
+  //   String packageTitle,
+  //   Map<String, List<Map<String, dynamic>>> newMenu,
+  // ) {
+  //   final idx = packages.indexWhere((p) => p['title'] == packageTitle);
+  //   if (idx == -1) return;
+
+  //   final newItems = <Map<String, dynamic>>[];
+
+  //   for (var f in newMenu['Food Items'] ?? []) {
+  //     newItems.add({
+  //       'name': f['name'],
+  //       'price': (f['price'] as num).toDouble(),
+  //       'qty': (f['qty'] as int),
+  //       'id': f['id'] ?? f['menu_item_id'],
+  //       'menu_item_id': f['menu_item_id'] ?? f['id'],
+  //     });
+  //   }
+  //   for (var s in newMenu['Services'] ?? []) {
+  //     newItems.add({
+  //       'name': s['name'],
+  //       'price': (s['price'] as num).toDouble(),
+  //       'qty': (s['qty'] as int),
+  //       'id': s['id'] ?? s['menu_item_id'],
+  //       'menu_item_id': s['menu_item_id'] ?? s['id'],
+  //     });
+  //   }
+
+  //   packages[idx]['items'] = newItems;
+  //   packageEdited[packageTitle] = true;
+  //   _customSelections[packageTitle] = {
+  //     'Food Items': (newMenu['Food Items'] ?? [])
+  //         .map((e) => Map<String, dynamic>.from(e))
+  //         .toList(),
+  //     'Services': (newMenu['Services'] ?? [])
+  //         .map((e) => Map<String, dynamic>.from(e))
+  //         .toList(),
+  //   };
+  //   // Persist selection
+  //   _saveSelectionToPrefs(packageTitle, _customSelections[packageTitle]!);
+  // }
 
   void clearSavedSelection(String packageTitle) {
     _customSelections.remove(packageTitle);

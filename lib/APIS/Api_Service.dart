@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
 import 'package:schedule_app/pages/Edit/models/model.dart' hide Event;
+import 'package:schedule_app/pages/List/ListModel.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -473,6 +474,63 @@ class ApiService {
     return await _handleRequest(
       http.get(uri, headers: await getHeaders(token: token)),
     );
+  }
+
+  // Add this to your ApiService class
+
+  // ---------------------------
+  // Get Orders with GetOrdersModel
+  // ---------------------------
+  static Future<List<GetOrdersModel>> getOrdersNew({String? token}) async {
+    try {
+      final Uri uri = Uri.parse('$baseUrl/orders');
+      print('🔄 Fetching orders from: $uri');
+
+      final response = await _handleRequest(
+        http.get(uri, headers: await getHeaders(token: token)),
+      );
+
+      print('📦 Raw API Response: ${response.toString()}');
+
+      if (response['success'] == true) {
+        final data = response['data'];
+        print('📊 Response data type: ${data.runtimeType}');
+        print('📊 Response data: $data');
+
+        // Handle different response structures
+        if (data is List) {
+          print('✅ Processing as List with ${data.length} items');
+          final orders = data.map((item) {
+            print('📝 Processing item: $item');
+            return GetOrdersModel.fromJson(item);
+          }).toList();
+          print('✅ Successfully parsed ${orders.length} orders');
+          return orders;
+        } else if (data is Map && data.containsKey('orders')) {
+          final List<dynamic> orders = data['orders'];
+          return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
+        } else if (data is Map && data.containsKey('data')) {
+          final List<dynamic> orders = data['data'];
+          return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
+        } else {
+          print('❌ Unexpected API response format: $data');
+          throw Exception('Unexpected API response format: $data');
+        }
+      } else {
+        final status = response['statusCode'];
+        final error = response['error'] ?? 'Unknown error';
+        print('❌ API returned error ($status): $error');
+
+        if (status == 401) {
+          throw Exception('Unauthorized. Please login again.');
+        }
+
+        throw Exception('Failed to load orders: $error');
+      }
+    } catch (e) {
+      print('❌ Error fetching orders: $e');
+      throw Exception('Error fetching orders: $e');
+    }
   }
 
   // ---------------------------

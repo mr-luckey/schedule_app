@@ -1,4 +1,5 @@
-class EditOrderModel {
+// get_orders_model.dart
+class GetOrdersModel {
   int? id;
   String? firstname;
   String? lastname;
@@ -19,13 +20,19 @@ class EditOrderModel {
   City? city;
   Event? event;
   Event? paymentMethod;
+  dynamic foodBeverageAmount;
+  dynamic serviceAmount;
+  dynamic discountAmount;
+  dynamic discountId;
+  dynamic totalAmount;
+  dynamic discount;
   List<OrderServices>? orderServices;
   List<OrderPackages>? orderPackages;
   String? url;
   String? createdAt;
   String? updatedAt;
 
-  EditOrderModel({
+  GetOrdersModel({
     this.id,
     this.firstname,
     this.lastname,
@@ -46,6 +53,12 @@ class EditOrderModel {
     this.city,
     this.event,
     this.paymentMethod,
+    this.foodBeverageAmount,
+    this.serviceAmount,
+    this.discountAmount,
+    this.discountId,
+    this.totalAmount,
+    this.discount,
     this.orderServices,
     this.orderPackages,
     this.url,
@@ -53,87 +66,95 @@ class EditOrderModel {
     this.updatedAt,
   });
 
-  EditOrderModel.fromJson(Map<dynamic, dynamic> json) {
-    id = json['id'];
-    firstname = json['firstname'];
-    lastname = json['lastname'];
-    email = json['email'];
-    phone = json['phone'];
-    nin = json['nin'];
-    cityId = json['city_id'];
-    address = json['address'];
-    eventId = json['event_id'];
-    noOfGust = json['no_of_gust'];
-    eventDate = json['event_date'];
-    eventTime = json['event_time'];
-    startTime = json['start_time'];
-    endTime = json['end_time'];
-    requirement = json['requirement'];
-    isInquiry = json['is_inquiry'];
-    paymentMethodId = json['payment_method_id'];
-    city = json['city'] != null ? new City.fromJson(json['city']) : null;
-    event = json['event'] != null ? new Event.fromJson(json['event']) : null;
-    paymentMethod = json['payment_method'] != null
-        ? new Event.fromJson(json['payment_method'])
-        : null;
-    if (json['order_services'] != null) {
-      orderServices = <OrderServices>[];
-      json['order_services'].forEach((v) {
-        orderServices!.add(new OrderServices.fromJson(v));
-      });
-    }
-    if (json['order_packages'] != null) {
-      orderPackages = <OrderPackages>[];
-      json['order_packages'].forEach((v) {
-        orderPackages!.add(new OrderPackages.fromJson(v));
-      });
-    }
-    url = json['url'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+  factory GetOrdersModel.fromJson(Map<String, dynamic> json) {
+    return GetOrdersModel(
+      id: json['id'],
+      firstname: json['firstname'],
+      lastname: json['lastname'],
+      email: json['email'],
+      phone: json['phone'],
+      nin: json['nin'],
+      cityId: json['city_id'],
+      address: json['address'],
+      eventId: json['event_id'],
+      noOfGust: json['no_of_gust'],
+      eventDate: json['event_date'],
+      eventTime: json['event_time'],
+      startTime: json['start_time'],
+      endTime: json['end_time'],
+      requirement: json['requirement'],
+      isInquiry: json['is_inquiry'],
+      paymentMethodId: json['payment_method_id'],
+      city: json['city'] != null ? City.fromJson(json['city']) : null,
+      event: json['event'] != null ? Event.fromJson(json['event']) : null,
+      paymentMethod: json['payment_method'] != null
+          ? Event.fromJson(json['payment_method'])
+          : null,
+      foodBeverageAmount: json['food_beverage_amount'],
+      serviceAmount: json['service_amount'],
+      discountAmount: json['discount_amount'],
+      discountId: json['discount_id'],
+      totalAmount: json['total_amount'],
+      discount: json['discount'],
+      orderServices: json['order_services'] != null
+          ? (json['order_services'] as List)
+                .map((v) => OrderServices.fromJson(v))
+                .toList()
+          : null,
+      orderPackages: json['order_packages'] != null
+          ? (json['order_packages'] as List)
+                .map((v) => OrderPackages.fromJson(v))
+                .toList()
+          : null,
+      url: json['url'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['firstname'] = this.firstname;
-    data['lastname'] = this.lastname;
-    data['email'] = this.email;
-    data['phone'] = this.phone;
-    data['nin'] = this.nin;
-    data['city_id'] = this.cityId;
-    data['address'] = this.address;
-    data['event_id'] = this.eventId;
-    data['no_of_gust'] = this.noOfGust;
-    data['event_date'] = this.eventDate;
-    data['event_time'] = this.eventTime;
-    data['start_time'] = this.startTime;
-    data['end_time'] = this.endTime;
-    data['requirement'] = this.requirement;
-    data['is_inquiry'] = this.isInquiry;
-    data['payment_method_id'] = this.paymentMethodId;
-    if (this.city != null) {
-      data['city'] = this.city!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['firstname'] = firstname;
+    data['lastname'] = lastname;
+    data['email'] = email;
+    data['phone'] = phone;
+    data['nin'] = nin;
+    data['city_id'] = cityId;
+    data['address'] = address;
+    data['event_id'] = eventId;
+    data['no_of_gust'] = noOfGust;
+    data['event_date'] = eventDate;
+    data['event_time'] = eventTime;
+    data['start_time'] = startTime;
+    data['end_time'] = endTime;
+    data['requirement'] = requirement;
+    data['is_inquiry'] = isInquiry;
+    data['payment_method_id'] = paymentMethodId;
+    if (city != null) {
+      data['city'] = city!.toJson();
     }
-    if (this.event != null) {
-      data['event'] = this.event!.toJson();
+    if (event != null) {
+      data['event'] = event!.toJson();
     }
-    if (this.paymentMethod != null) {
-      data['payment_method'] = this.paymentMethod!.toJson();
+    if (paymentMethod != null) {
+      data['payment_method'] = paymentMethod!.toJson();
     }
-    if (this.orderServices != null) {
-      data['order_services'] = this.orderServices!
-          .map((v) => v.toJson())
-          .toList();
+    data['food_beverage_amount'] = foodBeverageAmount;
+    data['service_amount'] = serviceAmount;
+    data['discount_amount'] = discountAmount;
+    data['discount_id'] = discountId;
+    data['total_amount'] = totalAmount;
+    data['discount'] = discount;
+    if (orderServices != null) {
+      data['order_services'] = orderServices!.map((v) => v.toJson()).toList();
     }
-    if (this.orderPackages != null) {
-      data['order_packages'] = this.orderPackages!
-          .map((v) => v.toJson())
-          .toList();
+    if (orderPackages != null) {
+      data['order_packages'] = orderPackages!.map((v) => v.toJson()).toList();
     }
-    data['url'] = this.url;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    data['url'] = url;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }
@@ -165,13 +186,13 @@ class City {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['description'] = this.description;
-    data['is_active'] = this.isActive;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['description'] = description;
+    data['is_active'] = isActive;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }
@@ -203,13 +224,13 @@ class Event {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['description'] = this.description;
-    data['is_active'] = this.isActive;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['title'] = title;
+    data['description'] = description;
+    data['is_active'] = isActive;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }
@@ -244,21 +265,21 @@ class OrderServices {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     service = json['service'] != null
-        ? new Service.fromJson(json['service'])
+        ? Service.fromJson(json['service'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['order_id'] = this.orderId;
-    data['menu_item_id'] = this.menuItemId;
-    data['price'] = this.price;
-    data['is_deleted'] = this.isDeleted;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    if (this.service != null) {
-      data['service'] = this.service!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['order_id'] = orderId;
+    data['menu_item_id'] = menuItemId;
+    data['price'] = price;
+    data['is_deleted'] = isDeleted;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    if (service != null) {
+      data['service'] = service!.toJson();
     }
     return data;
   }
@@ -268,7 +289,7 @@ class Service {
   int? id;
   String? title;
   String? price;
-  var description;
+  dynamic description;
   String? createdAt;
   String? updatedAt;
 
@@ -291,13 +312,13 @@ class Service {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['price'] = this.price;
-    data['description'] = this.description;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['title'] = title;
+    data['price'] = price;
+    data['description'] = description;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }
@@ -306,7 +327,7 @@ class OrderPackages {
   int? id;
   int? orderId;
   int? packageId;
-  dynamic amount;
+  String? amount;
   bool? isCustom;
   String? createdAt;
   String? updatedAt;
@@ -334,30 +355,30 @@ class OrderPackages {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     package = json['package'] != null
-        ? new Package.fromJson(json['package'])
+        ? Package.fromJson(json['package'])
         : null;
     if (json['order_package_items'] != null) {
       orderPackageItems = <OrderPackageItems>[];
       json['order_package_items'].forEach((v) {
-        orderPackageItems!.add(new OrderPackageItems.fromJson(v));
+        orderPackageItems!.add(OrderPackageItems.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['order_id'] = this.orderId;
-    data['package_id'] = this.packageId;
-    data['amount'] = this.amount;
-    data['is_custom'] = this.isCustom;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    if (this.package != null) {
-      data['package'] = this.package!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['order_id'] = orderId;
+    data['package_id'] = packageId;
+    data['amount'] = amount;
+    data['is_custom'] = isCustom;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    if (package != null) {
+      data['package'] = package!.toJson();
     }
-    if (this.orderPackageItems != null) {
-      data['order_package_items'] = this.orderPackageItems!
+    if (orderPackageItems != null) {
+      data['order_package_items'] = orderPackageItems!
           .map((v) => v.toJson())
           .toList();
     }
@@ -367,10 +388,9 @@ class OrderPackages {
 
 class Package {
   int? id;
-
   String? title;
   String? price;
-  Null? description;
+  dynamic description;
   int? reorder;
   String? createdAt;
   String? updatedAt;
@@ -389,7 +409,6 @@ class Package {
 
   Package.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-
     title = json['title'];
     price = json['price'];
     description = json['description'];
@@ -400,15 +419,15 @@ class Package {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['price'] = this.price;
-    data['description'] = this.description;
-    data['reorder'] = this.reorder;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    data['url'] = this.url;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['title'] = title;
+    data['price'] = price;
+    data['description'] = description;
+    data['reorder'] = reorder;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    data['url'] = url;
     return data;
   }
 }
@@ -446,22 +465,22 @@ class OrderPackageItems {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     menuItem = json['menu_item'] != null
-        ? new Service.fromJson(json['menu_item'])
+        ? Service.fromJson(json['menu_item'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['order_package_id'] = this.orderPackageId;
-    data['menu_item_id'] = this.menuItemId;
-    data['price'] = this.price;
-    data['no_of_gust'] = this.noOfGust;
-    data['is_deleted'] = this.isDeleted;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    if (this.menuItem != null) {
-      data['menu_item'] = this.menuItem!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['order_package_id'] = orderPackageId;
+    data['menu_item_id'] = menuItemId;
+    data['price'] = price;
+    data['no_of_gust'] = noOfGust;
+    data['is_deleted'] = isDeleted;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    if (menuItem != null) {
+      data['menu_item'] = menuItem!.toJson();
     }
     return data;
   }

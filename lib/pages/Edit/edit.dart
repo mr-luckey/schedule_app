@@ -14,6 +14,8 @@ import 'package:schedule_app/widgets/schedule_header.dart';
 import 'package:schedule_app/widgets/sidebar.dart';
 import 'package:schedule_app/pages/schedule_page.dart' hide Sidebar;
 
+import 'models/model.dart';
+
 // ===========================================================================
 // MAIN EDIT PAGE
 // ===========================================================================
@@ -840,38 +842,83 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // ===========================================================================
   // COST CALCULATION METHODS
   // ===========================================================================
+  double _calculateTotalFromItems() {
+    double total = 0.0;
+    for (var item in editController.selectedMenuItems) {
+      final price = double.tryParse(item.price) ?? 0.0;
+      total += price * item.qty;
+    }
+    return total;
+  }
 
   /// Calculate total food and beverage cost (excluding services)
   double get foodAndBeverageCost {
-    // Check if we're in edit mode (custom editing or editing items)
-    final bool isEditMode =
-        editController.isCustomEditing.value ||
-        editController.isEditingItems.value;
+    final isPackageModified = editController.hasPackageBeenModified();
+    final isApiPackage = _isApiPackage(editController.selectedPackage.value);
+    final isCustomPackage = editController.isCustomEditing.value;
 
-    if (!isEditMode) {
-      // Non-edit mode: Package price * number of guests (no services included)
+    print('=== DEBUG: Cost Calculation ===');
+    print('Package: ${editController.selectedPackage.value}');
+    print('isApiPackage: $isApiPackage');
+    print('isPackageModified: $isPackageModified');
+    print('isCustomPackage: $isCustomPackage');
+    print('Guests: ${editController.guests.value}');
+
+    // Scenario 1: Custom package OR modified API package - use item-based pricing
+    if (isCustomPackage || (isApiPackage && isPackageModified)) {
+      final itemTotal = _calculateTotalFromItems();
+      print('Using item-based pricing: £$itemTotal');
+      return itemTotal;
+    }
+    // Scenario 2: Predefined API package without modifications - use package price * guests
+    else if (isApiPackage && !isPackageModified) {
       final guests = editController.guests.value;
       final packagePrice = _getPackagePrice();
-      return packagePrice * guests;
-    } else {
-      // Edit mode: Individual item prices * quantities (no services included)
-      double total = 0.0;
-      for (var item in editController.selectedMenuItems) {
-        final price = double.tryParse(item.price) ?? 0.0;
-        total += price * item.qty;
-      }
+      final total = packagePrice * guests;
+      print('Using package pricing: £$packagePrice * $guests = £$total');
       return total;
+    }
+    // Scenario 3: No package selected or other cases - fallback to item-based
+    else {
+      final itemTotal = _calculateTotalFromItems();
+      print('Using fallback item-based pricing: £$itemTotal');
+      return itemTotal;
     }
   }
 
-  /// Get package price from current order
+  bool _isApiPackage(String packageTitle) {
+    if (packageTitle.isEmpty) return false;
+    final pkg = editController.apiPackages.firstWhere(
+      (p) => p.title == packageTitle,
+      orElse: () => Package(),
+    );
+    return pkg.id != null && pkg.id! > 0;
+  }
+
+  /// Get base package price from API packages
   double _getPackagePrice() {
-    if (editController.currentOrderPackages.isNotEmpty) {
-      final pkg = editController.currentOrderPackages.first;
-      return double.tryParse(pkg.amount ?? '0') ?? 0.0;
+    final packageTitle = editController.selectedPackage.value;
+    if (packageTitle.isNotEmpty) {
+      final pkg = editController.apiPackages.firstWhere(
+        (p) => p.title == packageTitle,
+        orElse: () => Package(),
+      );
+      return double.tryParse(pkg.price ?? '0') ?? 0.0;
     }
     return 0.0;
   }
+
+  // double _getPackagePrice() {
+  //   final packageTitle = editController.selectedPackage.value;
+  //   if (packageTitle.isNotEmpty) {
+  //     final pkg = editController.apiPackages.firstWhere(
+  //       (p) => p.title == packageTitle,
+  //       orElse: () => Package(),
+  //     );
+  //     return double.tryParse(pkg.price ?? '0') ?? 0.0;
+  //   }
+  //   return 0.0;
+  // }
 
   /// Get total cost of selected services
   double _getServicesCost() {
@@ -884,7 +931,14 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   /// Get service cost (sum of selected services)
-  double get serviceCost => _getServicesCost();
+  double get serviceCost {
+    double total = 0.0;
+    for (var service in editController.selectedServiceItems) {
+      final price = double.tryParse(service.price) ?? 0.0;
+      total += price * service.qty;
+    }
+    return total;
+  }
 
   /// Get VAT (20% of food and beverage cost)
   double get vat => 0.20 * foodAndBeverageCost;
@@ -896,6 +950,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // ITEM MANAGEMENT METHODS
   // ===========================================================================
 
+  /// Increment quantity for a food item
   /// Increment quantity for a food item
   void incrementQuantity(SelectedMenuItem item) {
     final index = editController.selectedMenuItems.indexWhere(
@@ -913,6 +968,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         isDeleted: item.isDeleted,
       );
       editController.selectedMenuItems.refresh();
+      editController.markPackageAsEdited(); // Mark as edited
     }
   }
 
@@ -934,6 +990,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           isDeleted: item.isDeleted,
         );
         editController.selectedMenuItems.refresh();
+        editController.markPackageAsEdited(); // Mark as edited
       }
     }
   }
@@ -949,6 +1006,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         (item as SelectedServiceItem).serviceId,
       );
     }
+    editController.markPackageAsEdited(); // Mark as edited
   }
 
   /// Add menu item to selection
@@ -958,8 +1016,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       menuItemId: menuItem.id ?? 0,
       name: menuItem.title ?? 'Unknown Item',
       price: menuItem.price?.toString() ?? '0',
-      qty: 1,
+      qty: editController.guests.value, // Use guest count for food
     );
+    editController.markPackageAsEdited(); // Mark as edited
   }
 
   /// Add service item to selection
@@ -982,6 +1041,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       price: (menuItem.price ?? '0').toString(),
       qty: 1,
     );
+    editController.markPackageAsEdited(); // Mark as edited
   }
 
   // ===========================================================================
@@ -1027,6 +1087,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       isDeleted: item.isDeleted,
                     );
                     editController.selectedMenuItems.refresh();
+                    editController.markPackageAsEdited(); // Mark as edited
                   }
                   Navigator.pop(ctx);
                 } else {
@@ -1356,8 +1417,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
           ),
 
-          // Quantity controls (visible when editing for food, not for services)
-          if (isEditing && isFoodItem)
+          // Quantity controls (visible when editing for food, always for services)
+          if (isEditing || !isFoodItem)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
@@ -1368,21 +1429,24 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove_outlined, size: 20),
-                    onPressed: () =>
-                        decrementQuantity(item as SelectedMenuItem),
+                    onPressed: isFoodItem
+                        ? () => decrementQuantity(item as SelectedMenuItem)
+                        : null,
                   ),
                   Text(qty.toString(), style: const TextStyle(fontSize: 16)),
                   IconButton(
                     icon: const Icon(Icons.add, size: 20),
-                    onPressed: () =>
-                        incrementQuantity(item as SelectedMenuItem),
+                    onPressed: isFoodItem
+                        ? () => incrementQuantity(item as SelectedMenuItem)
+                        : null,
                   ),
-                  // Edit button to input number manually
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () =>
-                        _showEditQuantityDialog(item as SelectedMenuItem),
-                  ),
+                  // Edit button to input number manually (only for food)
+                  if (isFoodItem)
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 18),
+                      onPressed: () =>
+                          _showEditQuantityDialog(item as SelectedMenuItem),
+                    ),
                 ],
               ),
             )
@@ -1404,20 +1468,23 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   /// Build cost summary section
-  Widget buildSummary() {
+  Widget _buildSummary() {
     return Card(
       margin: const EdgeInsets.all(12),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            _summaryRow("Food & Beverage", foodAndBeverageCost),
-            _summaryRow("Service Cost", serviceCost),
-            _summaryRow("VAT (20%)", vat),
+            _summaryRow(
+              "Food & Beverage",
+              foodAndBeverageCost.toStringAsFixed(2),
+            ),
+            _summaryRow("Service Cost", serviceCost.toStringAsFixed(2)),
+            _summaryRow("VAT (20%)", vat.toStringAsFixed(2)),
             const Divider(),
             _summaryRow(
               "Total Amount",
-              totalAmount,
+              totalAmount.toStringAsFixed(2),
               isBold: true,
               fontSize: 18,
             ),
@@ -1429,7 +1496,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   Widget _summaryRow(
     String label,
-    dynamic value, {
+    String value, {
     bool isBold = false,
     double fontSize = 16,
   }) {
@@ -1446,7 +1513,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
           ),
           Text(
-            "£${value}",
+            "£$value",
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
@@ -1456,6 +1523,36 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       ),
     );
   }
+
+  // Widget _summaryRow(
+  //   String label,
+  //   dynamic value, {
+  //   bool isBold = false,
+  //   double fontSize = 16,
+  // }) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 4),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Text(
+  //           label,
+  //           style: TextStyle(
+  //             fontSize: fontSize,
+  //             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+  //           ),
+  //         ),
+  //         Text(
+  //           "£${value}",
+  //           style: TextStyle(
+  //             fontSize: fontSize,
+  //             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // ===========================================================================
   // VALIDATION METHODS
@@ -1479,9 +1576,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   @override
   Widget build(BuildContext context) {
-    print("testing AMount");
-    print(editController.currentOrderPackages.first.amount);
-    // print(editController.apiPackages);
     return Obx(
       () => Container(
         width: 340,
@@ -1494,6 +1588,88 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // Package header with real-time status
+              Obx(() {
+                final isModified = editController.hasPackageBeenModified();
+                final packageTitle = editController.selectedPackage.value;
+
+                return Column(
+                  children: [
+                    Text(
+                      "Selected Package",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isModified ? Colors.orange : Colors.black,
+                      ),
+                    ),
+                    Text(
+                      packageTitle.isEmpty
+                          ? "No Package Selected"
+                          : isModified
+                          ? "$packageTitle (Customized)"
+                          : packageTitle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontStyle: isModified
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                        color: isModified ? Colors.orange : Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (isModified)
+                      Text(
+                        "Item-based Pricing Active",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.green,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    SizedBox(height: 16),
+                  ],
+                );
+              }),
+
+              // Reset button - only show when package is modified
+              Obx(() {
+                final isModified = editController.hasPackageBeenModified();
+                if (!isModified) return SizedBox();
+
+                return Container(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.refresh, size: 18),
+                    label: Text("Reset to Original Package"),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.orange,
+                      side: BorderSide(color: Colors.orange),
+                    ),
+                    onPressed: () {
+                      // Reset the current package to original state
+                      editController.resetPackageToOriginal(
+                        editController.selectedPackage.value,
+                      );
+
+                      // Update local state
+                      setState(() {
+                        isEditing = false;
+                        isEdited = false;
+                        editController.isEditingItems.value = false;
+                      });
+
+                      Get.snackbar(
+                        'Reset Complete',
+                        'Package has been reset to original state',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
+                  ),
+                );
+              }),
+              SizedBox(height: 16),
+
               // Food Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1510,8 +1686,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             Icons.add_circle,
                             color: Colors.green,
                           ),
-                          onPressed:
-                              _showAddMenuItemsDialog, // UPDATED: Use categorized dialog
+                          onPressed: _showAddMenuItemsDialog,
                         ),
                       ],
                     ),
@@ -1541,18 +1716,14 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     "Services",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  if (isEditing)
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle,
-                            color: Colors.green,
-                          ),
-                          onPressed: _showAddServiceItemsDialog,
-                        ),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.green),
+                        onPressed: _showAddServiceItemsDialog,
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const Divider(),
@@ -1569,23 +1740,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   (item) => buildItemRow(item, false),
                 ),
 
-              //  isEditing?_summaryRow(
-              //       "Total Amount",
-              //  editController.currentOrderPackages.first.amount,
-              //       isBold: true,
-              //       fontSize: 18,
-              //     ):;
-              _summaryRow("Food & Beverage", foodAndBeverageCost),
-              _summaryRow("Service Cost", serviceCost),
-              _summaryRow("VAT (20%)", vat),
-              _summaryRow(
-                "Total Amount",
-                isEdited
-                    ? totalAmount
-                    : editController.currentOrderPackages.first.amount,
-              ),
-              const Divider(),
-
+              // Cost Summary
+              _buildSummary(),
               const SizedBox(height: 10),
 
               // Action Buttons
@@ -1598,7 +1754,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                         isEditing = !isEditing;
                         isEdited = !isEdited;
                         editController.isEditingItems.value = isEditing;
-                        // Enable custom editing mode but keep currently selected package
+
                         if (isEditing) {
                           editController.isCustomEditing.value = true;
                           // Always sync selected package to current order package when entering edit mode
@@ -1666,7 +1822,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                     ),
                                   );
                                   if (!mounted) return;
-                                  ;
                                 }
                               } else {
                                 // Show error
