@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
 import 'package:schedule_app/pages/Edit/models/model.dart' hide Event;
-import 'package:schedule_app/pages/List/ListModel.dart' hide Event;
+import 'package:schedule_app/pages/List/order_model%20(1).dart' hide Event;
+// import 'package:schedule_app/pages/List/ListModel.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -481,57 +482,57 @@ class ApiService {
   // ---------------------------
   // Get Orders with GetOrdersModel
   // ---------------------------
-  static Future<List<GetOrdersModel>> getOrdersNew({String? token}) async {
-    try {
-      final Uri uri = Uri.parse('$baseUrl/orders');
-      print('🔄 Fetching orders from: $uri');
+  // static Future<List<GetOrdersModel>> getOrdersNew({String? token}) async {
+  //   try {
+  //     final Uri uri = Uri.parse('$baseUrl/orders');
+  //     print('🔄 Fetching orders from: $uri');
 
-      final response = await _handleRequest(
-        http.get(uri, headers: await getHeaders(token: token)),
-      );
+  //     final response = await _handleRequest(
+  //       http.get(uri, headers: await getHeaders(token: token)),
+  //     );
 
-      print('📦 Raw API Response: ${response.toString()}');
+  //     print('📦 Raw API Response: ${response.toString()}');
 
-      if (response['success'] == true) {
-        final data = response['data'];
-        print('📊 Response data type: ${data.runtimeType}');
-        print('📊 Response data: $data');
+  //     if (response['success'] == true) {
+  //       final data = response['data'];
+  //       print('📊 Response data type: ${data.runtimeType}');
+  //       print('📊 Response data: $data');
 
-        // Handle different response structures
-        if (data is List) {
-          print('✅ Processing as List with ${data.length} items');
-          final orders = data.map((item) {
-            print('📝 Processing item: $item');
-            return GetOrdersModel.fromJson(item);
-          }).toList();
-          print('✅ Successfully parsed ${orders.length} orders');
-          return orders;
-        } else if (data is Map && data.containsKey('orders')) {
-          final List<dynamic> orders = data['orders'];
-          return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
-        } else if (data is Map && data.containsKey('data')) {
-          final List<dynamic> orders = data['data'];
-          return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
-        } else {
-          print('❌ Unexpected API response format: $data');
-          throw Exception('Unexpected API response format: $data');
-        }
-      } else {
-        final status = response['statusCode'];
-        final error = response['error'] ?? 'Unknown error';
-        print('❌ API returned error ($status): $error');
+  //       // Handle different response structures
+  //       if (data is List) {
+  //         print('✅ Processing as List with ${data.length} items');
+  //         final orders = data.map((item) {
+  //           print('📝 Processing item: $item');
+  //           return GetOrdersModel.fromJson(item);
+  //         }).toList();
+  //         print('✅ Successfully parsed ${orders.length} orders');
+  //         return orders;
+  //       } else if (data is Map && data.containsKey('orders')) {
+  //         final List<dynamic> orders = data['orders'];
+  //         return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
+  //       } else if (data is Map && data.containsKey('data')) {
+  //         final List<dynamic> orders = data['data'];
+  //         return orders.map((item) => GetOrdersModel.fromJson(item)).toList();
+  //       } else {
+  //         print('❌ Unexpected API response format: $data');
+  //         throw Exception('Unexpected API response format: $data');
+  //       }
+  //     } else {
+  //       final status = response['statusCode'];
+  //       final error = response['error'] ?? 'Unknown error';
+  //       print('❌ API returned error ($status): $error');
 
-        if (status == 401) {
-          throw Exception('Unauthorized. Please login again.');
-        }
+  //       if (status == 401) {
+  //         throw Exception('Unauthorized. Please login again.');
+  //       }
 
-        throw Exception('Failed to load orders: $error');
-      }
-    } catch (e) {
-      print('❌ Error fetching orders: $e');
-      throw Exception('Error fetching orders: $e');
-    }
-  }
+  //       throw Exception('Failed to load orders: $error');
+  //     }
+  //   } catch (e) {
+  //     print('❌ Error fetching orders: $e');
+  //     throw Exception('Error fetching orders: $e');
+  //   }
+  // }
 
   // ---------------------------
   // Get Packages
@@ -628,4 +629,79 @@ class ApiService {
       http.get(uri, headers: await getHeaders(token: token)),
     );
   }
+  // ---------------------------
+// Get Orders with OrderList model
+// ---------------------------
+static Future<List<OrderList>> fetchOrders() async {
+  try {
+    final Uri uri = Uri.parse('$baseUrl/orders');
+    print('🔄 Fetching orders from: $uri');
+
+    final response = await _handleRequest(
+      http.get(uri, headers: await getHeaders()),
+    );
+
+    print('📦 Raw API Response: ${response.toString()}');
+
+    if (response['success'] == true) {
+      final data = response['data'];
+      print('📊 Response data type: ${data.runtimeType}');
+      print('📊 Response data: $data');
+
+      // Handle different response structures
+      List<dynamic> ordersList = [];
+
+      if (data is List) {
+        ordersList = data;
+        print('✅ Processing as List with ${ordersList.length} items');
+      } else if (data is Map<String, dynamic>) {
+        // Check common keys for data
+        if (data['data'] is List) {
+          ordersList = data['data'];
+        } else if (data['orders'] is List) {
+          ordersList = data['orders'];
+        } else if (data['results'] is List) {
+          ordersList = data['results'];
+        } else {
+          // If it's a single order object, wrap it in a list
+          ordersList = [data];
+        }
+        print('✅ Processing as Map with ${ordersList.length} items');
+      }
+
+      // Parse orders with better error handling
+      final List<OrderList> parsedOrders = [];
+      for (var item in ordersList) {
+        try {
+          if (item is Map<String, dynamic>) {
+            final order = OrderList.fromJson(item);
+            parsedOrders.add(order);
+          }
+        } catch (e) {
+          print('❌ Error parsing order: $e');
+          print('⚠️ Problematic order data: $item');
+          // Continue with other orders even if one fails
+        }
+      }
+
+      print('✅ Successfully parsed ${parsedOrders.length} orders');
+      return parsedOrders;
+
+    } else {
+      final status = response['statusCode'];
+      final error = response['error'] ?? 'Unknown error';
+      print('❌ API returned error ($status): $error');
+
+      if (status == 401) {
+        throw Exception('Unauthorized. Please login again.');
+      }
+
+      throw Exception('Failed to load orders: $error');
+    }
+  } catch (e) {
+    print('❌ Error fetching orders: $e');
+    throw Exception('Error fetching orders: $e');
+  }
+}
+  
 }
