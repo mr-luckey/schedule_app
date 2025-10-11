@@ -322,6 +322,15 @@ class EditController extends GetxController {
         currentOrderServices.value = List.from(order.orderServices ?? []);
         currentOrderPackages.value = List.from(order.orderPackages ?? []);
 
+        // Debug: Print order packages data
+        print('🔍 Order packages debug:');
+        for (var pkg in currentOrderPackages) {
+          print('  Package ID: ${pkg.packageId}');
+          print('  Package Title: ${pkg.package?.title}');
+          print('  Is Custom: ${pkg.isCustom}');
+          print('  Amount: ${pkg.amount}');
+        }
+
         // Build selected lists for UI
         _buildSelectedListsFromCurrentOrder();
 
@@ -1340,17 +1349,38 @@ class EditController extends GetxController {
 
   // Initialize package state when loading order
   void _initializePackageStateFromOrder() {
+    print('🔄 _initializePackageStateFromOrder called');
+    print('🔄 Current order packages: ${currentOrderPackages.length}');
+    print('🔄 Available packages: ${packages.length}');
+    
     if (currentOrderPackages.isNotEmpty) {
       final orderPackage = currentOrderPackages.first;
       final packageTitle = orderPackage.package?.title ?? '';
-
-      // Check if package is custom
       final isCustom = orderPackage.isCustom ?? false;
       
+      print('🔄 Order package title: $packageTitle');
+      print('🔄 Order package isCustom: $isCustom');
+      print('🔄 Order package ID: ${orderPackage.packageId}');
+      
       if (isCustom) {
+        print('🔄 Setting as Custom Package');
         // If package is custom, set as Custom Package
         selectedPackage.value = 'Custom Package';
-        selectedPackageId.value = ''; // Custom packages don't have a package ID
+        
+        // Find custom package ID from API packages
+        print('🔍 Available packages for custom lookup:');
+        for (var pkg in packages) {
+          print('  Package: ${pkg.title} (ID: ${pkg.id})');
+        }
+        
+        final customPkg = packages.firstWhere(
+          (pkg) => pkg.title == 'Custom Package',
+          orElse: () => Package(),
+        );
+        selectedPackageId.value = customPkg.id?.toString() ?? '';
+        
+        print('🔄 Custom package ID found: ${selectedPackageId.value}');
+        
         packageEdited['Custom Package'] = true;
         isCustomEditing.value = true;
         
@@ -1358,12 +1388,16 @@ class EditController extends GetxController {
         final customMenu = _buildCustomMenuFromOrder();
         _customSelections['Custom Package'] = customMenu;
       } else if (packageTitle.isNotEmpty) {
+        print('🔄 Setting as regular package: $packageTitle');
         // Regular package
         selectedPackage.value = packageTitle;
         selectedPackageId.value = orderPackage.packageId?.toString() ?? '';
         packageEdited[packageTitle] = false;
         isCustomEditing.value = false;
       }
+      
+      print('🔄 Final selected package: ${selectedPackage.value}');
+      print('🔄 Final selected package ID: ${selectedPackageId.value}');
     }
   }
 
