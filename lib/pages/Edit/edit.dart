@@ -465,10 +465,10 @@ class BookingForm extends StatelessWidget {
                                     : null,
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              Obx(() => Text(
                                 controller.guests.value.toString(),
                                 style: Theme.of(context).textTheme.bodyLarge,
-                              ),
+                              )),
                               const SizedBox(width: 8),
                               IconButton(
                                 padding: EdgeInsets.zero,

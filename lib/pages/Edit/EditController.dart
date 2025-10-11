@@ -1361,7 +1361,15 @@ class EditController extends GetxController {
     
     // Switch to custom package
     selectedPackage.value = customTitle;
-    selectedPackageId.value = 'custom';
+    
+    // Find and set the actual custom package ID from API packages
+    final customPkg = apiPackages.firstWhere(
+      (pkg) => pkg.title == 'Custom Package',
+      orElse: () => Package(),
+    );
+    selectedPackageId.value = customPkg.id?.toString() ?? '';
+    
+    print('🔄 Custom package ID set: ${selectedPackageId.value}');
     isCustomEditing.value = true;
     
     update();
