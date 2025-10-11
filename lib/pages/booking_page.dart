@@ -222,58 +222,87 @@ class BookingForm extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      context: context,
-                      controller: controller.emailController,
-                      label: 'Email Address',
-                      hint: 'Email Address',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        // Improved email validation with regex
-                        final emailRegex = RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                        );
-                        if (!emailRegex.hasMatch(value)) {
-                          return 'Please enter a valid email address';
-                        }
-                        return null;
-                      },
-
-                      // Add input formatters for email
-                    ),
-                  ),
-                ],
+    Expanded(
+  child: _buildTextField(
+    context: context,
+    controller: controller.emailController,
+    label: 'Email Address',
+    hint: 'your.email@example.com',
+    // keyboardType: TextInputType.emailAddress,
+    // textInputAction: TextInputAction.next,
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter your email';
+      }
+      
+      // Enhanced email validation with regex
+      final emailRegex = RegExp(
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      );
+      
+      if (!emailRegex.hasMatch(value)) {
+        return 'Please enter a valid email address\nExample: your.name@example.com';
+      }
+      
+      // Additional checks
+      if (value.contains('..')) {
+        return 'Email cannot contain consecutive dots';
+      }
+      
+      if (value.startsWith('.') || value.endsWith('.')) {
+        return 'Email cannot start or end with a dot';
+      }
+      
+      return null;
+    },
+  ),
+),           ],
               ),
 
               const SizedBox(height: 16),
 
               Row(
                 children: [
-                  Expanded(
-                    child: _buildTextField(
-                      context: context,
-                      controller: controller.contactController,
-                      label: 'Contact#',
-                      hint: '+44-XXX-XXX-XXX',
-
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          // Basic phone number validation - at least 6 digits
-                          final digitCount = value
-                              .replaceAll(RegExp(r'[^0-9]'), '')
-                              .length;
-                          if (digitCount < 15) {
-                            return 'Please enter a valid contact number';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
+            Expanded(
+  child: _buildTextField(
+    context: context,
+    controller: controller.contactController,
+    label: 'Contact#',
+    hint: '+44-XXX-XXX-XXX',
+    // keyboardType: TextInputType.phone,
+    // inputFormatters: [
+    //   FilteringTextInputFormatter.digitsOnly,
+    //   LengthLimitingTextInputFormatter(15), // Reasonable limit for phone numbers
+    //   // Optional: Add a formatter for phone number formatting
+    //   // _PhoneNumberFormatter(),
+    // ],
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter your contact number';
+      }
+      
+      // Remove all non-digit characters for validation
+      final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+      
+      // Check minimum length
+      if (digitsOnly.length < 8) {
+        return 'Phone number must be at least 8 digits';
+      }
+      
+      // Check maximum length
+      if (digitsOnly.length > 15) {
+        return 'Phone number too long';
+      }
+      
+      // Optional: Specific country code validation
+      if (value.startsWith('+44') && digitsOnly.length != 12) {
+        return 'UK numbers should be 12 digits with country code';
+      }
+      
+      return null;
+    },
+  ),
+),  const SizedBox(width: 16),
                   Expanded(
                     child: _buildDropdown(
                       context: context,
@@ -501,8 +530,10 @@ class BookingForm extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: controller.isFormValid.value
-                          ? () => controller
-                                .showBookingConfirmation() //TODO: Change made herer
+                          ? () => {controller
+                                .showBookingConfirmation(),
+                                
+                                } //TODO: Change made herer
                           : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1041,7 +1072,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           color: Colors.green,
                                         ),
                                         onPressed: () {
-                                          _autoSwitchToCustomPackage();
+                                          category=="Services"?null:_autoSwitchToCustomPackage();
                                           setState(() {
                                             menu[category]!.add({
                                               "name": item["name"],
@@ -1402,7 +1433,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     Get.snackbar('Saved', 'Package updated');
   }
 
-  
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 340,
