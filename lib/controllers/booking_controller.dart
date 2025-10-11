@@ -2337,7 +2337,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
-import 'package:schedule_app/model/event_model.dart';
 import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
@@ -2974,8 +2973,8 @@ class BookingController extends GetxController {
   double calculateSubtotal() {
     if (selectedPackage.value.isEmpty) return 0.0;
 
-    if (isPackageEditing.value && selectedPackage.value == 'Custom Package') {
-      // For custom package, calculate from items
+    if (selectedPackage.value == 'Custom Package') {
+      // For custom package, always calculate from items
       return calculateSubtotalFromItems();
     } else {
       // For regular packages, use package price
@@ -3040,7 +3039,7 @@ class BookingController extends GetxController {
     final perGuestCost = (subtotal / (guests.value > 0 ? guests.value : 1))
         .toStringAsFixed(0);
 
-    if (isPackageEditing.value && selectedPackage.value == 'Custom Package') {
+    if (selectedPackage.value == 'Custom Package') {
       return 'Custom Package - £$perGuestCost/Guest';
     } else {
       return '${selectedPackage.value} (£$perGuestCost/Guest)';
@@ -3525,6 +3524,14 @@ class BookingController extends GetxController {
     // If it's custom package and we're editing, return custom menu
     if (packageTitle == 'Custom Package' && isPackageEditing.value) {
       return _customPackageMenu;
+    }
+
+    // If it's custom package but not editing, return empty menu
+    if (packageTitle == 'Custom Package') {
+      return {
+        'Food Items': <Map<String, dynamic>>[],
+        'Services': <Map<String, dynamic>>[],
+      };
     }
 
     // Otherwise return original package menu

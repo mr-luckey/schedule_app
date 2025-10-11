@@ -11,7 +11,6 @@ import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
 import 'package:schedule_app/widgets/schedule_header.dart';
-import 'package:schedule_app/widgets/sidebar.dart';
 import 'package:schedule_app/pages/schedule_page.dart' hide Sidebar;
 
 import 'models/model.dart';
@@ -35,8 +34,9 @@ class _EditPageState extends State<EditPage> {
   @override
   void initState() {
     super.initState();
-    // Load order data when the page initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Load API data first, then order data when the page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await editController.loadApiData(); // Load packages, cities, events, etc.
       editController.loadOrderById(widget.selectedId);
     });
     editController.loadServiceItems();
@@ -493,33 +493,48 @@ class BookingForm extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Grid of packages
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.2,
-                ),
-                itemCount: controller.packages.length,
-                itemBuilder: (context, index) {
-                  final package = controller.packages[index];
-                  return Obx(() {
-                    final isSelected =
-                        controller.selectedPackage.value == package.title;
-                    return PackageCard(
-                      title: package.title ?? 'Unknown Package',
-                      description: package.description ?? '',
-                      price: package.price ?? '0',
-                      isSelected: isSelected,
-                      onTap: () {
-                        controller.setPackage(package.title ?? '');
-                      },
-                    );
-                  });
-                },
-              ),
+              Obx(() {
+                print('🔄 Building packages grid with ${controller.packages.length} packages');
+                if (controller.packages.isEmpty) {
+                  return Container(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      'No packages available. Loading...',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.2,
+                  ),
+                  itemCount: controller.packages.length,
+                  itemBuilder: (context, index) {
+                    final package = controller.packages[index];
+                    print('📦 Building package card: ${package.title}');
+                    return Obx(() {
+                      final isSelected =
+                          controller.selectedPackage.value == package.title;
+                      return PackageCard(
+                        title: package.title ?? 'Unknown Package',
+                        description: package.description ?? '',
+                        price: package.price ?? '0',
+                        isSelected: isSelected,
+                        onTap: () {
+                          print('📦 Package tapped: ${package.title}');
+                          controller.setPackage(package.title ?? '');
+                        },
+                      );
+                    });
+                  },
+                );
+              }),
               const SizedBox(height: 24),
             ],
           ),
@@ -853,82 +868,28 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   /// Calculate total food and beverage cost (excluding services)
   double get foodAndBeverageCost {
-    final isPackageModified = editController.hasPackageBeenModified();
-    final isApiPackage = _isApiPackage(editController.selectedPackage.value);
-    final isCustomPackage = editController.isCustomEditing.value;
-
-    print('=== DEBUG: Cost Calculation ===');
-    print('Package: ${editController.selectedPackage.value}');
-    print('isApiPackage: $isApiPackage');
-    print('isPackageModified: $isPackageModified');
-    print('isCustomPackage: $isCustomPackage');
-    print('Guests: ${editController.guests.value}');
-
-    // Scenario 1: Custom package OR modified API package - use item-based pricing
-    if (isCustomPackage || (isApiPackage && isPackageModified)) {
-      final itemTotal = _calculateTotalFromItems();
-      print('Using item-based pricing: £$itemTotal');
-      return itemTotal;
-    }
-    // Scenario 2: Predefined API package without modifications - use package price * guests
-    else if (isApiPackage && !isPackageModified) {
-      final guests = editController.guests.value;
-      final packagePrice = _getPackagePrice();
-      final total = packagePrice * guests;
-      print('Using package pricing: £$packagePrice * $guests = £$total');
-      return total;
-    }
-    // Scenario 3: No package selected or other cases - fallback to item-based
-    else {
-      final itemTotal = _calculateTotalFromItems();
-      print('Using fallback item-based pricing: £$itemTotal');
-      return itemTotal;
-    }
-  }
-
-  bool _isApiPackage(String packageTitle) {
-    if (packageTitle.isEmpty) return false;
-    final pkg = editController.apiPackages.firstWhere(
-      (p) => p.title == packageTitle,
-      orElse: () => Package(),
-    );
-    return pkg.id != null && pkg.id! > 0;
-  }
-
-  /// Get base package price from API packages
-  double _getPackagePrice() {
-    final packageTitle = editController.selectedPackage.value;
-    if (packageTitle.isNotEmpty) {
+    // Apply the same simple logic as booking screen
+    if (editController.isCustomEditing.value && 
+        editController.selectedPackage.value == 'Custom Package') {
+      return _calculateTotalFromItems();
+    } else {
       final pkg = editController.apiPackages.firstWhere(
-        (p) => p.title == packageTitle,
+        (p) => p.title == editController.selectedPackage.value,
         orElse: () => Package(),
       );
-      return double.tryParse(pkg.price ?? '0') ?? 0.0;
+      final packagePrice = _parsePriceString(pkg.price);
+      final guestCount = editController.guests.value;
+      return packagePrice * guestCount;
     }
-    return 0.0;
   }
 
-  // double _getPackagePrice() {
-  //   final packageTitle = editController.selectedPackage.value;
-  //   if (packageTitle.isNotEmpty) {
-  //     final pkg = editController.apiPackages.firstWhere(
-  //       (p) => p.title == packageTitle,
-  //       orElse: () => Package(),
-  //     );
-  //     return double.tryParse(pkg.price ?? '0') ?? 0.0;
-  //   }
-  //   return 0.0;
-  // }
-
-  /// Get total cost of selected services
-  double _getServicesCost() {
-    double total = 0.0;
-    for (var service in editController.selectedServiceItems) {
-      final price = double.tryParse(service.price) ?? 0.0;
-      total += price * service.qty;
-    }
-    return total;
+  double _parsePriceString(String? priceStr) {
+    if (priceStr == null) return 0.0;
+    final cleaned = priceStr.replaceAll(RegExp(r'[^0-9.]'), '');
+    if (cleaned.isEmpty) return 0.0;
+    return double.tryParse(cleaned) ?? 0.0;
   }
+
 
   /// Get service cost (sum of selected services)
   double get serviceCost {
@@ -945,6 +906,38 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   /// Get total amount
   double get totalAmount => foodAndBeverageCost + serviceCost + vat;
+
+  // ===========================================================================
+  // CUSTOM PACKAGE SWITCHING (matching booking screen)
+  // ===========================================================================
+
+  /// Auto switch to custom package when editing (like booking screen)
+  void _autoSwitchToCustomPackage() {
+    // Get current menu state from selected items
+    final currentMenu = {
+      'Food Items': editController.selectedMenuItems
+          .map((item) => {
+                'name': item.name,
+                'price': item.price,
+                'qty': item.qty,
+                'menu_item_id': item.menuItemId,
+                'id': item.id,
+              })
+          .toList(),
+      'Services': editController.selectedServiceItems
+          .map((item) => {
+                'name': item.title,
+                'price': item.price,
+                'qty': item.qty,
+                'menu_item_id': item.serviceId,
+                'id': item.id,
+              })
+          .toList(),
+    };
+
+    // Switch to custom package and update with current menu
+    editController.switchToCustomPackageAndUpdate(currentMenu);
+  }
 
   // ===========================================================================
   // ITEM MANAGEMENT METHODS
@@ -969,6 +962,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       );
       editController.selectedMenuItems.refresh();
       editController.markPackageAsEdited(); // Mark as edited
+      
+      // Auto switch to custom package when modifying items (like booking screen)
+      _autoSwitchToCustomPackage();
     }
   }
 
@@ -991,6 +987,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         );
         editController.selectedMenuItems.refresh();
         editController.markPackageAsEdited(); // Mark as edited
+        
+        // Auto switch to custom package when modifying items (like booking screen)
+        _autoSwitchToCustomPackage();
       }
     }
   }
@@ -1001,10 +1000,13 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       editController.removeSelectedMenuItemByMenuItemId(
         (item as SelectedMenuItem).menuItemId,
       );
+      // Auto switch to custom package only for food items (like booking screen)
+      _autoSwitchToCustomPackage();
     } else {
       editController.removeSelectedServiceItemById(
         (item as SelectedServiceItem).serviceId,
       );
+      // Services are excluded from auto-switching functionality
     }
     editController.markPackageAsEdited(); // Mark as edited
   }
@@ -1019,9 +1021,11 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       qty: editController.guests.value, // Use guest count for food
     );
     editController.markPackageAsEdited(); // Mark as edited
+    
+    // Auto switch to custom package when modifying items (like booking screen)
+    _autoSwitchToCustomPackage();
   }
 
-  /// Add service item to selection
   /// Add service item to selection
   void addServiceItem(EditModels.ServiceMode service) {
     editController.addSelectedServiceItem(
@@ -1031,6 +1035,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           service.price?.toString() ?? '0', // Use service.price, not menuItems
       qty: 1,
     );
+    editController.markPackageAsEdited(); // Mark as edited
   }
 
   /// Add a service MENU ITEM directly into Services section
@@ -1043,6 +1048,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
     editController.markPackageAsEdited(); // Mark as edited
   }
+
 
   // ===========================================================================
   // DIALOG METHODS
@@ -1588,9 +1594,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Package header with real-time status
+              // Package header
               Obx(() {
-                final isModified = editController.hasPackageBeenModified();
                 final packageTitle = editController.selectedPackage.value;
 
                 return Column(
@@ -1600,75 +1605,23 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isModified ? Colors.orange : Colors.black,
+                        color: Colors.black,
                       ),
                     ),
                     Text(
                       packageTitle.isEmpty
                           ? "No Package Selected"
-                          : isModified
-                          ? "$packageTitle (Customized)"
                           : packageTitle,
                       style: TextStyle(
                         fontSize: 16,
-                        fontStyle: isModified
-                            ? FontStyle.italic
-                            : FontStyle.normal,
-                        color: isModified ? Colors.orange : Colors.grey[700],
+                        color: Colors.grey[700],
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    if (isModified)
-                      Text(
-                        "Item-based Pricing Active",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.green,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
                     SizedBox(height: 16),
                   ],
                 );
               }),
-
-              // Reset button - only show when package is modified
-              Obx(() {
-                final isModified = editController.hasPackageBeenModified();
-                if (!isModified) return SizedBox();
-
-                return Container(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.refresh, size: 18),
-                    label: Text("Reset to Original Package"),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange,
-                      side: BorderSide(color: Colors.orange),
-                    ),
-                    onPressed: () {
-                      // Reset the current package to original state
-                      editController.resetPackageToOriginal(
-                        editController.selectedPackage.value,
-                      );
-
-                      // Update local state
-                      setState(() {
-                        isEditing = false;
-                        isEdited = false;
-                        editController.isEditingItems.value = false;
-                      });
-
-                      Get.snackbar(
-                        'Reset Complete',
-                        'Package has been reset to original state',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    },
-                  ),
-                );
-              }),
-              SizedBox(height: 16),
 
               // Food Section
               Row(
