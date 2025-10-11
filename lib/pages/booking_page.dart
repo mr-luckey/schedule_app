@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:schedule_app/controllers/booking_controller.dart';
 
-// import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import '../theme/app_colors.dart';
 import '../widgets/schedule_header.dart';
@@ -217,6 +216,9 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
                         }
+                        if (value.trim().length < 2) {
+                          return 'Name must be at least 2 characters';
+                        }
                         return null;
                       },
                     ),
@@ -310,6 +312,12 @@ class BookingForm extends StatelessWidget {
                       value: controller.selectedCity.value,
                       items: controller.cities,
                       onChanged: controller.setCity,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a city';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -344,6 +352,12 @@ class BookingForm extends StatelessWidget {
                 value: controller.selectedEventType.value,
                 items: controller.eventTypes,
                 onChanged: controller.setEventType,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select an event type';
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 16),
@@ -623,6 +637,7 @@ class BookingForm extends StatelessWidget {
     required String value,
     required List<String> items,
     required Function(String) onChanged,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,11 +652,18 @@ class BookingForm extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value.isEmpty ? null : value,
+          validator: validator,
           decoration: InputDecoration(
             hintText: 'Select $label',
             border: const OutlineInputBorder(),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.primary),
+            ),
+            errorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
             ),
           ),
           items: items
@@ -755,7 +777,6 @@ class BookingForm extends StatelessWidget {
     );
   }
 }
-// ... (previous imports and code remains the same)
 
 class FoodBeverageSelection extends StatefulWidget {
   const FoodBeverageSelection({super.key});
@@ -919,8 +940,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   double get foodAndBeverageCost {
-    if (controller.isPackageEditing.value &&
-        controller.selectedPackage.value == 'Custom Package') {
+    // Check if package is custom (either currently editing or was edited and saved as custom)
+    if (controller.selectedPackage.value == 'Custom Package' ||
+        (controller.isPackageEditing.value && controller.selectedPackage.value == 'Custom Package')) {
       return _calculateTotalFromItems();
     } else {
       final pkg = controller.packages.firstWhere(

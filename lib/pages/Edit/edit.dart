@@ -5,8 +5,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:schedule_app/pages/Edit/EditController.dart';
 import 'package:schedule_app/pages/Edit/models/EditModel.dart' as EditModels;
 import 'package:schedule_app/pages/Edit/models/MenuItem.dart' as MenuItemModel;
-// import 'package:schedule_app/pages/Edit/models/ServiceModel.dart';
-// import 'package:schedule_app/pages/Edit/models/model.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
@@ -14,10 +12,6 @@ import 'package:schedule_app/widgets/schedule_header.dart';
 import 'package:schedule_app/pages/schedule_page.dart' hide Sidebar;
 
 import 'models/model.dart';
-
-// ===========================================================================
-// MAIN EDIT PAGE
-// ===========================================================================
 
 // ignore: must_be_immutable
 class EditPage extends StatefulWidget {
@@ -190,9 +184,6 @@ class _EditPageState extends State<EditPage> {
   }
 }
 
-// ===========================================================================
-// BOOKING FORM WIDGET
-// ===========================================================================
 
 class BookingForm extends StatelessWidget {
   const BookingForm({super.key});
@@ -276,6 +267,9 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
                         }
+                        if (value.trim().length < 2) {
+                          return 'Name must be at least 2 characters';
+                        }
                         return null;
                       },
                     ),
@@ -291,8 +285,9 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!value.contains('@'))
-                          return 'Please enter a valid email';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
                         return null;
                       },
                     ),
@@ -311,6 +306,17 @@ class BookingForm extends StatelessWidget {
                       controller: controller.contactController,
                       label: 'Contact#',
                       hint: '+44-XXX-XXX-XXX',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your contact number';
+                        }
+                        // Remove all non-digit characters for validation
+                        final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        if (digitsOnly.length < 10) {
+                          return 'Contact number must be at least 10 digits';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -321,6 +327,12 @@ class BookingForm extends StatelessWidget {
                       value: controller.selectedCity.value,
                       items: controller.cities,
                       onChanged: controller.setCity,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a city';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -350,6 +362,12 @@ class BookingForm extends StatelessWidget {
                 value: controller.selectedEventType.value,
                 items: controller.eventTypes,
                 onChanged: controller.setEventType,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select an event type';
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 16),
@@ -615,6 +633,7 @@ class BookingForm extends StatelessWidget {
     required String value,
     required List<String> items,
     required Function(String) onChanged,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,11 +648,18 @@ class BookingForm extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value.isEmpty ? null : value,
+          validator: validator,
           decoration: InputDecoration(
             hintText: 'Select $label',
             border: const OutlineInputBorder(),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.primary),
+            ),
+            errorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
             ),
           ),
           items: items
@@ -748,9 +774,6 @@ class BookingForm extends StatelessWidget {
   }
 }
 
-// ===========================================================================
-// FOOD & BEVERAGE SELECTION WIDGET
-// ===========================================================================
 class FoodBeverageSelection extends StatefulWidget {
   const FoodBeverageSelection({super.key});
 

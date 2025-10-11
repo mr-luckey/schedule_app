@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// import 'package:hallmanagementsystem/controllers/home_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/pages/List/home_controller.dart';
 import 'package:schedule_app/pages/List/order_model%20(1).dart';
 import 'package:schedule_app/pages/List/payment_controller.dart';
-// import '../controllers/payment_controller.dart';
-// import '../models/order_model.dart';
 
 
 class ListingDetailScreen extends StatelessWidget {

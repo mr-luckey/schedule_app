@@ -6,7 +6,6 @@ import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/models/EditModel.dart';
 import 'package:schedule_app/pages/Edit/models/MenuItem.dart' hide MenuItem;
 import 'package:schedule_app/pages/Edit/models/model.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 class EditController extends GetxController {
   // ===========================================================================
@@ -951,7 +950,7 @@ class EditController extends GetxController {
     selectedPackage.value = packageTitle;
     print('🔄 New package set: $packageTitle');
 
-    // Find and set the package ID
+    // Find and set the package ID - ensure we match by title exactly
     final packageData = apiPackages.firstWhere(
       (p) => p.title == packageTitle,
       orElse: () => Package(),
@@ -1740,10 +1739,6 @@ class EditController extends GetxController {
     return false;
   }
 }
-
-// ===========================================================================
-// SUPPORTING MODELS FOR SELECTED ITEMS
-// ===========================================================================
 
 /// Model for selected menu items in UI
 class SelectedMenuItem {
