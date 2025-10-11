@@ -77,7 +77,6 @@ class EditController extends GetxController {
   void onInit() {
     super.onInit();
     loadApiData();
-    // _loadServiceItems();
   }
 
   @override
@@ -790,91 +789,52 @@ class EditController extends GetxController {
 
     final String currentPkgId = pkg.packageId!.toString();
     final String selectedPkgId = selectedPackageId.value;
+    final bool isCustomPackage = selectedPackage.value == 'Custom Package';
 
-    // Case 1: User picked a different package -> push new package_id and items
-    if (selectedPkgId.isNotEmpty &&
-        selectedPkgId != currentPkgId &&
-        !isCustomEditing.value) {
-      // Check if the selected package is "Custom Package"
-      final isCustomPackage = selectedPackage.value == 'Custom Package';
-      
-      // Get items for the new package
-      final List<Map<String, dynamic>> packageItems = [];
-      
-      if (isCustomPackage) {
-        // For custom package, send current selected items
-        for (final m in selectedMenuItems) {
-          packageItems.add({
-            "menu_item_id": m.menuItemId?.toString() ?? '',
-            "price": m.price,
-            "no_of_gust": m.qty.toString(),
-            "is_deleted": false,
-          });
-        }
-        for (final s in selectedServiceItems) {
-          packageItems.add({
-            "menu_item_id": s.serviceId?.toString() ?? '',
-            "price": s.price,
-            "no_of_gust": s.qty.toString(),
-            "is_deleted": false,
-          });
-        }
-      }
-      
-      return [
-        {
-          if (pkg.id != null) "id": pkg.id,
-          "package_id": selectedPkgId,
-          "is_custom": isCustomPackage,
-          if (packageItems.isNotEmpty) "order_package_items_attributes": packageItems,
-        },
-      ];
-    }
+    print('🔄 _getOrderPackagesForApi - Current Package ID: $currentPkgId');
+    print('🔄 _getOrderPackagesForApi - Selected Package ID: $selectedPkgId');
+    print('🔄 _getOrderPackagesForApi - Selected Package: ${selectedPackage.value}');
+    print('🔄 _getOrderPackagesForApi - Is Custom: $isCustomPackage');
 
-    // Index existing package items by menu_item_id
-    final Map<String, dynamic> existingByMenuItemId = {};
+    // Always use the selected package ID (this handles package switching properly)
+    final String packageIdToUse = selectedPkgId.isNotEmpty ? selectedPkgId : currentPkgId;
+    
+    // Build package items based on current selection
+    final List<Map<String, dynamic>> packageItems = [];
+    
+    // Create maps for quick lookup of existing items
+    final Map<String, OrderPackageItems> existingItemsByMenuItemId = {};
     if (pkg.orderPackageItems != null) {
       for (final item in pkg.orderPackageItems!) {
-        if (item.menuItemId != null) {
-          existingByMenuItemId[item.menuItemId!.toString()] = item;
+        if (item.menuItemId != null && !(item.isDeleted ?? false)) {
+          existingItemsByMenuItemId[item.menuItemId!.toString()] = item;
         }
       }
     }
-
-    final List<Map<String, dynamic>> packageItems = [];
-    final Set<String> selectedIds = {};
-    final Set<String> existingIds = existingByMenuItemId.keys.toSet();
-    bool hasQuantityChange = false;
-
-    // Add/Update currently selected food items
+    
+    // Track which items are currently selected
+    final Set<String> selectedMenuItemIds = {};
+    
+    // Add/Update selected menu items (food items only)
     for (final m in selectedMenuItems) {
-      final key = (m.menuItemId?.toString() ?? '');
-      if (key.isEmpty) continue;
-      selectedIds.add(key);
-      final existing = existingByMenuItemId[key];
-      // Track quantity change relative to existing item
-      if (existing != null) {
-        final String existingQtyStr = (existing.noOfGust ?? '1').toString();
-        final int existingQty = int.tryParse(existingQtyStr) ?? 1;
-        if (existingQty != m.qty) {
-          hasQuantityChange = true;
-        }
-      } else {
-        // New item added which didn't exist before
-        hasQuantityChange = true;
+      if (m.menuItemId != null) {
+        final menuItemIdStr = m.menuItemId!.toString();
+        selectedMenuItemIds.add(menuItemIdStr);
+        
+        final existingItem = existingItemsByMenuItemId[menuItemIdStr];
+        packageItems.add({
+          if (existingItem?.id != null) "id": existingItem!.id,
+          "menu_item_id": menuItemIdStr,
+          "price": m.price,
+          "no_of_gust": m.qty.toString(),
+          "is_deleted": false,
+        });
       }
-      packageItems.add({
-        if (existing?.id != null) "id": existing.id,
-        "menu_item_id": key,
-        "price": m.price,
-        "no_of_gust": m.qty.toString(),
-        "is_deleted": false,
-      });
     }
-
-    // Mark deletions for items removed from selection
-    for (final entry in existingByMenuItemId.entries) {
-      if (!selectedIds.contains(entry.key)) {
+    
+    // Mark deleted items (items that existed but are no longer selected)
+    for (final entry in existingItemsByMenuItemId.entries) {
+      if (!selectedMenuItemIds.contains(entry.key)) {
         final item = entry.value;
         packageItems.add({
           if (item.id != null) "id": item.id,
@@ -886,24 +846,29 @@ class EditController extends GetxController {
       }
     }
 
-    // Decide if this order's package should be treated as custom to prevent server from re-applying defaults
-    final bool itemsSetChanged =
-        selectedIds.length != existingIds.length ||
-        !selectedIds.containsAll(existingIds) ||
-        !existingIds.containsAll(selectedIds);
-    final bool shouldMarkCustom =
-        isCustomEditing.value ||
-        (pkg.isCustom ?? false) ||
-        itemsSetChanged ||
-        hasQuantityChange ||
-        selectedPackage.value == 'Custom Package';
+    // If package was changed, mark all old items as deleted
+    if (selectedPkgId != currentPkgId && pkg.orderPackageItems != null) {
+      for (final item in pkg.orderPackageItems!) {
+        if (item.menuItemId != null && !selectedMenuItemIds.contains(item.menuItemId!.toString())) {
+          packageItems.add({
+            if (item.id != null) "id": item.id,
+            "menu_item_id": item.menuItemId!.toString(),
+            "price": (item.price ?? '0').toString(),
+            "no_of_gust": (item.noOfGust ?? '1').toString(),
+            "is_deleted": true,
+          });
+        }
+      }
+    }
+
+    print('🔄 _getOrderPackagesForApi - Package items count: ${packageItems.length}');
+    print('🔄 _getOrderPackagesForApi - Final package ID to use: $packageIdToUse');
 
     return [
       {
         if (pkg.id != null) "id": pkg.id,
-        "package_id": currentPkgId,
-        "amount": pkg.amount ?? "0",
-        "is_custom": shouldMarkCustom,
+        "package_id": packageIdToUse,
+        "is_custom": isCustomPackage,
         "order_package_items_attributes": packageItems,
       },
     ];
@@ -939,10 +904,11 @@ class EditController extends GetxController {
     print('🔄 Current package: ${selectedPackage.value}');
     print('🔄 Current custom editing: ${isCustomEditing.value}');
     
-    // Save current package state before switching
+    // Save current package state before switching (only for custom packages)
     if (selectedPackage.value.isNotEmpty &&
         selectedPackage.value != packageTitle &&
-        isCustomEditing.value) {
+        isCustomEditing.value &&
+        selectedPackage.value == 'Custom Package') {
       print('🔄 Saving current package state before switching');
       _saveCurrentPackageState();
     }
@@ -972,17 +938,34 @@ class EditController extends GetxController {
     print('🔄 Is existing custom: $isExistingCustom');
     print('🔄 Has custom selection: ${_customSelections.containsKey(packageTitle)}');
 
-    // Load custom selection if exists or it's an existing custom package, otherwise load API package items
-    if (_customSelections.containsKey(packageTitle) || isExistingCustom) {
-      print('🔄 Loading custom menu');
-      final customMenu =
-          _customSelections[packageTitle] ?? _buildCustomMenuFromOrder();
+    // Handle package switching logic
+    if (packageTitle == 'Custom Package') {
+      print('🔄 Loading Custom Package');
+      // For custom package, load current selected items or build from order
+      final customMenu = _customSelections.containsKey(packageTitle) 
+          ? _customSelections[packageTitle]! 
+          : _buildCustomMenuFromOrder();
+      _updateSelectedItemsFromMenu(customMenu);
+      packageEdited[packageTitle] = true;
+      isCustomEditing.value = true;
+    } else if (_customSelections.containsKey(packageTitle)) {
+      print('🔄 Loading saved custom selection for: $packageTitle');
+      // Load previously saved custom selection for this package
+      final customMenu = _customSelections[packageTitle]!;
+      _updateSelectedItemsFromMenu(customMenu);
+      packageEdited[packageTitle] = true;
+      isCustomEditing.value = true;
+    } else if (isExistingCustom) {
+      print('🔄 Loading existing custom package from order');
+      // Load existing custom package from order
+      final customMenu = _buildCustomMenuFromOrder();
       _updateSelectedItemsFromMenu(customMenu);
       packageEdited[packageTitle] = true;
       isCustomEditing.value = true;
     } else {
-      print('🔄 Loading API package items');
-      // Load API package items for the selected package and reset data
+      print('🔄 Loading API package items for: $packageTitle');
+      // Load fresh API package items for the selected package
+      // This will clear all current items and load new ones
       _loadAndResetPackageData(packageTitle, guests.value);
     }
   }
@@ -1074,92 +1057,6 @@ class EditController extends GetxController {
   }
 
 
-
-  // Get the original package menu without any customizations
-  // Map<String, List<Map<String, dynamic>>> _getOriginalPackageMenu(
-  //   String packageTitle,
-  //   int guestCount,
-  // ) {
-  //   final pkg = _findPackage(packageTitle);
-  //   if (pkg == null) {
-  //     return {'Food Items': [], 'Services': []};
-  //   }
-
-  //   final food = <Map<String, dynamic>>[];
-  //   final services = <Map<String, dynamic>>[];
-
-  //   // FIXED: Better null safety and type checking
-  //   if (pkg.packageItems != null && pkg.packageItems is List) {
-  //     for (var packageItem in pkg.packageItems!) {
-  //       // Add additional null checks
-  //       if (packageItem?.menuItem != null) {
-  //         final menuItem = packageItem!.menuItem!;
-
-  //         // FIXED: Use ID-based check instead of type-based
-  //         final isFood = _isFoodItemById(menuItem.id);
-  //         final qty = isFood ? guestCount : 1;
-
-  //         final entry = {
-  //           'name': menuItem.title ?? 'Unknown Item',
-  //           'price': menuItem.price ?? '0',
-  //           'qty': qty,
-  //           'menu_item_id': menuItem.id,
-  //           'id': menuItem.id,
-  //         };
-
-  //         if (isFood) {
-  //           food.add(entry);
-  //         } else {
-  //           services.add(entry);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   return {'Food Items': food, 'Services': services};
-  // }
-
-  // Map<String, List<Map<String, dynamic>>> _getOriginalPackageMenu(
-  //   String packageTitle,
-  //   int guestCount,
-  // ) {
-  //   final pkg = _findPackage(packageTitle);
-  //   if (pkg == null) {
-  //     return {'Food Items': [], 'Services': []};
-  //   }
-
-  //   final food = <Map<String, dynamic>>[];
-  //   final services = <Map<String, dynamic>>[];
-
-  //   // Get package items from API package structure
-  //   if (pkg.packageItems != null) {
-  //     for (var packageItem in pkg.packageItems!) {
-  //       if (packageItem.menuItem != null) {
-  //         final menuItem = packageItem.menuItem!;
-  //         final isFood = _isFoodItem(menuItem);
-  //         final qty = isFood ? guestCount : 1;
-
-  //         final entry = {
-  //           'name': menuItem.title ?? 'Unknown Item',
-  //           'price': menuItem.price ?? '0',
-  //           'qty': qty,
-  //           'menu_item_id': menuItem.id,
-  //           'id': menuItem.id,
-  //         };
-
-  //         if (isFood) {
-  //           food.add(entry);
-  //         } else {
-  //           services.add(entry);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   return {'Food Items': food, 'Services': services};
-  // }
-
-
   // Update selected items from menu
   void _updateSelectedItemsFromMenu(
     Map<String, List<Map<String, dynamic>>> menu,
@@ -1167,39 +1064,43 @@ class EditController extends GetxController {
     print('🔄 _updateSelectedItemsFromMenu called');
     print('🔄 Menu data: ${menu['Food Items']?.length} food, ${menu['Services']?.length} services');
     
-    // Clear current selections
+    // Clear current selections completely
     selectedMenuItems.clear();
     selectedServiceItems.clear();
     print('🔄 Cleared current selections');
 
     // Add food items
-    for (var foodItem in menu['Food Items']!) {
-      print('🔄 Adding food item: ${foodItem['name']}');
-      selectedMenuItems.add(
-        SelectedMenuItem(
-          menuItemId: int.tryParse(foodItem['menu_item_id']?.toString() ?? '0') ?? 0,
-          name: foodItem['name'],
-          price: foodItem['price'].toString(),
-          qty: foodItem['qty'],
-          id: null, // Will be set by API
-          isDeleted: false,
-        ),
-      );
+    if (menu['Food Items'] != null) {
+      for (var foodItem in menu['Food Items']!) {
+        print('🔄 Adding food item: ${foodItem['name']}');
+        selectedMenuItems.add(
+          SelectedMenuItem(
+            menuItemId: int.tryParse(foodItem['menu_item_id']?.toString() ?? '0') ?? 0,
+            name: foodItem['name'],
+            price: foodItem['price'].toString(),
+            qty: foodItem['qty'],
+            id: null, // Will be set by API
+            isDeleted: false,
+          ),
+        );
+      }
     }
 
     // Add service items
-    for (var serviceItem in menu['Services']!) {
-      print('🔄 Adding service item: ${serviceItem['name']}');
-      selectedServiceItems.add(
-        SelectedServiceItem(
-          serviceId: int.tryParse(serviceItem['menu_item_id']?.toString() ?? '0') ?? 0,
-          title: serviceItem['name'],
-          price: serviceItem['price'].toString(),
-          qty: serviceItem['qty'],
-          id: null, // Will be set by API
-          isDeleted: false,
-        ),
-      );
+    if (menu['Services'] != null) {
+      for (var serviceItem in menu['Services']!) {
+        print('🔄 Adding service item: ${serviceItem['name']}');
+        selectedServiceItems.add(
+          SelectedServiceItem(
+            serviceId: int.tryParse(serviceItem['menu_item_id']?.toString() ?? '0') ?? 0,
+            title: serviceItem['name'],
+            price: serviceItem['price'].toString(),
+            qty: serviceItem['qty'],
+            id: null, // Will be set by API
+            isDeleted: false,
+          ),
+        );
+      }
     }
 
     print('🔄 Final counts - Food: ${selectedMenuItems.length}, Services: ${selectedServiceItems.length}');
@@ -1557,19 +1458,20 @@ class EditController extends GetxController {
   void _loadAndResetPackageData(String packageTitle, int guestCount) {
     print('🔄 _loadAndResetPackageData called for: $packageTitle with $guestCount guests');
     
-    // First, copy current items to custom package if we have any
-    if (selectedMenuItems.isNotEmpty || selectedServiceItems.isNotEmpty) {
-      print('🔄 Copying current items to custom package');
-      _copyCurrentItemsToCustomPackage();
-    }
+    // Clear current selections completely before loading new package
+    print('🔄 Clearing current selections');
+    selectedMenuItems.clear();
+    selectedServiceItems.clear();
+    selectedMenuItems.refresh();
+    selectedServiceItems.refresh();
 
     // Load API package items for the selected package (like booking controller)
     print('🔄 Getting original package menu from API');
     final apiPackageItems = _getOriginalPackageMenu(packageTitle, guestCount);
     print('🔄 API package items loaded: ${apiPackageItems['Food Items']?.length} food, ${apiPackageItems['Services']?.length} services');
     
-    // Reset to show API package items
-    print('🔄 Updating selected items from menu');
+    // Load the new package items
+    print('🔄 Loading new package items');
     _updateSelectedItemsFromMenu(apiPackageItems);
     packageEdited[packageTitle] = false;
     isCustomEditing.value = false;
@@ -1578,33 +1480,6 @@ class EditController extends GetxController {
     update();
   }
 
-  /// Copy current items to custom package (like booking controller)
-  void _copyCurrentItemsToCustomPackage() {
-    final currentMenu = {
-      'Food Items': selectedMenuItems
-          .map((item) => {
-                'name': item.name,
-                'price': item.price,
-                'qty': item.qty,
-                'menu_item_id': item.menuItemId,
-                'id': item.id,
-              })
-          .toList(),
-      'Services': selectedServiceItems
-          .map((item) => {
-                'name': item.title,
-                'price': item.price,
-                'qty': item.qty,
-                'menu_item_id': item.serviceId,
-                'id': item.id,
-              })
-          .toList(),
-    };
-
-    // Save to custom selections
-    _customSelections[selectedPackage.value] = currentMenu;
-    packageEdited[selectedPackage.value] = true;
-  }
 
   /// Get original package menu (like booking controller)
   Map<String, List<Map<String, dynamic>>> _getOriginalPackageMenu(
