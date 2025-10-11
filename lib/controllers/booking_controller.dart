@@ -2999,10 +2999,17 @@ class BookingController extends GetxController {
   }
 
   double calculateSubtotalFromItems() {
-    final menu = menuForPackage(
-      selectedPackage.value,
-      guests.value > 0 ? guests.value : 1,
-    );
+    Map<String, List<Map<String, dynamic>>> menu;
+    
+    // For custom packages, use _customPackageMenu directly
+    if (selectedPackage.value == 'Custom Package') {
+      menu = _customPackageMenu;
+    } else {
+      menu = menuForPackage(
+        selectedPackage.value,
+        guests.value > 0 ? guests.value : 1,
+      );
+    }
 
     double total = 0.0;
     for (var item in menu['Food Items']!) {
@@ -3093,8 +3100,7 @@ class BookingController extends GetxController {
 
       // Get the current menu for the selected package
       final menu = menuForPackage(selectedPackage.value, guests.value);
-      final bool isCustomFlag =
-          isPackageEditing.value && selectedPackage.value == 'Custom Package';
+      final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
@@ -3134,7 +3140,8 @@ class BookingController extends GetxController {
         orElse: () => {},
       );
 
-      if (packageData.isNotEmpty) {
+      // Handle custom packages or regular packages
+      if (selectedPackage.value == 'Custom Package' || packageData.isNotEmpty) {
         List<Map<String, dynamic>> packageItems = [];
 
         int? _resolveMenuItemId(Map<String, dynamic> entry) {
@@ -3188,17 +3195,39 @@ class BookingController extends GetxController {
           });
         }
 
+        // For custom packages, use _customPackageMenu data
+        List<Map<String, dynamic>> foodItems = [];
+        List<Map<String, dynamic>> serviceItems = [];
+        
+        if (selectedPackage.value == 'Custom Package') {
+          foodItems = _customPackageMenu['Food Items'] ?? [];
+          serviceItems = _customPackageMenu['Services'] ?? [];
+        } else {
+          foodItems = menu['Food Items'] ?? [];
+          serviceItems = menu['Services'] ?? [];
+        }
+
         // Add all food items
-        for (final food in menu['Food Items']!) {
+        for (final food in foodItems) {
           _addEntryToPackageItems(food, isFood: true);
         }
         // Add all services as items as well
-        for (final svc in menu['Services']!) {
+        for (final svc in serviceItems) {
           _addEntryToPackageItems(svc, isFood: false);
         }
 
+        // Get custom package ID from API packages
+        String? customPackageId;
+        if (selectedPackage.value == 'Custom Package') {
+          final customPkg = apiPackages.firstWhere(
+            (pkg) => (pkg['name']?.toString() ?? pkg['title']?.toString()) == 'Custom Package',
+            orElse: () => {},
+          );
+          customPackageId = customPkg['id']?.toString();
+        }
+
         orderPackages.add({
-          "package_id": selectedPackageId.value,
+          "package_id": selectedPackage.value == 'Custom Package' ? customPackageId : selectedPackageId.value,
           "amount": calculateTotal().toStringAsFixed(2),
           "is_custom": isCustomFlag,
           "order_package_items_attributes": packageItems,
@@ -3298,8 +3327,7 @@ class BookingController extends GetxController {
 
       // Get the current menu for the selected package
       final menu = menuForPackage(selectedPackage.value, guests.value);
-      final bool isCustomFlag =
-          isPackageEditing.value && selectedPackage.value == 'Custom Package';
+      final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
@@ -3650,9 +3678,16 @@ class BookingController extends GetxController {
   void createOrOpenCustomPackage() {
     const customTitle = 'Custom Package';
 
+    // Find custom package ID from API packages
+    final customPkg = apiPackages.firstWhere(
+      (pkg) => (pkg['name']?.toString() ?? pkg['title']?.toString()) == customTitle,
+      orElse: () => {},
+    );
+    final customPackageId = customPkg['id']?.toString() ?? '';
+
     // Switch to custom package
     selectedPackage.value = customTitle;
-    selectedPackageId.value = 'custom';
+    selectedPackageId.value = customPackageId;
     isPackageEditing.value = true;
 
     update();
