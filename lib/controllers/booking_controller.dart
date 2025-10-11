@@ -2337,7 +2337,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
-import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 
@@ -3060,10 +3059,6 @@ class BookingController extends GetxController {
     }
 
     confirmPressCount.value++;
-
-    if (confirmPressCount.value == 1) {
-      Get.dialog(ReceiptPopup(controller: this), barrierDismissible: false);
-    } else if (confirmPressCount.value >= 2) {
       Get.dialog(
         PaymentPopup(
           eventName: selectedEventType.value,
@@ -3080,7 +3075,7 @@ class BookingController extends GetxController {
           onCancel: cancelBookingPopup,
         ),
       );
-    }
+
   }
 
   Future<void> completeBooking() async {
@@ -3103,7 +3098,16 @@ class BookingController extends GetxController {
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
-      for (var service in menu['Services']!) {
+      
+      // For custom packages, use _customPackageMenu services
+      List<Map<String, dynamic>> servicesToProcess = [];
+      if (selectedPackage.value == 'Custom Package') {
+        servicesToProcess = _customPackageMenu['Services'] ?? [];
+      } else {
+        servicesToProcess = menu['Services'] ?? [];
+      }
+      
+      for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
             .expand(
               (category) => (category['menu_items'] as List<dynamic>? ?? []),
@@ -3299,7 +3303,16 @@ class BookingController extends GetxController {
 
       // Prepare order services from the services in the menu
       List<Map<String, dynamic>> orderServices = [];
-      for (var service in menu['Services']!) {
+      
+      // For custom packages, use _customPackageMenu services
+      List<Map<String, dynamic>> servicesToProcess = [];
+      if (selectedPackage.value == 'Custom Package') {
+        servicesToProcess = _customPackageMenu['Services'] ?? [];
+      } else {
+        servicesToProcess = menu['Services'] ?? [];
+      }
+      
+      for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
             .expand(
               (category) => (category['menu_items'] as List<dynamic>? ?? []),

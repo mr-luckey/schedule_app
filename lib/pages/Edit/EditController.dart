@@ -374,17 +374,10 @@ class EditController extends GetxController {
       selectedCityId.value = '';
     }
 
-    // Package
-    if (order.orderPackages != null && order.orderPackages!.isNotEmpty) {
-      final package = order.orderPackages!.first.package;
-      if (package != null) {
-        selectedPackage.value = package.title ?? '';
-        selectedPackageId.value = package.id?.toString() ?? '';
-      }
-    } else {
-      selectedPackage.value = '';
-      selectedPackageId.value = '';
-    }
+    // Package - Don't set here, let _initializePackageStateFromOrder handle it
+    // This ensures custom packages are properly detected
+    selectedPackage.value = '';
+    selectedPackageId.value = '';
   }
 
   /// Parse time string to TimeOfDay
@@ -790,18 +783,42 @@ class EditController extends GetxController {
     final String currentPkgId = pkg.packageId!.toString();
     final String selectedPkgId = selectedPackageId.value;
 
-    // Case 1: User picked a different package -> push only package_id; let server attach defaults
+    // Case 1: User picked a different package -> push new package_id and items
     if (selectedPkgId.isNotEmpty &&
         selectedPkgId != currentPkgId &&
         !isCustomEditing.value) {
       // Check if the selected package is "Custom Package"
       final isCustomPackage = selectedPackage.value == 'Custom Package';
+      
+      // Get items for the new package
+      final List<Map<String, dynamic>> packageItems = [];
+      
+      if (isCustomPackage) {
+        // For custom package, send current selected items
+        for (final m in selectedMenuItems) {
+          packageItems.add({
+            "menu_item_id": m.menuItemId?.toString() ?? '',
+            "price": m.price,
+            "no_of_gust": m.qty.toString(),
+            "is_deleted": false,
+          });
+        }
+        for (final s in selectedServiceItems) {
+          packageItems.add({
+            "menu_item_id": s.serviceId?.toString() ?? '',
+            "price": s.price,
+            "no_of_gust": s.qty.toString(),
+            "is_deleted": false,
+          });
+        }
+      }
+      
       return [
         {
           if (pkg.id != null) "id": pkg.id,
           "package_id": selectedPkgId,
-          // amount and items omitted; server will apply package defaults
           "is_custom": isCustomPackage,
+          if (packageItems.isNotEmpty) "order_package_items_attributes": packageItems,
         },
       ];
     }
@@ -1327,20 +1344,25 @@ class EditController extends GetxController {
       final orderPackage = currentOrderPackages.first;
       final packageTitle = orderPackage.package?.title ?? '';
 
-      if (packageTitle.isNotEmpty) {
+      // Check if package is custom
+      final isCustom = orderPackage.isCustom ?? false;
+      
+      if (isCustom) {
+        // If package is custom, set as Custom Package
+        selectedPackage.value = 'Custom Package';
+        selectedPackageId.value = ''; // Custom packages don't have a package ID
+        packageEdited['Custom Package'] = true;
+        isCustomEditing.value = true;
+        
+        // Build custom selection from order items
+        final customMenu = _buildCustomMenuFromOrder();
+        _customSelections['Custom Package'] = customMenu;
+      } else if (packageTitle.isNotEmpty) {
+        // Regular package
         selectedPackage.value = packageTitle;
         selectedPackageId.value = orderPackage.packageId?.toString() ?? '';
-
-        // Check if package is custom
-        final isCustom = orderPackage.isCustom ?? false;
-        packageEdited[packageTitle] = isCustom;
-        isCustomEditing.value = isCustom;
-
-        if (isCustom) {
-          // Build custom selection from order items
-          final customMenu = _buildCustomMenuFromOrder();
-          _customSelections[packageTitle] = customMenu;
-        }
+        packageEdited[packageTitle] = false;
+        isCustomEditing.value = false;
       }
     }
   }
@@ -1566,7 +1588,7 @@ class EditController extends GetxController {
     );
 
     print('🔍 Found package: $pkg');
-    
+
     if (pkg.isEmpty) {
       print('❌ Package not found in rawApiPackages');
       return {'Food Items': [], 'Services': []};
