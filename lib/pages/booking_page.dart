@@ -419,66 +419,103 @@ class BookingForm extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // --- Guests control (added per request) ---
+              // --- Guests control (added per request) --- Advance Payment Field
               Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Guests',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Guests',
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 28),
-                                icon: const Icon(Icons.remove),
-                                onPressed: controller.guests.value > 1
-                                    ? controller.decrementGuests
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                controller.guests.value.toString(),
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 28),
-                                icon: const Icon(Icons.add),
-                                onPressed: controller.incrementGuests,
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 28),
-                                icon: const Icon(Icons.edit, size: 20),
-                                onPressed: _showEditGuestsDialog,
-                              ),
-                            ],
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 28),
+                              icon: const Icon(Icons.remove),
+                              onPressed: controller.guests.value > 1
+                                  ? controller.decrementGuests
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              controller.guests.value.toString(),
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 28),
+                              icon: const Icon(Icons.add),
+                              onPressed: controller.incrementGuests,
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 28),
+                              icon: const Icon(Icons.edit, size: 20),
+                              onPressed: _showEditGuestsDialog,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 20,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Advance Payment (£)',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 150, // Add this line
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12, // Increased padding for better appearance
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: TextFormField(
+                          controller: controller.advancePaymentController,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            hintText: '0.00',
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -17,6 +17,7 @@ class BookingController extends GetxController {
   final contactController = TextEditingController();
   final messageController = TextEditingController();
   final specialRequirementsController = TextEditingController();
+  final advancePaymentController = TextEditingController();
 
   // Form data
   final RxString selectedCity = ''.obs;
@@ -25,6 +26,7 @@ class BookingController extends GetxController {
   final Rx<TimeOfDay?> startTime = Rx<TimeOfDay?>(null);
   final Rx<TimeOfDay?> endTime = Rx<TimeOfDay?>(null);
   final RxInt guests = 1.obs;
+   RxDouble advancePayment = 0.0.obs;
   final RxString selectedEventType = ''.obs;
   final RxString selectedEventId = ''.obs;
   final RxBool isPackageEditing = false.obs;
