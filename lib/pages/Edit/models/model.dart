@@ -22,7 +22,11 @@ class EditOrderModel {
   List<OrderServices>? orderServices;
   List<OrderPackages>? orderPackages;
   String? url;
-  String? advancePayment;
+  String? totalAmount;
+  String? discountAmount;
+  String? serviceAmount;
+  String? foodBeverageAmount;
+  int? discountId;
   String? createdAt;
   String? updatedAt;
 
@@ -50,7 +54,11 @@ class EditOrderModel {
     this.orderServices,
     this.orderPackages,
     this.url,
-    this.advancePayment,
+    this.totalAmount,
+    this.discountAmount,
+    this.serviceAmount,
+    this.foodBeverageAmount,
+    this.discountId,
     this.createdAt,
     this.updatedAt,
   });
@@ -91,7 +99,11 @@ class EditOrderModel {
       });
     }
     url = json['url'];
-    advancePayment = json['advance_payment'];
+    totalAmount = json['total_amount'];
+    discountAmount = json['discount_amount'];
+    serviceAmount = json['service_amount'];
+    foodBeverageAmount = json['food_beverage_amount'];
+    discountId = json['discount_id'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -135,7 +147,11 @@ class EditOrderModel {
           .toList();
     }
     data['url'] = this.url;
-    data['advance_payment'] = this.url;
+    data['total_amount'] = this.totalAmount;
+    data['discount_amount'] = this.discountAmount;
+    data['service_amount'] = this.serviceAmount;
+    data['food_beverage_amount'] = this.foodBeverageAmount;
+    data['discount_id'] = this.discountId;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;

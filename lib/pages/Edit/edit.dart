@@ -917,31 +917,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // ===========================================================================
   // COST CALCULATION METHODS
   // ===========================================================================
-  double _calculateTotalFromItems() {
-    double total = 0.0;
-    for (var item in editController.selectedMenuItems) {
-      final price = double.tryParse(item.price) ?? 0.0;
-      total += price * item.qty;
-    }
-    return total;
-  }
 
-  /// Calculate total food and beverage cost (excluding services)
-  double get foodAndBeverageCost {
-    // Apply the same simple logic as booking screen
-    if (editController.isCustomEditing.value && 
-        editController.selectedPackage.value == 'Custom Package') {
-      return _calculateTotalFromItems();
-    } else {
-      final pkg = editController.apiPackages.firstWhere(
-        (p) => p.title == editController.selectedPackage.value,
-        orElse: () => Package(),
-      );
-      final packagePrice = _parsePriceString(pkg.price);
-      final guestCount = editController.guests.value;
-      return packagePrice * guestCount;
-    }
-  }
+
 
   double _parsePriceString(String? priceStr) {
     if (priceStr == null) return 0.0;
@@ -951,21 +928,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
 
-  /// Get service cost (sum of selected services)
-  double get serviceCost {
-    double total = 0.0;
-    for (var service in editController.selectedServiceItems) {
-      final price = double.tryParse(service.price) ?? 0.0;
-      total += price * service.qty;
-    }
-    return total;
-  }
 
-  /// Get VAT (20% of food and beverage cost)
-  double get vat => 0.20 * foodAndBeverageCost;
-
-  /// Get total amount
-  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
 
   // ===========================================================================
   // CUSTOM PACKAGE SWITCHING (matching booking screen)
@@ -1542,14 +1505,14 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           children: [
             _summaryRow(
               "Food & Beverage",
-              foodAndBeverageCost.toStringAsFixed(2),
+              editController.foodAndBeverageCost.toStringAsFixed(2),
             ),
-            _summaryRow("Service Cost", serviceCost.toStringAsFixed(2)),
-            _summaryRow("VAT (20%)", vat.toStringAsFixed(2)),
+            _summaryRow("Service Cost", editController.serviceCost.toStringAsFixed(2)),
+            _summaryRow("VAT (20%)", editController.vat.toStringAsFixed(2)),
             const Divider(),
             _summaryRow(
               "Total Amount",
-              totalAmount.toStringAsFixed(2),
+              editController.totalAmount.toStringAsFixed(2),
               isBold: true,
               fontSize: 18,
             ),

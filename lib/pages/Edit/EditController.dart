@@ -352,7 +352,7 @@ class EditController extends GetxController {
     emailController.text = order.email ?? '';
     contactController.text = order.phone ?? '';
     specialRequirementsController.text = order.requirement ?? '';
-    advancePaymentController.text = order.advancePayment ?? '';
+    advancePaymentController.text ='0.0';
 
     // Event details
     selectedEventType.value = order.event?.title ?? '';
@@ -517,7 +517,45 @@ class EditController extends GetxController {
       );
     }
   }
+  /// Calculate total food and beverage cost (excluding services)
+  double get foodAndBeverageCost {
+    // Apply the same simple logic as booking screen
+    if (isCustomEditing.value &&
+        selectedPackage.value == 'Custom Package') {
+      return _calculateTotalFromItems();
+    } else {
+      final pkg = apiPackages.firstWhere(
+            (p) => p.title == selectedPackage.value,
+        orElse: () => Package(),
+      );
+      final packagePrice = _parsePriceString(pkg.price);
+      final guestCount = guests.value;
+      return packagePrice * guestCount;
+    }
+  }
+  double _calculateTotalFromItems() {
+    double total = 0.0;
+    for (var item in selectedMenuItems) {
+      final price = double.tryParse(item.price) ?? 0.0;
+      total += price * item.qty;
+    }
+    return total;
+  }
+  /// Get service cost (sum of selected services)
+  double get serviceCost {
+    double total = 0.0;
+    for (var service in selectedServiceItems) {
+      final price = double.tryParse(service.price) ?? 0.0;
+      total += price * service.qty;
+    }
+    return total;
+  }
 
+  /// Get VAT (20% of food and beverage cost)
+  double get vat => 0.20 * foodAndBeverageCost;
+
+  /// Get total amount
+  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
   /// Remove service item from selection
   void removeSelectedServiceItemById(int? serviceId) {
     selectedServiceItems.removeWhere((s) => s.serviceId == serviceId);
@@ -620,22 +658,18 @@ class EditController extends GetxController {
 
     // System fields
     order.paymentMethodId = 1;
+
+    order.totalAmount = totalAmount.toString();
+    debugPrint("TESTING TOTAL AMOUNT: ${order.totalAmount}");
+    order.discountAmount = '0';
+    order.serviceAmount = serviceCost.toString();
+    order.foodBeverageAmount = foodAndBeverageCost.toString();
     order.isInquiry = order.isInquiry ?? false;
 
-    // Debug: show the prepared order fields
-    print('=== DEBUG: _prepareOrderForUpdate ===');
-    print('firstname=' + (order.firstname ?? 'null'));
-    print('lastname=' + (order.lastname ?? 'null'));
-    print('email=' + (order.email ?? 'null'));
-    print('phone=' + (order.phone ?? 'null'));
-    print('cityId=' + (order.cityId?.toString() ?? 'null'));
-    print('address=' + (order.address ?? 'null'));
-    print('eventId=' + (order.eventId?.toString() ?? 'null'));
-    print('noOfGust=' + (order.noOfGust ?? 'null'));
-    print('requirement=' + (order.requirement ?? 'null'));
-    print('eventDate=' + (order.eventDate ?? 'null'));
-    print('startTime=' + (order.startTime ?? 'null'));
-    print('endTime=' + (order.endTime ?? 'null'));
+    print("TESTING ORDER DATA BEFORE SENDING TO API:");
+    final prettyJson = JsonEncoder.withIndent('  ').convert(order);
+
+    print(prettyJson);
 
     return order;
   }
