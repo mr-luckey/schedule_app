@@ -1484,7 +1484,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           ),
 
           // Quantity controls (visible when editing for food, always for services)
-          if (isEditing || !isFoodItem)
+          // Quantity controls - only show for food items when editing
+          if (isFoodItem && isEditing)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
@@ -1495,34 +1496,32 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove_outlined, size: 20),
-                    onPressed: isFoodItem
-                        ? () => decrementQuantity(item as SelectedMenuItem)
-                        : null,
+                    onPressed: () => decrementQuantity(item as SelectedMenuItem),
                   ),
                   Text(qty.toString(), style: const TextStyle(fontSize: 16)),
                   IconButton(
                     icon: const Icon(Icons.add, size: 20),
-                    onPressed: isFoodItem
-                        ? () => incrementQuantity(item as SelectedMenuItem)
-                        : null,
+                    onPressed: () => incrementQuantity(item as SelectedMenuItem),
                   ),
                   // Edit button to input number manually (only for food)
-                  if (isFoodItem)
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 18),
-                      onPressed: () =>
-                          _showEditQuantityDialog(item as SelectedMenuItem),
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18),
+                    onPressed: () => _showEditQuantityDialog(item as SelectedMenuItem),
+                  ),
                 ],
               ),
             )
           else if (isFoodItem)
+          // For food items when NOT editing, show simple quantity text
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text("Qty: $qty"),
-            ),
+            )
+          else
+          // For non-food items, show simple quantity text
+           SizedBox.shrink(),
 
-          // Remove button (only visible when editing)
+// Remove button (only visible when editing)
           if (isEditing)
             IconButton(
               icon: const Icon(Icons.close, color: Colors.red, size: 20),
