@@ -345,11 +345,15 @@ class ListingDetailScreen extends StatelessWidget {
             border: TableBorder(
               horizontalInside: BorderSide(color: const Color(0xFFF1F3F5)),
             ),
-            columnWidths: const {
+            columnWidths: (order.orderPackages!.first.isCustom == true)
+                ? const {
               0: FlexColumnWidth(3),
               1: FlexColumnWidth(1),
               2: FlexColumnWidth(1),
               3: FlexColumnWidth(1),
+            }
+                : const {
+              0: FlexColumnWidth(1),
             },
             children: [
               // Header Row
@@ -357,21 +361,29 @@ class ListingDetailScreen extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Color(0xFFF8FAFB),
                 ),
-                children: [
+                children: (order.orderPackages!.first.isCustom == true)
+                    ? [
                   _buildTableHeader('Item'),
                   _buildTableHeader('Quantity'),
                   _buildTableHeader('Unit Price'),
                   _buildTableHeader('Total'),
+                ]
+                    : [
+                  _buildTableHeader('Item'),
                 ],
               ),
               // Data Rows
               ...foodItems.map((item) {
                 return TableRow(
-                  children: [
+                  children: (order.orderPackages!.first.isCustom == true)
+                      ? [
                     _buildTableCell(item['title']),
                     _buildTableCell(item['qty'].toString()),
                     _buildTableCell('£${item['rate'].toStringAsFixed(2)}'),
                     _buildTableCell('£${item['amount'].toStringAsFixed(2)}'),
+                  ]
+                      : [
+                    _buildTableCell(item['title']),
                   ],
                 );
               }).toList(),
@@ -445,8 +457,7 @@ class ListingDetailScreen extends StatelessWidget {
             columnWidths: const {
               0: FlexColumnWidth(3),
               1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
-              3: FlexColumnWidth(1),
+              // 2: FlexColumnWidth(1),
             },
             children: [
               TableRow(
@@ -455,8 +466,7 @@ class ListingDetailScreen extends StatelessWidget {
                 ),
                 children: [
                   _buildTableHeader('Service'),
-                  _buildTableHeader('Quantity'),
-                  _buildTableHeader('Rate'),
+                  // _buildTableHeader('Rate'),
                   _buildTableHeader('Amount'),
                 ],
               ),
@@ -470,8 +480,8 @@ class ListingDetailScreen extends StatelessWidget {
                 return TableRow(
                   children: [
                     _buildTableCell(service.service?.title ?? ''),
-                    _buildTableCell(qty.toString()),
-                    _buildTableCell('£${rate.toStringAsFixed(2)}'),
+                    // _buildTableCell(qty.toString()),
+                    // _buildTableCell('£${rate.toStringAsFixed(2)}'),
                     _buildTableCell('£${amount.toStringAsFixed(2)}'),
                   ],
                 );
@@ -486,30 +496,34 @@ class ListingDetailScreen extends StatelessWidget {
 
 
   Widget _buildPricingSummary() {
-    double servicesTotal = 0;
-    if (order.orderServices != null) {
-      for (var service in order.orderServices!) {
-        double rate = double.tryParse(service.price.toString() ?? '0') ?? 0;
-        //TODO: Handle quantity gracefully
-        int qty = 1;
-        // int qty = int.tryParse(service.quantity ?? '1') ?? 1;
-        servicesTotal += rate * qty;
-      }
-    }
+    // double servicesTotal = 0;
+    // if (order.orderServices != null) {
+    //   for (var service in order.orderServices!) {
+    //     double rate = double.tryParse(service.price.toString() ?? '0') ?? 0;
+    //     //TODO: Handle quantity gracefully
+    //     int qty = 1;
+    //     // int qty = int.tryParse(service.quantity ?? '1') ?? 1;
+    //     servicesTotal += rate * qty;
+    //   }
+    // }
 
-    double packagesTotal = 0;
-    if (order.orderPackages != null) {
-      for (var package in order.orderPackages!) {
-        packagesTotal += double.tryParse(package.package?.price.toString() ?? '0') ?? 0;
-      }
-    }
+    // double packagesTotal = 0;
+    // if (order.orderPackages != null) {
+    //   for (var package in order.orderPackages!) {
+    //     packagesTotal += double.tryParse(package.package?.price.toString() ?? '0') ?? 0;
+    //   }
+    // }
 
-    double netAmount = servicesTotal + packagesTotal;
-    double serviceCharge = netAmount * 0.10;
-    double discount = netAmount * 0.05;
-    double subtotalAfterDiscount = netAmount + serviceCharge - discount;
-    double vat = subtotalAfterDiscount * 0.20;
-    double totalAmount = subtotalAfterDiscount + vat;
+
+    double serviceCharge = double.tryParse(order.serviceAmount!)!;
+    double foodBeverageCharges = double.tryParse(order.foodBeverageAmount!)!;
+    double netAmount = serviceCharge + foodBeverageCharges;
+    double vat = netAmount * 0.20;
+    double discount = 0.0; // Assuming no discount for now
+
+
+    double totalAmount = double.tryParse(order.totalAmount!)!;
+    double subtotalAfterDiscount =  totalAmount- discount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -541,11 +555,11 @@ class ListingDetailScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildPriceRow('Services Subtotal:', '£${servicesTotal.toStringAsFixed(2)}'),
-              _buildPriceRow('Packages Subtotal:', '£${packagesTotal.toStringAsFixed(2)}'),
+              _buildPriceRow('Services Subtotal:', '£${serviceCharge.toStringAsFixed(2)}'),
+              _buildPriceRow('Food and Beverage Subtotal:', '£${foodBeverageCharges.toStringAsFixed(2)}'),
               _buildPriceRow('Net Amount:', '£${netAmount.toStringAsFixed(2)}'),
-              _buildPriceRow('Service Charge (10%):', '£${serviceCharge.toStringAsFixed(2)}'),
-              _buildPriceRow('Early Booking Discount (5%):', '-£${discount.toStringAsFixed(2)}'),
+              // _buildPriceRow('Service Charge (10%):', '£${serviceCharge.toStringAsFixed(2)}'),
+              _buildPriceRow('Discount (0%):', '-£${discount.toStringAsFixed(2)}'),
               _buildPriceRow('Subtotal after Discount:', '£${subtotalAfterDiscount.toStringAsFixed(2)}'),
               _buildPriceRow('VAT @ 20%:', '£${vat.toStringAsFixed(2)}'),
               _buildTotalRow('TOTAL AMOUNT:', '£${totalAmount.toStringAsFixed(2)}'),
