@@ -480,12 +480,12 @@ class OrderList {
   City? city;
   Event? event;
   Event? paymentMethod;
-  Null? foodBeverageAmount;
-  Null? serviceAmount;
-  Null? discountAmount;
-  Null? discountId;
-  Null? totalAmount;
-  Null? discount;
+  String? foodBeverageAmount;
+  String? serviceAmount;
+  String? discountAmount;
+  String? discountId;
+  String? totalAmount;
+  String? discount;
   List<OrderServices>? orderServices;
   List<OrderPackages>? orderPackages;
   String? url;

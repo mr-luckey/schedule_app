@@ -415,7 +415,7 @@ class ListingScreen extends StatelessWidget {
     }
 
     return Text(
-      '£${total.toStringAsFixed(2)}',
+      '£${order.totalAmount ?? "0"}',
       style: TextStyle(
         fontWeight: FontWeight.w600,
         color: const Color(0xFF1A202C),
