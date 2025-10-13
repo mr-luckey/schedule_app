@@ -1173,6 +1173,9 @@ class BookingController extends GetxController {
             ? "No special requirements"
             : specialRequirementsController.text,
         "payment_method_id": 1,
+        "total_amount": totalAmount,
+        "service_amount": serviceCost,
+        "food_beverage_amount": foodAndBeverageCost,
         // Include order services if any
         if (orderServices.isNotEmpty)
           "order_services_attributes": orderServices,
