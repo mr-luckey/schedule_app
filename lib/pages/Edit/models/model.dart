@@ -22,6 +22,7 @@ class EditOrderModel {
   List<OrderServices>? orderServices;
   List<OrderPackages>? orderPackages;
   String? url;
+  String? advancePayment;
   String? createdAt;
   String? updatedAt;
 
@@ -49,6 +50,7 @@ class EditOrderModel {
     this.orderServices,
     this.orderPackages,
     this.url,
+    this.advancePayment,
     this.createdAt,
     this.updatedAt,
   });
@@ -89,6 +91,7 @@ class EditOrderModel {
       });
     }
     url = json['url'];
+    advancePayment = json['advance_payment'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -132,6 +135,7 @@ class EditOrderModel {
           .toList();
     }
     data['url'] = this.url;
+    data['advance_payment'] = this.url;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;

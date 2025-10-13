@@ -23,6 +23,7 @@ class EditController extends GetxController {
   final contactController = TextEditingController();
   final messageController = TextEditingController();
   final specialRequirementsController = TextEditingController();
+  final advancePaymentController = TextEditingController();
 
   // Form reactive data
   final RxString selectedCity = ''.obs;
@@ -351,6 +352,7 @@ class EditController extends GetxController {
     emailController.text = order.email ?? '';
     contactController.text = order.phone ?? '';
     specialRequirementsController.text = order.requirement ?? '';
+    advancePaymentController.text = order.advancePayment ?? '';
 
     // Event details
     selectedEventType.value = order.event?.title ?? '';
