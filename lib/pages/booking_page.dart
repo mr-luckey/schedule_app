@@ -789,7 +789,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   bool isConfirmed = false;
   bool isEditing = false;
 
-  late Map<String, List<Map<String, dynamic>>> menu;
+
   late BookingController controller;
 
   late List<Map<String, dynamic>> availableFoodLocal;
@@ -804,7 +804,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
     previousPackage = controller.selectedPackage.value;
 
-    menu = controller.menuForPackage(
+    controller.menu = controller.menuForPackage(
       previousPackage,
       controller.guests.value > 0 ? controller.guests.value : 1,
     );
@@ -821,7 +821,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         setState(() {
           isEditing = false;
           controller.toggleEditMode(false);
-          menu = controller.menuForPackage(
+          controller.menu = controller.menuForPackage(
             newPkg,
             controller.guests.value > 0 ? controller.guests.value : 1,
           );
@@ -837,15 +837,15 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         if (!mounted) return;
         setState(() {
           // Only update quantities for food items, preserve services
-          final currentFoodItems = menu['Food Items']!;
-          final currentServices = menu['Services']!;
+          final currentFoodItems = controller.menu['Food Items']!;
+          final currentServices = controller.menu['Services']!;
 
           // Update food quantities to match new guest count
           for (var foodItem in currentFoodItems) {
             foodItem['qty'] = guestsCount;
           }
 
-          menu = {
+          controller.menu = {
             'Food Items': currentFoodItems,
             'Services': currentServices, // Keep existing services
           };
@@ -916,8 +916,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     availableFoodLocal = List.from(controller.masterAvailableFood);
     availableServicesLocal = List.from(controller.masterAvailableServices);
 
-    final foodNames = menu['Food Items']!.map((d) => d['name']).toSet();
-    final serviceNames = menu['Services']!.map((d) => d['name']).toSet();
+    final foodNames = controller.menu['Food Items']!.map((d) => d['name']).toSet();
+    final serviceNames = controller.menu['Services']!.map((d) => d['name']).toSet();
 
     availableFoodLocal.removeWhere((f) => foodNames.contains(f['name']));
     availableServicesLocal.removeWhere((s) => serviceNames.contains(s['name']));
@@ -939,21 +939,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     return grouped;
   }
 
-  double get foodAndBeverageCost {
-    // Check if package is custom (either currently editing or was edited and saved as custom)
-    if (controller.selectedPackage.value == 'Custom Package' ||
-        (controller.isPackageEditing.value && controller.selectedPackage.value == 'Custom Package')) {
-      return _calculateTotalFromItems();
-    } else {
-      final pkg = controller.packages.firstWhere(
-        (p) => p['title'] == controller.selectedPackage.value,
-        orElse: () => {},
-      );
-      final packagePrice = _parsePriceString(pkg['price']?.toString());
-      final guestCount = controller.guests.value;
-      return packagePrice * guestCount;
-    }
-  }
+
 
   double _parsePriceString(String? priceStr) {
     if (priceStr == null) return 0.0;
@@ -962,34 +948,18 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     return double.tryParse(cleaned) ?? 0.0;
   }
 
-  double _calculateTotalFromItems() {
-    double total = 0.0;
-    for (var dish in menu['Food Items']!) {
-      total += (dish['price'] as num).toDouble() * (dish['qty'] as int);
-    }
-    return total;
-  }
 
-  double get serviceCost {
-    double total = 0.0;
-    for (var service in menu['Services']!) {
-      total += (service['price'] as num).toDouble() * (service['qty'] as int);
-    }
-    return total;
-  }
 
-  double get vat => 0.20 * foodAndBeverageCost;
-  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
 
   void removeDish(String category, Map<String, dynamic> dish) {
     setState(() {
-      final dishIndex = menu[category]!.indexWhere(
+      final dishIndex = controller.menu[category]!.indexWhere(
         (item) =>
             item["name"] == dish["name"] && item["price"] == dish["price"],
       );
 
       if (dishIndex != -1) {
-        final removedDish = menu[category]!.removeAt(dishIndex);
+        final removedDish = controller.menu[category]!.removeAt(dishIndex);
 
         if (category == "Food Items") {
           availableFoodLocal.add({
@@ -1096,7 +1066,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                         onPressed: () {
                                           category=="Services"?null:_autoSwitchToCustomPackage();
                                           setState(() {
-                                            menu[category]!.add({
+                                            controller.menu[category]!.add({
                                               "name": item["name"],
                                               "price": item["price"],
                                               "qty": category == "Food Items"
@@ -1207,13 +1177,13 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void _autoSwitchToCustomPackage() {
     // Get current menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(menu['Food Items']!),
-      'Services': List<Map<String, dynamic>>.from(menu['Services']!),
+      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
 
     controller.switchToCustomPackageAndUpdate(currentMenu);
     setState(() {
-      menu = controller.menuForPackage(
+      controller.menu = controller.menuForPackage(
         'Custom Package',
         controller.guests.value > 0 ? controller.guests.value : 1,
       );
@@ -1226,8 +1196,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void _updateControllerMenu() {
     // Update the controller's custom package menu with current local menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(menu['Food Items']!),
-      'Services': List<Map<String, dynamic>>.from(menu['Services']!),
+      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
     
     controller.updateCustomPackageItems('Custom Package', currentMenu);
@@ -1400,11 +1370,11 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            summaryRow("Food & Beverage", foodAndBeverageCost),
-            summaryRow("Service Cost", serviceCost),
-            summaryRow("VAT (20%)", vat),
+            summaryRow("Food & Beverage", controller.foodAndBeverageCost),
+            summaryRow("Service Cost", controller.serviceCost),
+            summaryRow("VAT (20%)", controller.vat),
             const Divider(),
-            summaryRow("Total Amount", totalAmount, isBold: true, fontSize: 18),
+            summaryRow("Total Amount", controller.totalAmount, isBold: true, fontSize: 18),
           ],
         ),
       ),
@@ -1444,8 +1414,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void commitEditsToController() {
     // Ensure we have the latest menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(menu['Food Items']!),
-      'Services': List<Map<String, dynamic>>.from(menu['Services']!),
+      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
 
     controller.updateCustomPackageItems(
@@ -1530,7 +1500,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
 
             const Divider(),
-            ...menu["Food Items"]!.map(
+            ...controller.menu["Food Items"]!.map(
               (dish) => buildmenuRow("Food Items", dish),
             ),
 
@@ -1555,7 +1525,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               ],
             ),
             const Divider(),
-            ...menu["Services"]!.map(
+            ...controller.menu["Services"]!.map(
               (service) => buildServiceRow("Services", service),
             ),
 

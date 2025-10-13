@@ -731,7 +731,7 @@ class BookingController extends GetxController {
       return;
     }
 
-    confirmPressCount.value++;
+    // confirmPressCount.value++;
       Get.dialog(
         PaymentPopup(
           eventName: selectedEventType.value,
@@ -741,15 +741,54 @@ class BookingController extends GetxController {
           endTime: endTime.value!,
           guests: guests.value,
           package: selectedPackage.value,
-          totalAmount: calculateTotal(),
+          totalAmount: totalAmount,
           customerName: nameController.text,
           customerEmail: emailController.text,
+          //TODO show invoice/receipt
+          // receiptHTML: generateReceiptHTML(),
           onConfirm: completeBooking,
           onCancel: cancelBookingPopup,
         ),
       );
 
   }
+  late Map<String, List<Map<String, dynamic>>> menu;
+
+  double get foodAndBeverageCost {
+    // Check if package is custom (either currently editing or was edited and saved as custom)
+    if (selectedPackage.value == 'Custom Package' ||
+        (isPackageEditing.value && selectedPackage.value == 'Custom Package')) {
+      return _calculateTotalFromItems();
+    } else {
+      final pkg = packages.firstWhere(
+            (p) => p['title'] == selectedPackage.value,
+        orElse: () => {},
+      );
+      final packagePrice = _parsePriceString(pkg['price']?.toString());
+      final guestCount = guests.value;
+      return packagePrice * guestCount;
+    }
+  }
+  double _calculateTotalFromItems() {
+    double total = 0.0;
+    for (var dish in menu['Food Items']!) {
+      total += (dish['price'] as num).toDouble() * (dish['qty'] as int);
+    }
+    return total;
+  }
+
+
+
+  double get serviceCost {
+    double total = 0.0;
+    for (var service in menu['Services']!) {
+      total += (service['price'] as num).toDouble() * (service['qty'] as int);
+    }
+    return total;
+  }
+
+  double get vat => 0.20 * foodAndBeverageCost;
+  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
 
   Future<void> completeBooking() async {
     try {
@@ -929,6 +968,10 @@ class BookingController extends GetxController {
             ? "No special requirements"
             : specialRequirementsController.text,
         "payment_method_id": 1,
+        "total_amount": totalAmount,
+        "service_amount": serviceCost,
+        "food_beverage_amount": foodAndBeverageCost,
+
         "is_inquiry": false,
         // Include order services if any
         if (orderServices.isNotEmpty)

@@ -11,7 +11,7 @@ import 'package:schedule_app/pages/List/order_model%20(1).dart';
 
 
 class ListingScreen extends StatelessWidget {
-  const ListingScreen({Key? key}) : super(key: key);
+  const ListingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +106,7 @@ class ListingScreen extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 20,
             crossAxisSpacing: 20,
-            childAspectRatio: 2.8,
+            childAspectRatio: 2.5,
             children: [
               _buildStatCard(
                 controller.orders.length.toString(),
