@@ -17,11 +17,14 @@ class ApiService {
 
   static String? _bearerToken;
   static SharedPreferences? _prefs;
+  static bool _isInitialized = false;
 
   // ---------------------------
   // Initialize SharedPreferences
   // ---------------------------
   static Future<void> init() async {
+    if (_isInitialized) return;
+    WidgetsFlutterBinding.ensureInitialized();
     _prefs = await SharedPreferences.getInstance();
     _bearerToken = _prefs?.getString('token');
   }
