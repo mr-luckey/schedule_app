@@ -1043,17 +1043,21 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
+import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/controllers/calender_controller.dart';
 import 'package:schedule_app/pages/Calender_Main/Week_Calender.dart';
 import 'package:schedule_app/pages/List/listing_screen.dart';
 // import 'package:schedule_app/pages/List/ListScreen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../APIS/shared_prefs_service.dart';
+import '../model/user_model.dart';
 import '../theme/app_colors.dart';
 import '../widgets/calendar_grid.dart';
 import '../pages/booking_page.dart';
 import '../widgets/filter_button.dart';
 import '../widgets/nav_item.dart';
+import 'Auth/Login_Signup.dart';
 
 // Define the different sections of the app
 enum AppSection { bookings, orders, users, settings }
@@ -1075,11 +1079,13 @@ class _SchedulePageState extends State<SchedulePage> {
   AppSection _currentSection = AppSection.bookings;
 
   CalendarsController calendarsController = Get.put(CalendarsController());
-
+  UserModel? currentUser;
   @override
   void initState() {
     super.initState();
     calendarsController.loadEventsFromApi();
+
+
   }
 
   void _goToToday() {
@@ -1455,6 +1461,96 @@ class _SidebarState extends State<Sidebar> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String _selectedFilter = 'Confirmed';
+  UserModel? currentUser;
+
+
+  @override
+  void initState() {
+    super.initState();//
+    getUserData();
+  }
+
+  getUserData()async{
+    currentUser = await SharedPrefsService.getUserData();
+    if (currentUser != null) {
+      print('Welcome ${currentUser!.name}');
+      print('Your email: ${currentUser!.email}');
+      print('Your token: ${currentUser!.token}');
+    }
+  }
+  String _getInitials(String name) {
+    if (name.isEmpty) return 'U'; // Default for empty name
+
+    List<String> names = name.trim().split(' ');
+
+    if (names.length == 1) {
+      // Single name - return first 2 characters
+      return names[0].length >= 2
+          ? names[0].substring(0, 2).toUpperCase()
+          : names[0].toUpperCase();
+    } else {
+      // Multiple names - return first character of first two names
+      String firstInitial = names[0].isNotEmpty ? names[0][0] : '';
+      String secondInitial = names[1].isNotEmpty ? names[1][0] : '';
+      return '${firstInitial.toUpperCase()}${secondInitial.toUpperCase()}';
+    }
+  }
+  void _showLogoutPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                _performLogout();
+              },
+              child: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _performLogout() async {
+    try {
+      // Clear user data from SharedPreferences
+      await SharedPrefsService.clearUserData();
+      await ApiService.clearToken();
+
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Logged out successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate to login screen
+      Get.offAll(()=>AuthScreen());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logout failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1624,57 +1720,60 @@ class _SidebarState extends State<Sidebar> {
           ),
 
           // User profile section
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Colors.pink,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'EA',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+          GestureDetector(
+            onTap: _showLogoutPopup,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Colors.pink,
+                      shape: BoxShape.circle,
+                    ),
+                    child:  Center(
+                      child: Text(
+                          _getInitials(currentUser != null ? currentUser!.name : 'User Name'),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Easin Arafat',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                  const SizedBox(width: 12),
+                   Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentUser != null ? currentUser!.name : 'User Name',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Free Account',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                        // Text(
+                        //   'Free Account',
+                        //   style: TextStyle(
+                        //     fontSize: 12,
+                        //     color: AppColors.textSecondary,
+                        //   ),
+                        // ),
+                      ],
+                    ),
                   ),
-                ),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: AppColors.textSecondary,
-                  size: 20,
-                ),
-              ],
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -40,13 +40,13 @@ class _EditPageState extends State<EditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Get.snackbar('Info', 'Custom package feature to be implemented');
-        },
-        label: const Text('Custom Package'),
-        icon: const Icon(Icons.edit),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () {
+      //     Get.snackbar('Info', 'Custom package feature to be implemented');
+      //   },
+      //   label: const Text('Custom Package'),
+      //   icon: const Icon(Icons.edit),
+      // ),
       body: Obx(() {
         if (editController.isLoading.value) {
           return Center(

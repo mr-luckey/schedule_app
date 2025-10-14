@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:schedule_app/APIS/shared_prefs_service.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
@@ -7,6 +8,8 @@ import 'package:schedule_app/pages/Edit/models/model.dart' hide Event;
 import 'package:schedule_app/pages/List/order_model%20(1).dart' hide Event;
 // import 'package:schedule_app/pages/List/ListModel.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../model/user_model.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -81,10 +84,28 @@ class ApiService {
       final token = _extractToken(data);
       if (token != null && token.isNotEmpty) {
         await setToken(token); // Use the new setToken method
+
+        // Extract and save complete user data
+        try {
+          final user = UserModel.fromJson(data);
+          await SharedPrefsService.saveUserData(user);
+
+          print('✅ User data saved successfully!');
+          print('👤 User: ${user.name} (ID: ${user.id})');
+          print('📧 Email: ${user.email}');
+          print('🔑 Token: ${user.token}');
+        } catch (e) {
+          print('❌ Error saving user data: $e');
+        }
       }
     }
 
     return result;
+  }
+
+// Helper method to extract token (if you don't already have this)
+  static String? _extractToken(Map<String, dynamic> data) {
+    return data['token']?.toString();
   }
 
   // ---------------------------
@@ -235,40 +256,40 @@ class ApiService {
   // ---------------------------
   // Token helpers (kept for compatibility)
   // ---------------------------
-  static String? _extractToken(dynamic data) {
-    if (data == null) return null;
-
-    String? tryFromMap(Map map) {
-      if (map.containsKey('token') && map['token'] is String) {
-        return map['token'] as String;
-      }
-      if (map.containsKey('access_token') && map['access_token'] is String) {
-        return map['access_token'] as String;
-      }
-      if (map.containsKey('auth_token') && map['auth_token'] is String) {
-        return map['auth_token'] as String;
-      }
-      if (map.containsKey('data') && map['data'] is Map) {
-        final inner = tryFromMap(map['data'] as Map);
-        if (inner != null) return inner;
-      }
-      if (map.containsKey('session') && map['session'] is Map) {
-        final inner = tryFromMap(map['session'] as Map);
-        if (inner != null) return inner;
-      }
-      if (map.containsKey('user') && map['user'] is Map) {
-        final inner = tryFromMap(map['user'] as Map);
-        if (inner != null) return inner;
-      }
-      return null;
-    }
-
-    if (data is Map) {
-      return tryFromMap(data);
-    }
-
-    return null;
-  }
+  // static String? _extractToken(dynamic data) {
+  //   if (data == null) return null;
+  //
+  //   String? tryFromMap(Map map) {
+  //     if (map.containsKey('token') && map['token'] is String) {
+  //       return map['token'] as String;
+  //     }
+  //     if (map.containsKey('access_token') && map['access_token'] is String) {
+  //       return map['access_token'] as String;
+  //     }
+  //     if (map.containsKey('auth_token') && map['auth_token'] is String) {
+  //       return map['auth_token'] as String;
+  //     }
+  //     if (map.containsKey('data') && map['data'] is Map) {
+  //       final inner = tryFromMap(map['data'] as Map);
+  //       if (inner != null) return inner;
+  //     }
+  //     if (map.containsKey('session') && map['session'] is Map) {
+  //       final inner = tryFromMap(map['session'] as Map);
+  //       if (inner != null) return inner;
+  //     }
+  //     if (map.containsKey('user') && map['user'] is Map) {
+  //       final inner = tryFromMap(map['user'] as Map);
+  //       if (inner != null) return inner;
+  //     }
+  //     return null;
+  //   }
+  //
+  //   if (data is Map) {
+  //     return tryFromMap(data);
+  //   }
+  //
+  //   return null;
+  // }
 
   // ---------------------------
   // Get Orders API

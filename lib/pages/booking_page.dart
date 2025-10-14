@@ -21,13 +21,13 @@ class BookingPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       // Floating button for creating/opening the Custom Package
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          controller.createOrOpenCustomPackage();
-        },
-        label: const Text('Custom Package'),
-        icon: const Icon(Icons.edit),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () {
+      //     controller.createOrOpenCustomPackage();
+      //   },
+      //   label: const Text('Custom Package'),
+      //   icon: const Icon(Icons.edit),
+      // ),
       body: ResponsiveBreakpoints.builder(
         child: _buildLayout(context),
         breakpoints: const [

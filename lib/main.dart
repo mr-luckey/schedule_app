@@ -8,18 +8,12 @@ import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Auth/Login_Signup.dart';
 // import 'package:schedule_app/pages/Edit/editApi.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   await ApiService.init();
   // await EditApiService.init();
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (kIsWeb) {
-    WebViewPlatform.instance = WebWebViewPlatform();
-  }
 
   runApp(const BookingScheduleApp());
 }

@@ -18,8 +18,6 @@ dependencies:
   get_storage: ^2.1.1
   http: ^1.5.0
   syncfusion_flutter_calendar: ^31.1.20
-  webview_flutter: ^4.13.0
-  webview_flutter_web: ^0.2.2
   permission_handler: ^12.0.1
   shared_preferences: ^2.5.3
 
