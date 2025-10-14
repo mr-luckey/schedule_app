@@ -1051,6 +1051,10 @@ class BookingController extends GetxController {
         "total_amount": totalAmount,
         "service_amount": serviceCost,
         "food_beverage_amount": foodAndBeverageCost,
+        "discount_amount": discountAmount.value,
+        "discount_id": selectedDiscount.value != null
+            ? selectedDiscount.value!.id.toString()
+            : "0",
 
         "is_inquiry": false,
         // Include order services if any

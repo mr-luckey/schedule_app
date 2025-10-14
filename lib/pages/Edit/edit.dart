@@ -1510,12 +1510,11 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             _summaryRow("Service Cost", editController.serviceCost.toStringAsFixed(2)),
             _summaryRow("VAT (20%)", editController.vat.toStringAsFixed(2)),
             const Divider(),
-            _summaryRow(
-              "Total Amount",
-              editController.totalAmount.toStringAsFixed(2),
-              isBold: true,
-              fontSize: 18,
-            ),
+            // _summaryRow("Total Amount", editController.totalAmount.toStringAsFixed(2), isBold: true, fontSize: 18,),
+            Obx(()=>_summaryRow("Total Amount", (editController.foodAndBeverageCost + editController.serviceCost+editController.vat).toStringAsFixed(2), isBold: true, fontSize: 18),),
+            Obx(()=>Visibility(
+                visible: editController.isDiscountApplied.value,
+                child: Obx(()=>_summaryRow("Grand Total Amount", editController.totalAmount.toStringAsFixed(2), isBold: true, fontSize: 18),))) ,
           ],
         ),
       ),
@@ -1767,50 +1766,52 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             );
 
                             try {
-                              final success = await editController
-                                  .completeEdit();
-                              Get.offAll(() => SchedulePage());
+                              // final success = await editController
+                              //     .completeEdit();
+                                editController
+                                  .showEditConfirmation();
+                              // Get.offAll(() => SchedulePage());
 
                               // Hide loading
-                              if (mounted) {
-                                Navigator.of(context).pop();
-                              }
-
-                              if (success) {
-                                // Show success dialog then navigate to main screen
-                                if (mounted) {
-                                  await showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Success'),
-                                      content: const Text(
-                                        'Event updated successfully!',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (!mounted) return;
-                                }
-                              } else {
-                                // Show error
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Failed to update event: ${editController.errorMessage.value}',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
+                              // if (mounted) {
+                              //   Navigator.of(context).pop();
+                              // }
+                              //
+                              // if (success) {
+                              //   // Show success dialog then navigate to main screen
+                              //   if (mounted) {
+                              //     await showDialog(
+                              //       context: context,
+                              //       builder: (context) => AlertDialog(
+                              //         title: const Text('Success'),
+                              //         content: const Text(
+                              //           'Event updated successfully!',
+                              //         ),
+                              //         actions: [
+                              //           TextButton(
+                              //             onPressed: () {
+                              //               Navigator.of(context).pop();
+                              //             },
+                              //             child: const Text('OK'),
+                              //           ),
+                              //         ],
+                              //       ),
+                              //     );
+                              //     if (!mounted) return;
+                              //   }
+                              // } else {
+                              //   // Show error
+                              //   if (mounted) {
+                              //     ScaffoldMessenger.of(context).showSnackBar(
+                              //       SnackBar(
+                              //         content: Text(
+                              //           'Failed to update event: ${editController.errorMessage.value}',
+                              //         ),
+                              //         backgroundColor: Colors.red,
+                              //       ),
+                              //     );
+                              //   }
+                              // }
                             } catch (e) {
                               // Hide loading
                               if (mounted) {

@@ -2,10 +2,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/models/EditModel.dart';
 import 'package:schedule_app/pages/Edit/models/MenuItem.dart' hide MenuItem;
 import 'package:schedule_app/pages/Edit/models/model.dart';
+import 'package:schedule_app/widgets/edit_payment_popup.dart';
+
+import '../../model/discount_model.dart';
+import '../../widgets/Payment_Popup.dart';
+import '../schedule_page.dart';
 
 class EditController extends GetxController {
   // ===========================================================================
@@ -36,6 +42,11 @@ class EditController extends GetxController {
   final RxString selectedEventId = ''.obs;
   final RxString selectedPackage = ''.obs;
   final RxString selectedPackageId = ''.obs;
+  RxBool isDiscountApplied = false.obs;
+
+  var discounts = <Discount>[].obs;
+  var selectedDiscount = Rx<Discount?>(null);
+  RxDouble discountAmount = 0.0.obs;
 
   // Current order data from API
   final RxList<OrderServices> currentOrderServices = <OrderServices>[].obs;
@@ -78,6 +89,7 @@ class EditController extends GetxController {
   void onInit() {
     super.onInit();
     loadApiData();
+    getDiscounts();
   }
 
   @override
@@ -196,7 +208,51 @@ class EditController extends GetxController {
     }
   }
 
-  /// Load service items from API
+  Future<void> getDiscounts() async {
+    try {
+      print("Getting discounts");
+      isLoading.value = true;
+
+      // Get headers with authentication token
+      final Map<String, String> headers = await ApiService.getHeaders();
+
+      final response = await http.get(
+        Uri.parse(ApiService.getDiscounts),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        final List<Discount> fetchedDiscounts = jsonData
+            .map((discountJson) => Discount.fromJson(discountJson))
+            .toList();
+
+        discounts.value = [
+          Discount(id: 0, title: "No Discount", val: "0.00", isPercent: false),
+          ...fetchedDiscounts,
+        ];
+
+        // Set first discount as selected by default
+        if (discounts.isNotEmpty) {
+          selectedDiscount.value = discounts.first;
+        }
+
+        print("Successfully fetched ${discounts.length} discounts");
+      } else {
+        print("Error fetching discounts: Status code ${response.statusCode}");
+        print("Response body: ${response.body}");
+        discounts.value = [];
+      }
+    } catch (e) {
+      print("Error fetching discounts: $e");
+      discounts.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  void setSelectedDiscount(Discount? discount) {
+    selectedDiscount.value = discount;
+  }
 
   ///
   // Future<List<MenuItem>> _loadServiceItems() async {
@@ -387,6 +443,13 @@ class EditController extends GetxController {
     // This ensures custom packages are properly detected
     selectedPackage.value = '';
     selectedPackageId.value = '';
+    selectedDiscount.value = discounts.firstWhere((state) => state.id.toString() == order.discountId.toString());
+    if(selectedDiscount.value!.id != 0){
+      isDiscountApplied.value = true;
+    } else {
+      isDiscountApplied.value = false;
+    }
+    discountAmount.value = double.parse(order.discountAmount!);
   }
 
   /// Parse time string to TimeOfDay
@@ -555,18 +618,61 @@ class EditController extends GetxController {
   double get vat => 0.20 * foodAndBeverageCost;
 
   /// Get total amount
-  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
+  double get totalAmount => (foodAndBeverageCost + serviceCost + vat) - discountAmount.value;
   /// Remove service item from selection
   void removeSelectedServiceItemById(int? serviceId) {
     selectedServiceItems.removeWhere((s) => s.serviceId == serviceId);
   }
+  void calculateDiscount(Discount discount) {
+    if (discount.isPercent == true) {
+      discountAmount.value = (double.parse(discount.val!) / 100) * (foodAndBeverageCost + serviceCost + vat);
 
+      // Apply discount logic here
+    } else if (discount.isPercent == false) {
+      discountAmount.value = (double.parse(discount.val!));
+      // Apply discount logic here
+    }
+
+  }
   /// Clear all selected service items
   void clearSelectedServiceItems() => selectedServiceItems.clear();
 
   // ===========================================================================
   // SECTION 7: ORDER UPDATE AND API COMMUNICATION
   // ===========================================================================
+
+  void showEditConfirmation(){
+
+    Get.dialog(
+      EditPaymentPopup(
+        eventName: selectedEventType.value,
+        venue: selectedCity.value,
+        date: selectedDate.value!,
+        startTime: startTime.value!,
+        endTime: endTime.value!,
+        guests: guests.value,
+        package: selectedPackage.value,
+        totalAmount: totalAmount,
+        customerName: nameController.text,
+        customerEmail: emailController.text,
+        onConfirm: ()async{
+          bool success = await completeEdit();
+          if (success) {
+            Get.offAll(() => SchedulePage());
+          }else{
+            Get.snackbar(
+                'Error',
+                errorMessage.value,
+                backgroundColor: Colors.red,
+                colorText: Colors.white
+            );
+          }
+        },
+
+        onCancel:Get.back,
+      ),
+    );
+  }
 
   /// Complete the edit process and update order via API
   Future<bool> completeEdit() async {
@@ -661,7 +767,8 @@ class EditController extends GetxController {
 
     order.totalAmount = totalAmount.toString();
     debugPrint("TESTING TOTAL AMOUNT: ${order.totalAmount}");
-    order.discountAmount = '0';
+    order.discountAmount = discountAmount.value.toString();
+    order.discountId = selectedDiscount.value!.id;
     order.serviceAmount = serviceCost.toString();
     order.foodBeverageAmount = foodAndBeverageCost.toString();
     order.isInquiry = order.isInquiry ?? false;
