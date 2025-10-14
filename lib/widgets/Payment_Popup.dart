@@ -316,6 +316,11 @@ class _PaymentPopupState extends State<PaymentPopup> {
                         }).toList(),
                         onChanged: (Discount? newValue) {
                           bookingController.setSelectedDiscount(newValue);
+                          if(newValue!.title == "No Discount") {
+                            bookingController.isDiscountApplied.value = false;
+                          }else{
+                            bookingController.isDiscountApplied.value = true;
+                          }
                           if (newValue != null) {
                             bookingController.calculateDiscount(newValue);
                           }

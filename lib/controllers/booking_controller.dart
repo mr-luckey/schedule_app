@@ -21,6 +21,7 @@ class BookingController extends GetxController {
   final messageController = TextEditingController();
   final specialRequirementsController = TextEditingController();
   final advancePaymentController = TextEditingController();
+  RxBool isDiscountApplied = false.obs;
 
   // Form data
   final RxString selectedCity = ''.obs;

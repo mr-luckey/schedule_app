@@ -1373,7 +1373,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             summaryRow("Service Cost", controller.serviceCost),
             summaryRow("VAT (20%)", controller.vat),
             const Divider(),
-           Obx(()=>summaryRow("Total Amount", controller.totalAmount, isBold: true, fontSize: 18),)
+           Obx(()=>summaryRow("Total Amount", controller.foodAndBeverageCost + controller.serviceCost+controller.vat, isBold: true, fontSize: 18),),
+          Obx(()=>Visibility(
+              visible: controller.isDiscountApplied.value,
+              child: Obx(()=>summaryRow("Grand Total Amount", controller.totalAmount, isBold: true, fontSize: 18),))) ,
           ],
         ),
       ),
