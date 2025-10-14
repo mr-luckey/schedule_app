@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
+
+import '../model/discount_model.dart';
 
 class BookingController extends GetxController {
   // Form controllers
@@ -33,6 +36,8 @@ class BookingController extends GetxController {
   final RxString selectedPackage = ''.obs;
   final RxString selectedPackageId = ''.obs;
 
+  RxDouble discountAmount = 0.0.obs;
+
   // Form validation
   final RxBool isFormValid = false.obs;
   final RxInt confirmPressCount = 0.obs;
@@ -49,11 +54,14 @@ class BookingController extends GetxController {
   final RxList<Map<String, dynamic>> apiPackages = <Map<String, dynamic>>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  var discounts = <Discount>[].obs;
+  var selectedDiscount = Rx<Discount?>(null);
 
   @override
   void onInit() {
     super.onInit();
     loadApiData();
+
 
     // Listen to form changes for validation
     ever(selectedCity, (_) => _validateForm());
@@ -77,12 +85,70 @@ class BookingController extends GetxController {
     specialRequirementsController.dispose();
     super.onClose();
   }
+  Future<void> getDiscounts() async {
+    try {
+      print("Getting discounts");
+      isLoading.value = true;
 
+      // Get headers with authentication token
+      final Map<String, String> headers = await ApiService.getHeaders();
+
+      final response = await http.get(
+        Uri.parse(ApiService.getDiscounts),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        final List<Discount> fetchedDiscounts = jsonData
+            .map((discountJson) => Discount.fromJson(discountJson))
+            .toList();
+
+        discounts.value = [
+          Discount(id: 0, title: "No Discount", val: "0.00", isPercent: false),
+          ...fetchedDiscounts,
+        ];
+
+        // Set first discount as selected by default
+        if (discounts.isNotEmpty) {
+          selectedDiscount.value = discounts.first;
+        }
+
+        print("Successfully fetched ${discounts.length} discounts");
+      } else {
+        print("Error fetching discounts: Status code ${response.statusCode}");
+        print("Response body: ${response.body}");
+        discounts.value = [];
+      }
+    } catch (e) {
+      print("Error fetching discounts: $e");
+      discounts.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void setSelectedDiscount(Discount? discount) {
+    selectedDiscount.value = discount;
+  }
+
+  // Helper method to get discount value for calculations
+  double getDiscountValue() {
+    if (selectedDiscount.value == null) return 0.0;
+
+    final discount = selectedDiscount.value!;
+    if (discount.isPercent == true) {
+      return double.tryParse(discount.val ?? '0') ?? 0.0;
+    } else {
+      // For fixed amount discounts
+      return double.tryParse(discount.val ?? '0') ?? 0.0;
+    }
+  }
   // Load data from APIs
   Future<void> loadApiData() async {
     isLoading.value = true;
     errorMessage.value = '';
-
+    getDiscounts();
     try {
       // Load menus
       final menusResult = await ApiService.getMenus();
@@ -790,8 +856,19 @@ class BookingController extends GetxController {
   }
 
   double get vat => 0.20 * foodAndBeverageCost;
-  double get totalAmount => foodAndBeverageCost + serviceCost + vat;
+  double get totalAmount => (foodAndBeverageCost + serviceCost + vat) - discountAmount.value;
 
+  void calculateDiscount(Discount discount) {
+    if (discount.isPercent == true) {
+       discountAmount.value = (double.parse(discount.val!) / 100) * (foodAndBeverageCost + serviceCost + vat);
+
+      // Apply discount logic here
+    } else if (discount.isPercent == false) {
+       discountAmount.value = (double.parse(discount.val!));
+      // Apply discount logic here
+    }
+
+  }
   Future<void> completeBooking() async {
     try {
       if (!isFormValid.value) {

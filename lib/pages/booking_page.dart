@@ -478,45 +478,7 @@ class BookingForm extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(width: 20,),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Advance Payment (£)',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: 150, // Add this line
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12, // Increased padding for better appearance
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: TextFormField(
-                          controller: controller.advancePaymentController,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            hintText: '0.00',
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
 
@@ -1411,7 +1373,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             summaryRow("Service Cost", controller.serviceCost),
             summaryRow("VAT (20%)", controller.vat),
             const Divider(),
-            summaryRow("Total Amount", controller.totalAmount, isBold: true, fontSize: 18),
+           Obx(()=>summaryRow("Total Amount", controller.totalAmount, isBold: true, fontSize: 18),)
           ],
         ),
       ),

@@ -28,6 +28,7 @@ class ApiService {
   // ---------------------------
   static String? get bearerToken => _bearerToken;
 
+
   static bool get isLoggedIn =>
       _bearerToken != null && _bearerToken!.isNotEmpty;
 
@@ -35,6 +36,7 @@ class ApiService {
     _bearerToken = token;
     await _prefs?.setString('token', token);
   }
+
 
   static Future<void> clearToken() async {
     _bearerToken = null;
@@ -619,6 +621,11 @@ class ApiService {
       http.get(uri, headers: await getHeaders(token: token)),
     );
   }
+  // ---------------------------
+  // Get Discounts
+  // ---------------------------
+  static String getDiscounts=  '$baseUrl/discounts';
+
 
   // ---------------------------
   // Get Services (menus filtered by service)
@@ -703,5 +710,5 @@ static Future<List<OrderList>> fetchOrders() async {
     throw Exception('Error fetching orders: $e');
   }
 }
-  
+
 }
