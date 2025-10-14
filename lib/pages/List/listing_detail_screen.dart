@@ -494,7 +494,6 @@ class ListingDetailScreen extends StatelessWidget {
   }
 
 
-
   Widget _buildPricingSummary() {
     // double servicesTotal = 0;
     // if (order.orderServices != null) {
@@ -558,7 +557,6 @@ class ListingDetailScreen extends StatelessWidget {
               _buildPriceRow('Services Subtotal:', '£${serviceCharge.toStringAsFixed(2)}'),
               _buildPriceRow('Food and Beverage Subtotal:', '£${foodBeverageCharges.toStringAsFixed(2)}'),
               _buildPriceRow('Net Amount:', '£${netAmount.toStringAsFixed(2)}'),
-              // _buildPriceRow('Service Charge (10%):', '£${serviceCharge.toStringAsFixed(2)}'),
               _buildPriceRow('Discount (0%):', '-£${discount.toStringAsFixed(2)}'),
               _buildPriceRow('Subtotal after Discount:', '£${subtotalAfterDiscount.toStringAsFixed(2)}'),
               _buildPriceRow('VAT @ 20%:', '£${vat.toStringAsFixed(2)}'),
@@ -653,6 +651,119 @@ class ListingDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
+          Container(
+
+            margin: EdgeInsets.only(bottom: 20),
+            padding: EdgeInsets.all(10),
+
+            decoration: BoxDecoration(
+              color: Colors.white,
+              // gradient: LinearGradient(
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              //   colors: [
+              //     const Color(0xFFD1FAE5),
+              //     const Color(0xFFA7F3D0),
+              //   ],
+              // ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF10B981), width: 2),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Payment Type',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF065F46),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(
+                          'Amount Received', // Replace with actual initial amount
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF065F46),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(
+                          'Received Date', // Replace with actual initial amount
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF065F46),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Initial Amount (£)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF065F46),
+                            fontSize: 14.4,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(
+                          '5000.00', // Replace with actual initial amount
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF065F46),
+                            fontSize: 14.4,
+                          ),
+                        ),
+                      ),const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(
+                          '10-10-2025', // Replace with actual initial amount
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF065F46),
+                            fontSize: 14.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+          SizedBox(height: 10,),
           Row(
             children: [
               Expanded(
