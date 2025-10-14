@@ -108,44 +108,44 @@ class _PaymentPopupState extends State<PaymentPopup> {
             color: Colors.white,
             child: _isProcessing
                 ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          "Processing your payment...",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
                     ),
-                  )
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Processing your payment...",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            )
                 : isMobile
                 ? SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _eventDetails(context),
-                        const SizedBox(height: 20),
-                        _paymentSection(context),
-                      ],
-                    ),
-                  )
+              child: Column(
+                children: [
+                  _eventDetails(context),
+                  const SizedBox(height: 20),
+                  _paymentSection(context),
+                ],
+              ),
+            )
                 : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 2, child: _eventDetails(context)),
-                      const SizedBox(width: 20),
-                      Expanded(flex: 3, child: _paymentSection(context)),
-                    ],
-                  ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 2, child: _eventDetails(context)),
+                const SizedBox(width: 20),
+                Expanded(flex: 3, child: _paymentSection(context)),
+              ],
+            ),
           );
         },
       ),
@@ -183,14 +183,14 @@ class _PaymentPopupState extends State<PaymentPopup> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
-        Obx(()=>Text(
-          "£${bookingController.totalAmount.toStringAsFixed(2)}",
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),),
+          Obx(()=>Text(
+            "£${bookingController.totalAmount.toStringAsFixed(2)}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),),
         ],
       ),
     );
@@ -251,156 +251,31 @@ class _PaymentPopupState extends State<PaymentPopup> {
         _buildPaymentOptions(),
         const SizedBox(height: 30),
 
-        Row(
-          children: [
-            // Discount Dropdown
-            Obx(() {
-              if (bookingController.isLoading.value) {
-                return const CircularProgressIndicator();
-              }
-
-              return Column(
-                children: [
-                  Text(
-                    'Discount',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: 200,
-                    height: 56, // Consistent height
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: AppColors.border, width: 1.5),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<Discount>(
-                        isExpanded: true,
-                        value: bookingController.selectedDiscount.value,
-                        icon: const Padding(
-                          padding: EdgeInsets.only(right: 12),
-                          child: Icon(Icons.arrow_drop_down, color: AppColors.primary),
-                        ),
-                        hint: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Select Discount',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        items: bookingController.discounts.map((Discount discount) {
-                          return DropdownMenuItem<Discount>(
-                            value: discount,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                discount.title ?? '',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (Discount? newValue) {
-                          bookingController.setSelectedDiscount(newValue);
-                          if(newValue!.title == "No Discount") {
-                            bookingController.isDiscountApplied.value = false;
-                          }else{
-                            bookingController.isDiscountApplied.value = true;
-                          }
-                          if (newValue != null) {
-                            bookingController.calculateDiscount(newValue);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-
-            const SizedBox(width: 20),
-
-            // Advance Payment Field
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Advance Payment (£)',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: 150,
-                  height: 56, // Consistent height with dropdown
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: AppColors.border, width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        '£',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: bookingController.advancePaymentController,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            hintText: '0.00',
-                            hintStyle: TextStyle(
-                              color: AppColors.textSecondary,
-                            ),
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+        // Discount Section
+        const Text(
+          "Discount",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
-        SizedBox(height: 20,),
+        const SizedBox(height: 10),
+        _buildDiscountSection(),
+        const SizedBox(height: 20),
+
+        // Advance Payment Section
+        const Text(
+          "Advance Payment",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        _buildAdvancePaymentSection(),
+        const SizedBox(height: 30),
 
         Row(
           children: [
@@ -506,6 +381,166 @@ class _PaymentPopupState extends State<PaymentPopup> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDiscountSection() {
+    return Obx(() {
+      if (bookingController.isLoading.value) {
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            border: Border.all(color: Colors.grey.shade300, width: 1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          border: Border.all(color: Colors.grey.shade300, width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<Discount>(
+            isExpanded: true,
+            value: bookingController.selectedDiscount.value,
+            icon: const Padding(
+              padding: EdgeInsets.only(left: 12),
+              child: Icon(Icons.arrow_drop_down, color: AppColors.primary),
+            ),
+            hint: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'Select Discount',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            items: bookingController.discounts.map((Discount discount) {
+              return DropdownMenuItem<Discount>(
+                value: discount,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.discount,
+                        color: discount.title == "No Discount"
+                            ? Colors.grey
+                            : AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          discount.title ?? '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: discount.title == "No Discount"
+                                ? Colors.grey
+                                : AppColors.textPrimary,
+                            fontWeight: discount.title == "No Discount"
+                                ? FontWeight.normal
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (discount.title != "No Discount")
+                        Text(
+                          discount.isPercent == true
+                              ? '${discount.val}%'
+                              : '£${discount.val}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (Discount? newValue) {
+              bookingController.setSelectedDiscount(newValue);
+              if (newValue!.title == "No Discount") {
+                bookingController.isDiscountApplied.value = false;
+              } else {
+                bookingController.isDiscountApplied.value = true;
+              }
+              if (newValue != null) {
+                bookingController.calculateDiscount(newValue);
+              }
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildAdvancePaymentSection() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.payment,
+            color: AppColors.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '£',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextFormField(
+              controller: bookingController.advancePaymentController,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintText: '0.00',
+                hintStyle: TextStyle(
+                  color: AppColors.textSecondary,
+                ),
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Advance',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
