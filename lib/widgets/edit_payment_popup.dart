@@ -281,7 +281,10 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: widget.onCancel,
+                onPressed: (){
+                  Get.back();
+                  Get.back();
+                },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.primary),
