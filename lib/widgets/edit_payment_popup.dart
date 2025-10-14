@@ -9,6 +9,7 @@ import 'package:schedule_app/pages/Edit/EditController.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 
 import '../model/discount_model.dart';
+import '../pages/Edit/edit_booking_recipt.dart';
 
 class EditPaymentPopup extends StatefulWidget {
   final String eventName;
@@ -306,18 +307,8 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
                   ),
                 ),
                 onPressed: () async{
-                  bool success = await editController.completeEdit();
-                  if (success) {
-                    widget.onConfirm(); // This will call completeEdit and navigate
-                  } else {
-                    // Show error message if update fails
-                    Get.snackbar(
-                        'Error',
-                        'Failed to update order',
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white
-                    );
-                  }
+                  Get.to(()=>EditReceiptScreen());
+
                 },
                 // _handlePaymentConfirmation,
                 child: const Text("Pay Now & Confirm Booking"),

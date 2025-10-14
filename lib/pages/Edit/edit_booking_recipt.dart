@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/controllers/booking_controller.dart';
+import 'package:schedule_app/pages/Edit/EditController.dart';
+import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 
-class ReceiptScreen extends StatelessWidget {
-  final BookingController controller = Get.find<BookingController>();
+class EditReceiptScreen extends StatelessWidget {
+  final EditController controller = Get.find<EditController>();
 
-  ReceiptScreen({super.key});
+  EditReceiptScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +43,20 @@ class ReceiptScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () {
+            onPressed: ()async {
               // Print or share functionality
-              Get.find<BookingController>().completeBooking();
-              Get.back();
+              bool success = await controller.completeEdit();
+              if (success) {
+                Get.offAll(()=>SchedulePage());
+              } else {
+                // Show error message if update fails
+                Get.snackbar(
+                    'Error',
+                    'Failed to update order',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white
+                );
+              }
             },
             backgroundColor: AppColors.primary,
             child: const Icon(Icons.arrow_forward, color: Colors.white),
