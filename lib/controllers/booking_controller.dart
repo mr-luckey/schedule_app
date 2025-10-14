@@ -8,6 +8,7 @@ import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 
 import '../model/discount_model.dart';
+import '../pages/booking_recipt.dart';
 
 class BookingController extends GetxController {
   // Form controllers
@@ -816,6 +817,7 @@ class BookingController extends GetxController {
           //TODO show invoice/receipt
           // receiptHTML: generateReceiptHTML(),
           onConfirm: completeBooking,
+          // onConfirm: completeBooking,
           onCancel: cancelBookingPopup,
         ),
       );
@@ -1076,6 +1078,7 @@ class BookingController extends GetxController {
         confirmPressCount.value = 0;
         Get.back(); // Close popup
 
+
         Get.snackbar(
           'Success',
           'Booking confirmed successfully! Order ID: ${result['data']?['id'] ?? 'N/A'}',
@@ -1087,6 +1090,7 @@ class BookingController extends GetxController {
         // Clear form after successful booking
         clearForm();
         Get.to(SchedulePage());
+
       } else {
         throw Exception(result['error'] ?? 'Failed to create order');
       }

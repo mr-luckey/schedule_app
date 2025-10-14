@@ -9,6 +9,7 @@ import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 
 import '../model/discount_model.dart';
+import '../pages/booking_recipt.dart';
 
 class PaymentPopup extends StatefulWidget {
   final String eventName;
@@ -303,8 +304,9 @@ class _PaymentPopupState extends State<PaymentPopup> {
                   ),
                 ),
                 onPressed: () {
-                  Get.find<BookingController>().completeBooking();
-                  Get.back();
+                  Get.to(()=>ReceiptScreen());
+                  // Get.find<BookingController>().completeBooking();
+                  // Get.back();
                   // Get.back();
                 },
                 // _handlePaymentConfirmation,
