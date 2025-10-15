@@ -305,9 +305,6 @@ class _PaymentPopupState extends State<PaymentPopup> {
                 ),
                 onPressed: () {
                   Get.to(()=>ReceiptScreen());
-                  // Get.find<BookingController>().completeBooking();
-                  // Get.back();
-                  // Get.back();
                 },
                 // _handlePaymentConfirmation,
                 child: const Text("Pay Now & Confirm Booking"),

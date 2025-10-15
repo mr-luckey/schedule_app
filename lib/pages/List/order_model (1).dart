@@ -148,7 +148,9 @@ class OrderList {
     data['discount_amount'] = this.discountAmount;
     data['discount_id'] = this.discountId;
     data['total_amount'] = this.totalAmount;
-    data['discount'] = this.discount;
+    if (this.discount != null) {
+      data['discount'] = this.discount!.toJson();
+    }
     if (this.orderServices != null) {
       data['order_services'] =
           this.orderServices!.map((v) => v.toJson()).toList();
@@ -163,6 +165,7 @@ class OrderList {
     return data;
   }
 }
+
 class PaymentMethod {
   final int id;
   final String title;
@@ -202,6 +205,7 @@ class PaymentMethod {
     };
   }
 }
+
 class City {
   int? id;
   String? name;
@@ -519,6 +523,7 @@ class OrderPackageItems {
   }
   
 }
+
 class Payment{
   int orderId;
   double amount;

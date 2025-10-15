@@ -212,7 +212,7 @@ class ListingScreen extends StatelessWidget {
                 label: _buildColumnHeader('STATUS'),
               ),
             ],
-            rows: controller.orders.asMap().entries.map((entry) {
+            rows: controller.orders.reversed.toList().asMap().entries.map((entry) {
               int index = entry.key;
               OrderList order = entry.value;
               //TODO: Determine if the wedding is within the next 7 days

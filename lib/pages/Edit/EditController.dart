@@ -768,10 +768,11 @@ class EditController extends GetxController {
     order.totalAmount = totalAmount.toString();
     debugPrint("TESTING TOTAL AMOUNT: ${order.totalAmount}");
     order.discountAmount = discountAmount.value.toString();
-    order.discountId = selectedDiscount.value!.id;
+    order.discountId = selectedDiscount.value!.id == 0 ? null : selectedDiscount.value!.id;
     order.serviceAmount = serviceCost.toString();
     order.foodBeverageAmount = foodAndBeverageCost.toString();
     order.isInquiry = order.isInquiry ?? false;
+    order.discount = selectedDiscount.value?.id == 0? null:selectedDiscount.value;
 
     print("TESTING ORDER DATA BEFORE SENDING TO API:");
     final prettyJson = JsonEncoder.withIndent('  ').convert(order);

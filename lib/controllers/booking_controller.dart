@@ -814,10 +814,7 @@ class BookingController extends GetxController {
           totalAmount: totalAmount,
           customerName: nameController.text,
           customerEmail: emailController.text,
-          //TODO show invoice/receipt
-          // receiptHTML: generateReceiptHTML(),
           onConfirm: completeBooking,
-          // onConfirm: completeBooking,
           onCancel: cancelBookingPopup,
         ),
       );
@@ -1258,17 +1255,14 @@ class BookingController extends GetxController {
         "event_time": formatTimeForApi(startTime.value),
         "start_time": formatTimeForApi(startTime.value),
         "end_time": formatTimeForApi(endTime.value),
-        "requirement": specialRequirementsController.text.isEmpty
-            ? "No special requirements"
-            : specialRequirementsController.text,
+        "requirement": specialRequirementsController.text.isEmpty ? "No special requirements" : specialRequirementsController.text,
         "payment_method_id": 1,
         "total_amount": totalAmount,
         "service_amount": serviceCost,
         "food_beverage_amount": foodAndBeverageCost,
         "discount_amount": discountAmount.value.toString() ?? 0.0,
-        "discount_id": selectedDiscount.value != null
-            ? selectedDiscount.value!.id.toString()
-            : "0",
+        "discount_id": selectedDiscount.value?.id == 0? null:selectedDiscount.value?.id.toString(),
+        "discount": selectedDiscount.value?.id == 0? null:selectedDiscount.value,
         // Include order services if any
         if (orderServices.isNotEmpty)
           "order_services_attributes": orderServices,

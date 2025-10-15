@@ -1,3 +1,5 @@
+import '../../../model/discount_model.dart';
+
 class EditOrderModel {
   int? id;
   String? firstname;
@@ -19,6 +21,7 @@ class EditOrderModel {
   City? city;
   Event? event;
   Event? paymentMethod;
+  Discount? discount;
   List<OrderServices>? orderServices;
   List<OrderPackages>? orderPackages;
   String? url;
@@ -27,6 +30,7 @@ class EditOrderModel {
   String? serviceAmount;
   String? foodBeverageAmount;
   int? discountId;
+
   String? createdAt;
   String? updatedAt;
 
@@ -51,6 +55,7 @@ class EditOrderModel {
     this.city,
     this.event,
     this.paymentMethod,
+    this.discount,
     this.orderServices,
     this.orderPackages,
     this.url,
@@ -85,6 +90,9 @@ class EditOrderModel {
     event = json['event'] != null ? new Event.fromJson(json['event']) : null;
     paymentMethod = json['payment_method'] != null
         ? new Event.fromJson(json['payment_method'])
+        : null;
+    discount = json['discount'] != null
+        ? new Discount.fromJson(json['discount'])
         : null;
     if (json['order_services'] != null) {
       orderServices = <OrderServices>[];
@@ -135,6 +143,9 @@ class EditOrderModel {
     }
     if (this.paymentMethod != null) {
       data['payment_method'] = this.paymentMethod!.toJson();
+    }
+    if (this.discount != null) {
+      data['discount'] = this.discount!.toJson();
     }
     if (this.orderServices != null) {
       data['order_services'] = this.orderServices!
