@@ -47,7 +47,7 @@ Future<void> fetchOrders() async {
     isLoading.value = true;
     final List<OrderList> fetchedOrders = await ApiService.fetchOrders();
     orders.assignAll(fetchedOrders);
-    print('Successfully loaded ${orders.length} orders');
+    // print('Successfully loaded ${orders.length} orders');
   } catch (e) {
     Get.snackbar(
       'Error',

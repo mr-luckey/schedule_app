@@ -318,7 +318,7 @@ class BookingConfirmationPopup extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              Get.to(SchedulePage());
+                              Get.to(()=>SchedulePage());
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),

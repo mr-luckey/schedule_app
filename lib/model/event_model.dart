@@ -71,7 +71,6 @@ class Event {
     final timeRange =
         '${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}';
 
-    print("Guests: $guests");
 
     return Event(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',

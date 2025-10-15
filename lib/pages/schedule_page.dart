@@ -438,9 +438,9 @@ class _SidebarState extends State<Sidebar> {
   getUserData()async{
     currentUser = await SharedPrefsService.getUserData();
     if (currentUser != null) {
-      print('Welcome ${currentUser!.name}');
-      print('Your email: ${currentUser!.email}');
-      print('Your token: ${currentUser!.token}');
+      // print('Welcome ${currentUser!.name}');
+      // print('Your email: ${currentUser!.email}');
+      // print('Your token: ${currentUser!.token}');
     }
   }
   String _getInitials(String name) {

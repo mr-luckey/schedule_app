@@ -300,27 +300,27 @@ class ApiService {
   static Future<List<Event>> getOrders({String? token}) async {
     try {
       final Uri uri = Uri.parse('$baseUrl/orders');
-      print('🔄 Fetching orders from: $uri');
+      // print('🔄 Fetching orders from: $uri');
 
       final response = await _handleRequest(
         http.get(uri, headers: await getHeaders(token: token)),
       );
 
-      print('📦 Raw API Response: ${response.toString()}');
+      // print('📦 Raw API Response: ${response.toString()}');
 
       if (response['success'] == true) {
         final data = response['data'];
-        print('📊 Response data type: ${data.runtimeType}');
-        print('📊 Response data: $data');
+        // print('📊 Response data type: ${data.runtimeType}');
+        // print('📊 Response data: $data');
 
         // Handle different response structures
         if (data is List) {
-          print('✅ Processing as List with ${data.length} items');
+          // print('✅ Processing as List with ${data.length} items');
           final events = data.map((item) {
-            print('📝 Processing item: $item');
+            // print('📝 Processing item: $item');
             return Event.fromJson(item);
           }).toList();
-          print('✅ Successfully parsed ${events.length} events');
+          // print('✅ Successfully parsed ${events.length} events');
           return events;
         } else if (data is Map && data.containsKey('orders')) {
           final List<dynamic> orders = data['orders'];
@@ -329,13 +329,13 @@ class ApiService {
           final List<dynamic> orders = data['data'];
           return orders.map((item) => Event.fromJson(item)).toList();
         } else {
-          print('❌ Unexpected API response format: $data');
+          // print('❌ Unexpected API response format: $data');
           throw Exception('Unexpected API response format: $data');
         }
       } else {
         final status = response['statusCode'];
         final error = response['error'] ?? 'Unknown error';
-        print('❌ API returned error ($status): $error');
+        // print('❌ API returned error ($status): $error');
 
         // Example: if unauthorized, throw a specific exception to let the UI redirect to login
         if (status == 401) {
@@ -345,7 +345,7 @@ class ApiService {
         throw Exception('Failed to load orders: $error');
       }
     } catch (e) {
-      print('❌ Error fetching orders: $e');
+      // print('❌ Error fetching orders: $e');
       throw Exception('Error fetching orders: $e');
     }
   }
@@ -666,28 +666,28 @@ class ApiService {
 static Future<List<OrderList>> fetchOrders() async {
   try {
     final Uri uri = Uri.parse('$baseUrl/orders');
-    print('🔄 Fetching orders from: $uri');
+    // print('🔄 Fetching orders from: $uri');
 
     final response = await _handleRequest(
       http.get(uri, headers: await getHeaders()),
     );
 
-    print('📦 Raw API Response:');
-    final prettyJson = JsonEncoder.withIndent('  ').convert(response);
-
-    print(prettyJson);
+    // print('📦 Raw API Response:');
+    // final prettyJson = JsonEncoder.withIndent('  ').convert(response);
+    //
+    // print(prettyJson);
 
     if (response['success'] == true) {
       final data = response['data'];
-      print('📊 Response data type: ${data.runtimeType}');
-      print('📊 Response data: $data');
+      // print('📊 Response data type: ${data.runtimeType}');
+      // print('📊 Response data: $data');
 
       // Handle different response structures
       List<dynamic> ordersList = [];
 
       if (data is List) {
         ordersList = data;
-        print('✅ Processing as List with ${ordersList.length} items');
+        // print('✅ Processing as List with ${ordersList.length} items');
       } else if (data is Map<String, dynamic>) {
         // Check common keys for data
         if (data['data'] is List) {
@@ -718,7 +718,7 @@ static Future<List<OrderList>> fetchOrders() async {
         }
       }
 
-      print('✅ Successfully parsed ${parsedOrders.length} orders');
+      // print('✅ Successfully parsed ${parsedOrders.length} orders');
       return parsedOrders;
 
     } else {

@@ -1086,7 +1086,7 @@ class BookingController extends GetxController {
 
         // Clear form after successful booking
         clearForm();
-        Get.to(SchedulePage());
+        Get.to(()=>SchedulePage());
 
       } else {
         throw Exception(result['error'] ?? 'Failed to create order');

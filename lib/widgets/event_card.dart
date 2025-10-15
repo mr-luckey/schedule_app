@@ -24,8 +24,6 @@ class EventTile extends StatelessWidget {
       eventDate: DateTime.now().toString(),
     );
 
-    print("Here is the events details" + "${event.guests}");
-
     return Container(
       // padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

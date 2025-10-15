@@ -64,12 +64,6 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
   @override
   Widget build(BuildContext context) {
     final List<Appointment> appts = calendController.events.map((e) {
-      print("TESTING APPOINTMENT");
-      print(e.id);
-      print(e.start);
-      print(e.end);
-      print(e.title);
-      print(e.guests);
 
       return Appointment(
         id: e.id,
@@ -136,7 +130,7 @@ class _WeekTimeCalendarState extends State<WeekTimeCalendar> {
                 String event = tapped.id.toString();
                 print(event);
                 // print(event.id.toString());
-                Get.to(EditPage(selectedId: event));
+                Get.to(()=>EditPage(selectedId: event));
 
                 // print()
                 // if (details.targetElement == CalendarElement.appointment &&
