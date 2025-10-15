@@ -672,7 +672,10 @@ static Future<List<OrderList>> fetchOrders() async {
       http.get(uri, headers: await getHeaders()),
     );
 
-    print('📦 Raw API Response: ${response.toString()}');
+    print('📦 Raw API Response:');
+    final prettyJson = JsonEncoder.withIndent('  ').convert(response);
+
+    print(prettyJson);
 
     if (response['success'] == true) {
       final data = response['data'];
