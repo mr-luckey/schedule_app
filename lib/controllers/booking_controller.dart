@@ -1709,8 +1709,8 @@ class BookingController extends GetxController {
                 ),
                 Text('Requirements: ${specialRequirementsController.text}'),
                 SizedBox(height: 10),
-                Text('Subtotal: Â£${calculateSubtotal().toStringAsFixed(2)}'),
-                Text('Total: Â£${calculateTotal().toStringAsFixed(2)}'),
+                Text('Subtotal: ${calculateSubtotal().toStringAsFixed(2)}'),
+                Text('Total: ${calculateTotal().toStringAsFixed(2)}'),
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {

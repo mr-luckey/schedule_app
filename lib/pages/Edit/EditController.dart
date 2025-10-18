@@ -402,6 +402,8 @@ class EditController extends GetxController {
 
   /// Populate form fields from order model
   void _populateFormFromOrder(EditOrderModel order) {
+    print("TESTING ORDER DATA IN POPULATE FUNCTION");
+    print(order.toJson());
     // Personal information
     nameController.text = '${order.firstname ?? ''} ${order.lastname ?? ''}'
         .trim();

@@ -13,7 +13,7 @@ import '../model/user_model.dart';
 
 class ApiService {
   static const String baseUrl =
-      'http://ec2-13-43-4-220.eu-west-2.compute.amazonaws.com:3031/api/v1';
+      'https://qaidhall-admin.nettechltd.com/api/v1';
 
   static String? _bearerToken;
   static SharedPreferences? _prefs;
