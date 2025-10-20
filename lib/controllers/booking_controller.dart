@@ -39,6 +39,8 @@ class BookingController extends GetxController {
   final RxString selectedPackageId = ''.obs;
 
   RxDouble discountAmount = 0.0.obs;
+  // Prepare order services from the services in the menu
+  List<Map<String, dynamic>> orderServices = [];
 
   // Form validation
   final RxBool isFormValid = false.obs;
@@ -175,8 +177,7 @@ class BookingController extends GetxController {
           apiServiceItems.value = [];
         }
       } else {
-        errorMessage.value +=
-            '\nFailed to load services: ${servicesResult['error']}';
+        errorMessage.value += '\nFailed to load services: ${servicesResult['error']}';
       }
 
       // Load cities
@@ -299,344 +300,6 @@ class BookingController extends GetxController {
       return [];
     }
   }
-
-//   String generateReceiptHTML() {
-//     // Get the current menu for the selected package
-//     final menu = menuForPackage(
-//       selectedPackage.value,
-//       guests.value > 0 ? guests.value : 1,
-//     );
-//
-//     // Calculate totals
-//     double foodSubtotal = 0;
-//     double servicesSubtotal = 0;
-//
-//     for (var item in menu['Food Items']!) {
-//       foodSubtotal += (item['price'] as num).toDouble() * (item['qty'] as int);
-//     }
-//
-//     for (var item in menu['Services']!) {
-//       servicesSubtotal +=
-//           (item['price'] as num).toDouble() * (item['qty'] as int);
-//     }
-//
-//     double netAmount = foodSubtotal + servicesSubtotal;
-//     double serviceCharge = netAmount * 0.10;
-//     double discount = netAmount * 0.05;
-//     double subtotalAfterDiscount = netAmount + serviceCharge - discount;
-//     double vat = subtotalAfterDiscount * 0.20;
-//     double totalAmount = subtotalAfterDiscount + vat;
-//
-//     // Format date and time
-//     String formatDate(DateTime? date) {
-//       if (date == null) return 'Not set';
-//       final day = date.day;
-//       final month = date.month;
-//       final year = date.year;
-//       final suffixes = [
-//         'th',
-//         'st',
-//         'nd',
-//         'rd',
-//         'th',
-//         'th',
-//         'th',
-//         'th',
-//         'th',
-//         'th',
-//       ];
-//       final suffix = day % 10 <= suffixes.length - 1
-//           ? suffixes[day % 10]
-//           : 'th';
-//       final months = [
-//         '',
-//         'January',
-//         'February',
-//         'March',
-//         'April',
-//         'May',
-//         'June',
-//         'July',
-//         'August',
-//         'September',
-//         'October',
-//         'November',
-//         'December',
-//       ];
-//       return '${day}$suffix ${months[month]} $year';
-//     }
-//
-//     String formatTime(TimeOfDay? time) {
-//       if (time == null) return 'Not set';
-//       final hour = time.hourOfPeriod;
-//       final minute = time.minute.toString().padLeft(2, '0');
-//       final period = time.period == DayPeriod.am ? 'AM' : 'PM';
-//       return '$hour:$minute $period';
-//     }
-//
-//     // Generate food items HTML
-//     String foodItemsHTML = '';
-//     for (var item in menu['Food Items']!) {
-//       foodItemsHTML +=
-//           '''
-//         <tr>
-//           <td>${item['name']}</td>
-//           <td>${item['qty']}</td>
-//           <td>Â£${(item['price'] as num).toStringAsFixed(2)}</td>
-//           <td>Â£${((item['price'] as num).toDouble() * (item['qty'] as int)).toStringAsFixed(2)}</td>
-//         </tr>
-//       ''';
-//     }
-//
-//     // Generate services HTML
-//     String servicesHTML = '';
-//     for (var item in menu['Services']!) {
-//       servicesHTML +=
-//           '''
-//         <tr>
-//           <td>${item['name']}</td>
-//           <td>${item['qty']}</td>
-//           <td>Â£${(item['price'] as num).toStringAsFixed(2)}</td>
-//           <td>Â£${((item['price'] as num).toDouble() * (item['qty'] as int)).toStringAsFixed(2)}</td>
-//         </tr>
-//       ''';
-//     }
-//
-//     // Generate customer initials for reference
-//     String getCustomerInitials() {
-//       if (nameController.text.isEmpty) return 'CUST';
-//       final names = nameController.text
-//           .trim()
-//           .split(' ')
-//           .where((name) => name.isNotEmpty)
-//           .toList();
-//       if (names.isEmpty) return 'CUST';
-//       if (names.length == 1) {
-//         return names[0].isNotEmpty ? names[0][0].toUpperCase() : 'CUST';
-//       }
-//       final firstInitial = names[0].isNotEmpty ? names[0][0].toUpperCase() : '';
-//       final lastInitial = names.last.isNotEmpty
-//           ? names.last[0].toUpperCase()
-//           : '';
-//       return firstInitial + lastInitial;
-//     }
-//
-//     return '''
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Booking Confirmation Receipt - A4</title>
-//     <style>
-//         * { margin: 0; padding: 0; box-sizing: border-box; }
-//         body { font-family: 'Times New Roman', serif; background-color: white; color: #000; line-height: 1.2; font-size: 12px; }
-//         .receipt-container { width: 210mm; height: 297mm; margin: 0 auto; background: white; border: 2px solid #000; padding: 15mm; overflow: hidden; }
-//         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
-//         .company-name { font-size: 20px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase; }
-//         .company-details { font-size: 10px; margin-bottom: 8px; line-height: 1.3; }
-//         .receipt-title { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-top: 8px; }
-//         .receipt-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 9px; }
-//         .section { margin-bottom: 10px; }
-//         .section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 5px; }
-//         .info-table { width: 100%; font-size: 9px; margin-bottom: 5px; }
-//         .info-table td { padding: 1px 0; vertical-align: top; }
-//         .info-table td:first-child { width: 25%; font-weight: bold; }
-//         .order-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 8px; }
-//         .order-table th, .order-table td { border: 1px solid #000; padding: 3px; text-align: left; }
-//         .order-table th { background-color: #f0f0f0; font-weight: bold; text-transform: uppercase; font-size: 7px; }
-//         .order-table td:nth-child(2), .order-table td:nth-child(3), .order-table td:nth-child(4) { text-align: right; }
-//         .subtotal-section { border: 1px solid #000; padding: 8px; margin-top: 8px; }
-//         .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 9px; }
-//         .subtotal-row.total { border-top: 2px solid #000; padding-top: 4px; margin-top: 5px; font-weight: bold; font-size: 11px; }
-//         .footer { border-top: 2px solid #000; padding-top: 8px; margin-top: 10px; text-align: center; font-size: 9px; }
-//         .terms { font-size: 7px; margin-top: 8px; text-align: justify; line-height: 1.2; }
-//         .signature-section { margin-top: 15px; display: flex; justify-content: space-between; }
-//         .signature-box { width: 150px; text-align: center; font-size: 8px; }
-//         .signature-line { border-bottom: 1px solid #000; margin-bottom: 3px; height: 20px; }
-//         .two-column { display: flex; gap: 10px; }
-//         .column { flex: 1; }
-//         @media print {
-//             @page { size: A4; margin: 0; }
-//             body { padding: 0; margin: 0; }
-//             .receipt-container { border: none; padding: 15mm; margin: 0; width: 210mm; height: 297mm; max-width: none; max-height: none; }
-//         }
-//         @media screen {
-//             body { padding: 10px; background-color: #f0f0f0; }
-//         }
-//         .cancel-icon { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 20px; color: #ff0000; z-index: 1000; }
-//         .next-button { background-color: #28a745; color: white; border: none; padding: 12px 24px; font-size: 14px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; transition: background-color 0.3s ease; }
-//         .next-button:hover { background-color: #218838; }
-//     </style>
-// </head>
-// <body>
-//    <div class="cancel-icon" onclick="handleCancel()">âœ•</div>
-//     <div class="receipt-container">
-//         <div class="header">
-//             <div class="company-name">Premium Event Catering Ltd.</div>
-//             <div class="company-details">
-//                 123 Wedding Lane, London, EC1A 1BB<br>
-//                 Tel: +44-20-7123-4567 | Email: events@premiumcatering.co.uk | VAT: GB123456789
-//             </div>
-//             <div class="receipt-title">Booking Confirmation Receipt</div>
-//         </div>
-//
-//         <div class="receipt-info">
-//             <div>
-//                 <strong>Receipt No:</strong> WED-${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}-001<br>
-//                 <strong>Date:</strong> ${formatDate(DateTime.now())}<br>
-//                 <strong>Payment Method:</strong> Bank Transfer
-//             </div>
-//             <div>
-//                 <strong>Account Manager:</strong> Emma Wilson<br>
-//                 <strong>Reference:</strong> WEDDING-${getCustomerInitials()}-001<br>
-//                 <strong>Status:</strong> CONFIRMED
-//             </div>
-//         </div>
-//
-//         <div class="two-column">
-//             <div class="column">
-//                 <div class="section">
-//                     <div class="section-title">Customer Information</div>
-//                     <table class="info-table">
-//                         <tr><td>Customer Name:</td><td>${nameController.text}</td></tr>
-//                         <tr><td>Email:</td><td>${emailController.text}</td></tr>
-//                         <tr><td>Contact:</td><td>${contactController.text}</td></tr>
-//                         <tr><td>Event Address:</td><td>${selectedCity.value}</td></tr>
-//                     </table>
-//                 </div>
-//             </div>
-//             <div class="column">
-//                 <div class="section">
-//                     <div class="section-title">Event Details</div>
-//                     <table class="info-table">
-//                         <tr><td>Event Type:</td><td>${selectedEventType.value}</td></tr>
-//                         <tr><td>Date:</td><td>${formatDate(selectedDate.value)}</td></tr>
-//                         <tr><td>Time:</td><td>${formatTime(startTime.value)} - ${formatTime(endTime.value)}</td></tr>
-//                         <tr><td>Guests:</td><td>${guests.value} persons</td></tr>
-//                         <tr><td>Package:</td><td>${selectedPackage.value}</td></tr>
-//                     </table>
-//                 </div>
-//             </div>
-//         </div>
-//
-//         <div class="section">
-//             <div class="section-title">Food Items</div>
-//             <table class="order-table">
-//                 <thead>
-//                     <tr>
-//                         <th style="width: 50%;">Description</th>
-//                         <th style="width: 15%;">Qty</th>
-//                         <th style="width: 17%;">Unit Price</th>
-//                         <th style="width: 18%;">Amount</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     $foodItemsHTML
-//                 </tbody>
-//             </table>
-//         </div>
-//
-//         <div class="section">
-//             <div class="section-title">Additional Services</div>
-//             <table class="order-table">
-//                 <thead>
-//                     <tr>
-//                         <th style="width: 50%;">Service Description</th>
-//                         <th style="width: 15%;">Qty</th>
-//                         <th style="width: 17%;">Rate</th>
-//                         <th style="width: 18%;">Amount</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     $servicesHTML
-//                 </tbody>
-//             </table>
-//         </div>
-//
-//         <div class="subtotal-section">
-//             <div class="subtotal-row"><span>Food Items Subtotal:</span><span>Â£${foodSubtotal.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>Services Subtotal:</span><span>Â£${servicesSubtotal.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>Net Amount:</span><span>Â£${netAmount.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>Service Charge (10%):</span><span>Â£${serviceCharge.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>Early Booking Discount (5%):</span><span>-Â£${discount.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>Subtotal after Discount:</span><span>Â£${subtotalAfterDiscount.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row"><span>VAT @ 20%:</span><span>Â£${vat.toStringAsFixed(2)}</span></div>
-//             <div class="subtotal-row total"><span>TOTAL AMOUNT:</span><span>Â£${totalAmount.toStringAsFixed(2)}</span></div>
-//         </div>
-//
-//         <div class="footer">
-//             <p><strong>BOOKING CONFIRMED - PAYMENT DUE: 50% DEPOSIT BY ${formatDate(selectedDate.value?.subtract(const Duration(days: 14)))}</strong></p>
-//             <p>Balance payment due 7 days prior to event date</p>
-//
-//             <div class="terms">
-//                 <strong>Terms & Conditions:</strong> This booking is subject to our standard terms and conditions. Cancellation policy: 30 days notice required for full refund minus 10% administration fee. Final guest numbers must be confirmed 7 days prior to event. Additional charges may apply for changes made within 48 hours of event. All prices include VAT at current rate.
-//             </div>
-//
-//             <div class="signature-section">
-//                 <div class="signature-box">
-//                     <div class="signature-line"></div>
-//                     <div>Customer Signature</div>
-//                 </div>
-//                 <div class="signature-box">
-//                     <div class="signature-line"></div>
-//                     <div>Authorized Signature</div>
-//                 </div>
-//             </div>
-//
-//             <!-- Close button for the receipt -->
-//             <div style="text-align: center; margin-top: 20px;">
-//                 <button class="next-button" onclick="handleNext()">Close</button>
-//             </div>
-//         </div>
-//     </div>
-//        <script>
-//         window.addEventListener('load', function() {
-//             console.log('Page loaded - checking for available channels');
-//             console.log('cancelBooking available:', typeof window.cancelBooking !== 'undefined');
-//             console.log('navigateToNextScreen available:', typeof window.navigateToNextScreen !== 'undefined');
-//             console.log('flutter_inappwebview available:', typeof window.flutter_inappwebview !== 'undefined');
-//         });
-//
-//         function handleCancel() {
-//             console.log('handleCancel() function called');
-//
-//             if (typeof window.cancelBooking !== 'undefined') {
-//                 console.log('Using cancelBooking channel directly');
-//                 window.cancelBooking.postMessage('');
-//             } else if (typeof window.flutter_inappwebview !== 'undefined') {
-//                 console.log('Using flutter_inappwebview API for cancel');
-//                 window.flutter_inappwebview.callHandler('cancelBooking');
-//             } else {
-//                 console.log('Cancel button clicked - WebView handler not available');
-//                 console.log('Available window objects:', Object.keys(window).filter(key => key.includes('flutter') || key.includes('navigate') || key.includes('cancel')));
-//                 alert('Cancel button clicked - Navigation not available. Check console for details.');
-//             }
-//         }
-//
-//         function handleNext() {
-//             console.log('Close button clicked - closing receipt');
-//
-//             if (typeof window.navigateToNextScreen !== 'undefined') {
-//                 console.log('Using navigateToNextScreen channel directly');
-//                 window.navigateToNextScreen.postMessage('');
-//             } else if (typeof window.cancelBooking !== 'undefined') {
-//                 console.log('Using cancelBooking channel to close');
-//                 window.cancelBooking.postMessage('');
-//             } else if (typeof window.flutter_inappwebview !== 'undefined') {
-//                 console.log('Using flutter_inappwebview API to close');
-//                 window.flutter_inappwebview.callHandler('navigateToNextScreen');
-//             } else {
-//                 console.log('Close button clicked - WebView handler not available');
-//                 console.log('Available window objects:', Object.keys(window).filter(key => key.includes('flutter') || key.includes('navigate') || key.includes('cancel')));
-//                 alert('Close button clicked - Closing not available. Check console for details.');
-//             }
-//         }
-//     </script>
-// </body>
-// </html>
-//     ''';
-//   }
 
   void _validateForm() {
     isFormValid.value =
@@ -887,7 +550,7 @@ class BookingController extends GetxController {
       final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
       // Prepare order services from the services in the menu
-      List<Map<String, dynamic>> orderServices = [];
+      // List<Map<String, dynamic>> orderServices = [];
       
       // For custom packages, use _customPackageMenu services
       List<Map<String, dynamic>> servicesToProcess = [];
@@ -1120,8 +783,7 @@ class BookingController extends GetxController {
       final menu = menuForPackage(selectedPackage.value, guests.value);
       final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
-      // Prepare order services from the services in the menu
-      List<Map<String, dynamic>> orderServices = [];
+
       
       // For custom packages, use _customPackageMenu services
       List<Map<String, dynamic>> servicesToProcess = [];

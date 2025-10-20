@@ -948,8 +948,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
 
-
-
   void removeDish(String category, Map<String, dynamic> dish) {
     setState(() {
       final dishIndex = controller.menu[category]!.indexWhere(
@@ -1082,6 +1080,19 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                                 (f) => f['id'] == item['id'],
                                               );
                                             } else {
+                                              //Adding Service in order services list
+                                              controller.orderServices.addAll(
+                                                  controller.menu['Services']!
+                                                      .where((service) => service['id'] == item['id'])
+                                                      .map((service) => {
+                                                    'menu_item_id': service['id'], // or whatever field contains the menu_item_id
+                                                    'price': service['price'],
+                                                    'is_deleted': service['is_deleted'] ?? false,
+                                                  })
+                                                      .toList()
+                                              );
+                                              print("Order Services after adding service: ${controller.orderServices}");
+
                                               availableServicesLocal
                                                   .removeWhere(
                                                     (s) =>
