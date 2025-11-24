@@ -1226,30 +1226,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-  /// Get available menu items from all services (excluding already selected ones)
-  // List<MenuItem> get availableServiceMenuItems {
-  //   final selectedIds = editController.selectedMenuItems
-  //       .map((item) => item.menuItemId.toString())
-  //       .toSet();
 
-  //   final allMenuItems = <MenuItem>[];
-
-  //   for (var service in editController.apiServiceItems) {
-  //     if (service.menuItems != null && service.menuItems!.isNotEmpty) {
-  //       for (var menuItem in service.menuItems!) {
-  //         if (!selectedIds.contains(menuItem.id.toString())) {
-  //           allMenuItems.add(menuItem);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   return allMenuItems;
-  // }
-
-  /// Show dialog to add service items
-  /// Show dialog to add service items
-  /// Show dialog to add service items
   /// Show dialog to add service items
   void _showAddServiceItemsDialog() {
     final availableMenuItems = availableServiceMenuItems;
@@ -1333,87 +1310,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-  ///   // void _showAddServiceItemsDialog() {
-  //   final availableServices = availableServiceItems;
-
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     builder: (ctx) {
-  //       return SafeArea(
-  //         child: Container(
-  //           constraints: BoxConstraints(
-  //             maxHeight: MediaQuery.of(context).size.height * 0.8,
-  //           ),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               ListTile(
-  //                 title: const Text(
-  //                   'Add Services',
-  //                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-  //                 ),
-  //                 trailing: IconButton(
-  //                   icon: const Icon(Icons.close),
-  //                   onPressed: () => Navigator.pop(ctx),
-  //                 ),
-  //               ),
-  //               if (availableServices.isEmpty)
-  //                 Padding(
-  //                   padding: const EdgeInsets.all(16),
-  //                   child: Text(
-  //                     'No more services available to add.',
-  //                     style: TextStyle(color: Colors.grey[600]),
-  //                   ),
-  //                 )
-  //               else
-  //                 Expanded(
-  //                   child: ListView(
-  //                     shrinkWrap: true,
-  //                     children: [
-  //                       const Padding(
-  //                         padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-  //                         child: Text(
-  //                           'Available Services',
-  //                           style: TextStyle(
-  //                             fontWeight: FontWeight.bold,
-  //                             fontSize: 16,
-  //                             color: Colors.blue,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                       ...availableServices.map((menuItems) {
-  //                         return ListTile(
-  //                           title: Text(MenuItem.title ?? 'Unknown Service'),
-  //                           subtitle: Text(
-  //                             '£${(double.tryParse(MenuItem.menuItems) ?? 0.0).toStringAsFixed(2)}',
-  //                           ),
-  //                           trailing: IconButton(
-  //                             icon: const Icon(
-  //                               Icons.add_circle,
-  //                               color: Colors.green,
-  //                             ),
-  //                             onPressed: () {
-  //                               addServiceItem(service as Service);
-  //                               Navigator.pop(ctx);
-  //                             },
-  //                           ),
-  //                         );
-  //                       }).toList(),
-  //                     ],
-  //                   ),
-  //                 ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // ===========================================================================
-  // UI BUILDING METHODS
-  // ===========================================================================
 
   /// Build item row for display
   Widget buildItemRow(dynamic item, bool isFoodItem) {

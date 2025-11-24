@@ -69,6 +69,10 @@ class ReceiptScreen extends StatelessWidget {
       controller.guests.value > 0 ? controller.guests.value : 1,
     );
 
+    final nemu = controller.menu;
+
+
+
     // Calculate totals
     double foodSubtotal = 0;
     double servicesSubtotal = 0;
@@ -120,7 +124,7 @@ class ReceiptScreen extends StatelessWidget {
         const SizedBox(height: 20),
 
         // Additional Services
-        _buildServicesSection(menu['Services']!),
+        _buildServicesSection(nemu['Services']!),
         const SizedBox(height: 20),
 
         // Subtotal Section

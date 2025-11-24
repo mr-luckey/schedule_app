@@ -80,7 +80,7 @@ class EditReceiptScreen extends StatelessWidget {
       controller.selectedPackage.value,
       controller.guests.value > 0 ? controller.guests.value : 1,
     );
-
+    print("TESTING RECEIPT MENU: $menu");
     // Calculate totals
     double foodSubtotal = 0;
     double servicesSubtotal = 0;
@@ -386,7 +386,7 @@ class EditReceiptScreen extends StatelessWidget {
           color: Colors.black,
         ),
         const SizedBox(height: 5),
-        _buildItemsTable(services, isFood: false),
+        _buildServiceItemsTable(),
       ],
     );
   }
@@ -504,6 +504,210 @@ class EditReceiptScreen extends StatelessWidget {
       ],
     );
   }
+  Widget _buildServiceItemsTable() {
+    return Column(
+      children: [
+        // Header Row
+        Container(
+          decoration: BoxDecoration(color: Colors.grey[200]),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(3),
+                  child: Text(
+                    'Service Description',
+                    style: const TextStyle(
+                      fontSize: 7,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Times New Roman',
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(3),
+                child: Text(
+                  'Amount',
+                  style: const TextStyle(
+                    fontSize: 7,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Services List
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.selectedServiceItems.length,
+            itemBuilder: (context, index) {
+              final service = controller.selectedServiceItems[index];
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: index < controller.selectedServiceItems.length - 1
+                        ? BorderSide(color: Colors.black, width: 1)
+                        : BorderSide.none,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Text(
+                          service.title,
+                          style: const TextStyle(
+                            fontSize: 8,
+                            fontFamily: 'Times New Roman',
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        service.price,
+                        style: const TextStyle(
+                          fontSize: 8,
+                          fontFamily: 'Times New Roman',
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+  // Widget _buildServiceItemsTable() {
+  //   return Table(
+  //     border: TableBorder.all(color: Colors.black, width: 1),
+  //     columnWidths: const {
+  //       0: FlexColumnWidth(3.0),
+  //       1: FlexColumnWidth(1.0),
+  //       2: FlexColumnWidth(1.2),
+  //       3: FlexColumnWidth(1.2),
+  //     },
+  //     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+  //     children: [
+  //       TableRow(
+  //         decoration: BoxDecoration(color: Colors.grey[200]),
+  //         children: [
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //                'Service Description',
+  //               style: const TextStyle(
+  //                 fontSize: 7,
+  //                 fontWeight: FontWeight.bold,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               'Qty',
+  //               style: const TextStyle(
+  //                 fontSize: 7,
+  //                 fontWeight: FontWeight.bold,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               'Rate',
+  //               style: const TextStyle(
+  //                 fontSize: 7,
+  //                 fontWeight: FontWeight.bold,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               'Amount',
+  //               style: const TextStyle(
+  //                 fontSize: 7,
+  //                 fontWeight: FontWeight.bold,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //        TableRow(
+  //         children: [
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               controller.selectedServiceItems.first.title,
+  //               style: const TextStyle(
+  //                 fontSize: 8,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               1.toString(),
+  //               style: const TextStyle(
+  //                 fontSize: 8,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //   controller.selectedServiceItems.first.price,
+  //               style: const TextStyle(
+  //                 fontSize: 8,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(3),
+  //             child: Text(
+  //               controller.selectedServiceItems.first.price,
+  //               style: const TextStyle(
+  //                 fontSize: 8,
+  //                 fontFamily: 'Times New Roman',
+  //               ),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildSubtotalSection(
       double foodSubtotal,
