@@ -9,6 +9,7 @@ import 'package:schedule_app/widgets/Payment_Popup.dart';
 
 import '../model/discount_model.dart';
 import '../pages/booking_recipt.dart';
+import 'package:schedule_app/pages/List/order_model%20(1).dart'; // Import OrderList model
 
 class BookingController extends GetxController {
   // Form controllers
@@ -490,13 +491,19 @@ class BookingController extends GetxController {
   }
 
   // Confirmation UI
-  void showBookingConfirmation() {
+  Future<void> showBookingConfirmation() async {
     if (!isFormValid.value) {
       // Validation is handled in the UI layer
       return;
     }
 
-    // confirmPressCount.value++;
+    // Check availability before showing payment popup
+    final isAvailable = await checkAvailability();
+    if (!isAvailable) {
+      // Error dialog is shown in checkAvailability
+      return;
+    }
+
     Get.dialog(
       PaymentPopup(
         eventName: selectedEventType.value,
@@ -513,6 +520,179 @@ class BookingController extends GetxController {
         onCancel: cancelBookingPopup,
       ),
     );
+  }
+
+  Future<bool> checkAvailability() async {
+    isLoading.value = true;
+    try {
+      print("DEBUG: Starting availability check");
+      final List<OrderList> existingOrders = await ApiService.fetchOrders();
+      print("DEBUG: Fetched ${existingOrders.length} orders");
+
+      // Filter orders for the selected date
+      final String selectedDateStr =
+          "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
+      print("DEBUG: Checking for date: $selectedDateStr");
+
+      final ordersOnDate = existingOrders.where((order) {
+        if (order.eventDate == null) return false;
+        String orderDateStr = order.eventDate!;
+        if (orderDateStr.contains('T')) {
+          orderDateStr = orderDateStr.split('T')[0];
+        }
+        return orderDateStr == selectedDateStr;
+      }).toList();
+
+      print("DEBUG: Found ${ordersOnDate.length} orders on selected date");
+
+      // Check for time overlap
+      bool hasConflict = false;
+
+      if (ordersOnDate.isNotEmpty) {
+        final double newStart =
+            startTime.value!.hour + startTime.value!.minute / 60.0;
+        final double newEnd =
+            endTime.value!.hour + endTime.value!.minute / 60.0;
+
+        print("DEBUG: New booking time: $newStart - $newEnd");
+
+        for (final order in ordersOnDate) {
+          String? sTime = order.startTime ?? order.eventTime;
+          String? eTime = order.endTime;
+
+          if (sTime != null && eTime != null) {
+            try {
+              DateTime orderStartDt = DateTime.parse(sTime);
+              DateTime orderEndDt = DateTime.parse(eTime);
+
+              double orderStart =
+                  orderStartDt.hour + orderStartDt.minute / 60.0;
+              double orderEnd = orderEndDt.hour + orderEndDt.minute / 60.0;
+
+              print(
+                "DEBUG: Order ${order.id} numeric: $orderStart - $orderEnd",
+              );
+
+              if (newStart < orderEnd && newEnd > orderStart) {
+                print("DEBUG: Conflict detected with Order ${order.id}");
+                hasConflict = true;
+                break;
+              }
+            } catch (e) {
+              print("DEBUG: Error parsing order time: $e");
+            }
+          }
+        }
+      }
+
+      isLoading.value = false;
+
+      if (hasConflict) {
+        Get.dialog(
+          Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Get.back(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.red,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Time Slot Unavailable",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "This time slot is already booked. Please choose another time.",
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Get.back(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text("Close"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        return false;
+      }
+      return true;
+    } catch (e) {
+      print("Error checking availability: $e");
+      isLoading.value = false;
+      // On error, maybe allow to proceed or show error?
+      // Proceeding might cause double booking, safer to block or warn.
+      // For now, let's treat error as available but log it, or allow user to retry.
+      // Or show error dialog.
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Get.back(),
+                    ),
+                  ],
+                ),
+                const Icon(Icons.error_outline, color: Colors.orange, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  "Connection Error",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text("Could not check availability: $e"),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  child: const Text("Close"),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return false;
+    }
   }
 
   late Map<String, List<Map<String, dynamic>>> menu;
@@ -569,9 +749,13 @@ class BookingController extends GetxController {
   Future<void> completeBooking() async {
     try {
       if (!isFormValid.value) {
-        // Validation is handled in the UI layer
         return;
       }
+
+      isLoading.value = true;
+
+      // Availability check is now done in showBookingConfirmation.
+      // We proceed to create the order.
 
       // Get the current menu for the selected package
       final menu = menuForPackage(selectedPackage.value, guests.value);

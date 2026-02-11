@@ -109,44 +109,44 @@ class _PaymentPopupState extends State<PaymentPopup> {
             color: Colors.white,
             child: _isProcessing
                 ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "Processing your payment...",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Processing your payment...",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            )
+                  )
                 : isMobile
                 ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  _eventDetails(context),
-                  const SizedBox(height: 20),
-                  _paymentSection(context),
-                ],
-              ),
-            )
+                    child: Column(
+                      children: [
+                        _eventDetails(context),
+                        const SizedBox(height: 20),
+                        _paymentSection(context),
+                      ],
+                    ),
+                  )
                 : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 2, child: _eventDetails(context)),
-                const SizedBox(width: 20),
-                Expanded(flex: 3, child: _paymentSection(context)),
-              ],
-            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 2, child: _eventDetails(context)),
+                      const SizedBox(width: 20),
+                      Expanded(flex: 3, child: _paymentSection(context)),
+                    ],
+                  ),
           );
         },
       ),
@@ -184,14 +184,16 @@ class _PaymentPopupState extends State<PaymentPopup> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
-          Obx(()=>Text(
-            "£${bookingController.totalAmount.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+          Obx(
+            () => Text(
+              "£${bookingController.totalAmount.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
-          ),),
+          ),
         ],
       ),
     );
@@ -304,10 +306,18 @@ class _PaymentPopupState extends State<PaymentPopup> {
                   ),
                 ),
                 onPressed: () {
-                  Get.to(()=>ReceiptScreen());
+                  // Trigger the booking logic which includes validation
+                  widget.onConfirm();
                 },
-                // _handlePaymentConfirmation,
-                child: const Text("Pay Now & Confirm Booking"),
+                child: Obx(
+                  () => bookingController.isLoading.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : const Text("Pay Now & Confirm Booking"),
+                ),
               ),
             ),
           ],
@@ -394,9 +404,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
             border: Border.all(color: Colors.grey.shade300, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -419,10 +427,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
               padding: EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 'Select Discount',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
             ),
             items: bookingController.discounts.map((Discount discount) {
@@ -496,11 +501,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.payment,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          Icon(Icons.payment, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Text(
             '£',
@@ -513,9 +514,9 @@ class _PaymentPopupState extends State<PaymentPopup> {
           Expanded(
             child: TextFormField(
               controller: bookingController.advancePaymentController,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -523,9 +524,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
                 disabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 hintText: '0.00',
-                hintStyle: TextStyle(
-                  color: AppColors.textSecondary,
-                ),
+                hintStyle: TextStyle(color: AppColors.textSecondary),
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
               ),
