@@ -192,6 +192,7 @@ class BookingForm extends StatelessWidget {
         ),
         child: Form(
           key: formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -216,95 +217,122 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
                         }
-                        if (value.trim().length < 2) {
+
+                        final trimmedValue = value.trim();
+
+                        // Check minimum length
+                        if (trimmedValue.length < 2) {
                           return 'Name must be at least 2 characters';
                         }
+
+                        // Check for valid name format (only letters and spaces)
+                        final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
+                        if (!nameRegex.hasMatch(trimmedValue)) {
+                          return 'Name should contain only letters and spaces';
+                        }
+
+                        // Check if name has at least one letter (not just spaces)
+                        if (!trimmedValue.contains(RegExp(r'[a-zA-Z]'))) {
+                          return 'Please enter a valid name';
+                        }
+
+                        // Check for excessive spaces
+                        if (trimmedValue.contains(RegExp(r'\s{2,}'))) {
+                          return 'Name should not contain consecutive spaces';
+                        }
+
                         return null;
                       },
                     ),
                   ),
                   const SizedBox(width: 16),
-    Expanded(
-  child: _buildTextField(
-    context: context,
-    controller: controller.emailController,
-    label: 'Email Address',
-    hint: 'your.email@example.com',
-    // keyboardType: TextInputType.emailAddress,
-    // textInputAction: TextInputAction.next,
-    validator: (value) {
-      if (value == null || value.isEmpty) {
-        return 'Please enter your email';
-      }
-      
-      // Enhanced email validation with regex
-      final emailRegex = RegExp(
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-      );
-      
-      if (!emailRegex.hasMatch(value)) {
-        return 'Please enter a valid email address\nExample: your.name@example.com';
-      }
-      
-      // Additional checks
-      if (value.contains('..')) {
-        return 'Email cannot contain consecutive dots';
-      }
-      
-      if (value.startsWith('.') || value.endsWith('.')) {
-        return 'Email cannot start or end with a dot';
-      }
-      
-      return null;
-    },
-  ),
-),           ],
+                  Expanded(
+                    child: _buildTextField(
+                      context: context,
+                      controller: controller.emailController,
+                      label: 'Email Address',
+                      hint: 'your.email@example.com',
+                      // keyboardType: TextInputType.emailAddress,
+                      // textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+
+                        // Enhanced email validation with regex
+                        final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        );
+
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Please enter a valid email address\nExample: your.name@example.com';
+                        }
+
+                        // Additional checks
+                        if (value.contains('..')) {
+                          return 'Email cannot contain consecutive dots';
+                        }
+
+                        if (value.startsWith('.') || value.endsWith('.')) {
+                          return 'Email cannot start or end with a dot';
+                        }
+
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
 
               Row(
                 children: [
-            Expanded(
-  child: _buildTextField(
-    context: context,
-    controller: controller.contactController,
-    label: 'Contact#',
-    hint: '+44-XXX-XXX-XXX',
-    // keyboardType: TextInputType.phone,
-    // inputFormatters: [
-    //   FilteringTextInputFormatter.digitsOnly,
-    //   LengthLimitingTextInputFormatter(15), // Reasonable limit for phone numbers
-    //   // Optional: Add a formatter for phone number formatting
-    //   // _PhoneNumberFormatter(),
-    // ],
-    validator: (value) {
-      if (value == null || value.isEmpty) {
-        return 'Please enter your contact number';
-      }
-      
-      // Remove all non-digit characters for validation
-      final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
-      
-      // Check minimum length
-      if (digitsOnly.length < 8) {
-        return 'Phone number must be at least 8 digits';
-      }
-      
-      // Check maximum length
-      if (digitsOnly.length > 15) {
-        return 'Phone number too long';
-      }
-      
-      // Optional: Specific country code validation
-      if (value.startsWith('+44') && digitsOnly.length != 12) {
-        return 'UK numbers should be 12 digits with country code';
-      }
-      
-      return null;
-    },
-  ),
-),  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      context: context,
+                      controller: controller.contactController,
+                      label: 'Contact#',
+                      hint: '+44-XXX-XXX-XXX',
+                      // keyboardType: TextInputType.phone,
+                      // inputFormatters: [
+                      //   FilteringTextInputFormatter.digitsOnly,
+                      //   LengthLimitingTextInputFormatter(15), // Reasonable limit for phone numbers
+                      //   // Optional: Add a formatter for phone number formatting
+                      //   // _PhoneNumberFormatter(),
+                      // ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your contact number';
+                        }
+
+                        // Remove all non-digit characters for validation
+                        final digitsOnly = value.replaceAll(
+                          RegExp(r'[^0-9]'),
+                          '',
+                        );
+
+                        // Check minimum length
+                        if (digitsOnly.length < 8) {
+                          return 'Phone number must be at least 8 digits';
+                        }
+
+                        // Check maximum length
+                        if (digitsOnly.length > 15) {
+                          return 'Phone number too long';
+                        }
+
+                        // Optional: Specific country code validation
+                        if (value.startsWith('+44') &&
+                            digitsOnly.length != 12) {
+                          return 'UK numbers should be 12 digits with country code';
+                        }
+
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: _buildDropdown(
                       context: context,
@@ -427,11 +455,10 @@ class BookingForm extends StatelessWidget {
                     children: [
                       Text(
                         'Guests',
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -478,7 +505,6 @@ class BookingForm extends StatelessWidget {
                       ),
                     ],
                   ),
-
                 ],
               ),
 
@@ -542,12 +568,37 @@ class BookingForm extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: controller.isFormValid.value
-                          ? () => {controller
-                                .showBookingConfirmation(),
-                                
-                                }
-                          : null,
+                      onPressed: () {
+                        // Validate the form first
+                        if (formKey.currentState?.validate() ?? false) {
+                          // Check if all required reactive fields are filled
+                          if (!controller.isFormValid.value) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Please fill in all required fields',
+                                ),
+                                backgroundColor: Colors.orange,
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                            return;
+                          }
+                          // All validations passed
+                          controller.showBookingConfirmation();
+                        } else {
+                          // Form validation failed
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Please fix the errors in the form',
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: AppColors.primary,
@@ -788,7 +839,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   bool isConfirmed = false;
   bool isEditing = false;
 
-
   late BookingController controller;
 
   late List<Map<String, dynamic>> availableFoodLocal;
@@ -915,8 +965,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     availableFoodLocal = List.from(controller.masterAvailableFood);
     availableServicesLocal = List.from(controller.masterAvailableServices);
 
-    final foodNames = controller.menu['Food Items']!.map((d) => d['name']).toSet();
-    final serviceNames = controller.menu['Services']!.map((d) => d['name']).toSet();
+    final foodNames = controller.menu['Food Items']!
+        .map((d) => d['name'])
+        .toSet();
+    final serviceNames = controller.menu['Services']!
+        .map((d) => d['name'])
+        .toSet();
 
     availableFoodLocal.removeWhere((f) => foodNames.contains(f['name']));
     availableServicesLocal.removeWhere((s) => serviceNames.contains(s['name']));
@@ -938,15 +992,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     return grouped;
   }
 
-
-
   double _parsePriceString(String? priceStr) {
     if (priceStr == null) return 0.0;
     final cleaned = priceStr.replaceAll(RegExp(r'[^0-9.]'), '');
     if (cleaned.isEmpty) return 0.0;
     return double.tryParse(cleaned) ?? 0.0;
   }
-
 
   void removeDish(String category, Map<String, dynamic> dish) {
     setState(() {
@@ -978,7 +1029,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         _syncAvailableListsWithMenu();
       }
     });
-    
+
     // Update controller menu after removal
     _updateControllerMenu();
   }
@@ -1061,7 +1112,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           color: Colors.green,
                                         ),
                                         onPressed: () {
-                                          category=="Services"?null:_autoSwitchToCustomPackage();
+                                          category == "Services"
+                                              ? null
+                                              : _autoSwitchToCustomPackage();
                                           setState(() {
                                             controller.menu[category]!.add({
                                               "name": item["name"],
@@ -1082,16 +1135,28 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                             } else {
                                               //Adding Service in order services list
                                               controller.orderServices.addAll(
-                                                  controller.menu['Services']!
-                                                      .where((service) => service['id'] == item['id'])
-                                                      .map((service) => {
-                                                    'menu_item_id': service['id'], // or whatever field contains the menu_item_id
-                                                    'price': service['price'],
-                                                    'is_deleted': service['is_deleted'] ?? false,
-                                                  })
-                                                      .toList()
+                                                controller.menu['Services']!
+                                                    .where(
+                                                      (service) =>
+                                                          service['id'] ==
+                                                          item['id'],
+                                                    )
+                                                    .map(
+                                                      (service) => {
+                                                        'menu_item_id':
+                                                            service['id'], // or whatever field contains the menu_item_id
+                                                        'price':
+                                                            service['price'],
+                                                        'is_deleted':
+                                                            service['is_deleted'] ??
+                                                            false,
+                                                      },
+                                                    )
+                                                    .toList(),
                                               );
-                                              print("Order Services after adding service: ${controller.orderServices}");
+                                              print(
+                                                "Order Services after adding service: ${controller.orderServices}",
+                                              );
 
                                               availableServicesLocal
                                                   .removeWhere(
@@ -1187,7 +1252,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void _autoSwitchToCustomPackage() {
     // Get current menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Food Items': List<Map<String, dynamic>>.from(
+        controller.menu['Food Items']!,
+      ),
       'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
 
@@ -1206,10 +1273,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void _updateControllerMenu() {
     // Update the controller's custom package menu with current local menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Food Items': List<Map<String, dynamic>>.from(
+        controller.menu['Food Items']!,
+      ),
       'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
-    
+
     controller.updateCustomPackageItems('Custom Package', currentMenu);
   }
 
@@ -1220,10 +1289,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         if (currentQty < controller.guests.value) {
           dish["qty"] = currentQty + 1;
         } else {
-          Get.snackbar(
-            'Maximum Quantity Reached',
-            'Food quantity cannot exceed number of guests (${controller.guests.value})',
-            snackPosition: SnackPosition.BOTTOM,
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Food quantity cannot exceed number of guests (${controller.guests.value})',
+              ),
+            ),
           );
         }
       } else {
@@ -1298,10 +1369,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     onPressed: () {
                       if (isFoodItem &&
                           (dish["qty"] >= controller.guests.value)) {
-                        Get.snackbar(
-                          'Maximum Reached',
-                          'Cannot exceed ${controller.guests.value} guests',
-                          snackPosition: SnackPosition.BOTTOM,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Cannot exceed ${controller.guests.value} guests',
+                            ),
+                          ),
                         );
                       } else {
                         increment(dish, category);
@@ -1384,10 +1457,29 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             summaryRow("Service Cost", controller.serviceCost),
             summaryRow("VAT (20%)", controller.vat),
             const Divider(),
-           Obx(()=>summaryRow("Total Amount", controller.foodAndBeverageCost + controller.serviceCost+controller.vat, isBold: true, fontSize: 18),),
-          Obx(()=>Visibility(
-              visible: controller.isDiscountApplied.value,
-              child: Obx(()=>summaryRow("Grand Total Amount", controller.totalAmount, isBold: true, fontSize: 18),))) ,
+            Obx(
+              () => summaryRow(
+                "Total Amount",
+                controller.foodAndBeverageCost +
+                    controller.serviceCost +
+                    controller.vat,
+                isBold: true,
+                fontSize: 18,
+              ),
+            ),
+            Obx(
+              () => Visibility(
+                visible: controller.isDiscountApplied.value,
+                child: Obx(
+                  () => summaryRow(
+                    "Grand Total Amount",
+                    controller.totalAmount,
+                    isBold: true,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1427,7 +1519,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   void commitEditsToController() {
     // Ensure we have the latest menu state
     final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(controller.menu['Food Items']!),
+      'Food Items': List<Map<String, dynamic>>.from(
+        controller.menu['Food Items']!,
+      ),
       'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
     };
 
@@ -1435,7 +1529,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       controller.selectedPackage.value,
       currentMenu,
     );
-    Get.snackbar('Saved', 'Package updated');
+    // ScaffoldMessenger.of(
+    //   context,
+    // ).showSnackBar(SnackBar(content: Text('Package updated')));
   }
 
   @override

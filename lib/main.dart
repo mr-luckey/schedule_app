@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,18 +5,13 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:schedule_app/APIS/Api_Service.dart';
 
 import 'package:schedule_app/pages/Auth/Login_Signup.dart';
-// import 'package:schedule_app/pages/Edit/editApi.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
-  await ApiService.init();
-  // await EditApiService.init();
   WidgetsFlutterBinding.ensureInitialized();
 
   await ApiService.init();
-
 
   runApp(const BookingScheduleApp());
 }

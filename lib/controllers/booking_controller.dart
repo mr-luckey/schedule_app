@@ -31,7 +31,7 @@ class BookingController extends GetxController {
   final Rx<TimeOfDay?> startTime = Rx<TimeOfDay?>(null);
   final Rx<TimeOfDay?> endTime = Rx<TimeOfDay?>(null);
   final RxInt guests = 1.obs;
-   RxDouble advancePayment = 0.0.obs;
+  RxDouble advancePayment = 0.0.obs;
   final RxString selectedEventType = ''.obs;
   final RxString selectedEventId = ''.obs;
   final RxBool isPackageEditing = false.obs;
@@ -66,7 +66,6 @@ class BookingController extends GetxController {
     super.onInit();
     loadApiData();
 
-
     // Listen to form changes for validation
     ever(selectedCity, (_) => _validateForm());
     ever(selectedDate, (_) => _validateForm());
@@ -78,6 +77,7 @@ class BookingController extends GetxController {
 
     nameController.addListener(_validateForm);
     emailController.addListener(_validateForm);
+    contactController.addListener(_validateForm);
   }
 
   @override
@@ -89,6 +89,7 @@ class BookingController extends GetxController {
     specialRequirementsController.dispose();
     super.onClose();
   }
+
   Future<void> getDiscounts() async {
     try {
       print("Getting discounts");
@@ -148,6 +149,7 @@ class BookingController extends GetxController {
       return double.tryParse(discount.val ?? '0') ?? 0.0;
     }
   }
+
   // Load data from APIs
   Future<void> loadApiData() async {
     isLoading.value = true;
@@ -177,7 +179,8 @@ class BookingController extends GetxController {
           apiServiceItems.value = [];
         }
       } else {
-        errorMessage.value += '\nFailed to load services: ${servicesResult['error']}';
+        errorMessage.value +=
+            '\nFailed to load services: ${servicesResult['error']}';
       }
 
       // Load cities
@@ -302,9 +305,16 @@ class BookingController extends GetxController {
   }
 
   void _validateForm() {
+    // Check if contact number is filled and valid
+    final contactValue = contactController.text;
+    final hasValidContact =
+        contactValue.isNotEmpty &&
+        contactValue.replaceAll(RegExp(r'[^0-9]'), '').length >= 8;
+
     isFormValid.value =
         nameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
+        hasValidContact &&
         selectedCity.value.isNotEmpty &&
         selectedDate.value != null &&
         startTime.value != null &&
@@ -399,7 +409,7 @@ class BookingController extends GetxController {
 
   double calculateSubtotalFromItems() {
     Map<String, List<Map<String, dynamic>>> menu;
-    
+
     // For custom packages, use _customPackageMenu directly
     if (selectedPackage.value == 'Custom Package') {
       menu = _customPackageMenu;
@@ -454,35 +464,29 @@ class BookingController extends GetxController {
   // Confirmation UI
   void showBookingConfirmation() {
     if (!isFormValid.value) {
-      Get.snackbar(
-        'Error',
-        'Please fill in all required fields',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Validation is handled in the UI layer
       return;
     }
 
     // confirmPressCount.value++;
-      Get.dialog(
-        PaymentPopup(
-          eventName: selectedEventType.value,
-          venue: selectedCity.value,
-          date: selectedDate.value!,
-          startTime: startTime.value!,
-          endTime: endTime.value!,
-          guests: guests.value,
-          package: selectedPackage.value,
-          totalAmount: totalAmount,
-          customerName: nameController.text,
-          customerEmail: emailController.text,
-          onConfirm: completeBooking,
-          onCancel: cancelBookingPopup,
-        ),
-      );
-
+    Get.dialog(
+      PaymentPopup(
+        eventName: selectedEventType.value,
+        venue: selectedCity.value,
+        date: selectedDate.value!,
+        startTime: startTime.value!,
+        endTime: endTime.value!,
+        guests: guests.value,
+        package: selectedPackage.value,
+        totalAmount: totalAmount,
+        customerName: nameController.text,
+        customerEmail: emailController.text,
+        onConfirm: completeBooking,
+        onCancel: cancelBookingPopup,
+      ),
+    );
   }
+
   late Map<String, List<Map<String, dynamic>>> menu;
 
   double get foodAndBeverageCost {
@@ -492,7 +496,7 @@ class BookingController extends GetxController {
       return _calculateTotalFromItems();
     } else {
       final pkg = packages.firstWhere(
-            (p) => p['title'] == selectedPackage.value,
+        (p) => p['title'] == selectedPackage.value,
         orElse: () => {},
       );
       final packagePrice = _parsePriceString(pkg['price']?.toString());
@@ -500,6 +504,7 @@ class BookingController extends GetxController {
       return packagePrice * guestCount;
     }
   }
+
   double _calculateTotalFromItems() {
     double total = 0.0;
     for (var dish in menu['Food Items']!) {
@@ -507,8 +512,6 @@ class BookingController extends GetxController {
     }
     return total;
   }
-
-
 
   double get serviceCost {
     double total = 0.0;
@@ -519,29 +522,26 @@ class BookingController extends GetxController {
   }
 
   double get vat => 0.20 * foodAndBeverageCost;
-  double get totalAmount => (foodAndBeverageCost + serviceCost + vat) - discountAmount.value;
+  double get totalAmount =>
+      (foodAndBeverageCost + serviceCost + vat) - discountAmount.value;
 
   void calculateDiscount(Discount discount) {
     if (discount.isPercent == true) {
-       discountAmount.value = (double.parse(discount.val!) / 100) * (foodAndBeverageCost + serviceCost + vat);
+      discountAmount.value =
+          (double.parse(discount.val!) / 100) *
+          (foodAndBeverageCost + serviceCost + vat);
 
       // Apply discount logic here
     } else if (discount.isPercent == false) {
-       discountAmount.value = (double.parse(discount.val!));
+      discountAmount.value = (double.parse(discount.val!));
       // Apply discount logic here
     }
-
   }
+
   Future<void> completeBooking() async {
     try {
       if (!isFormValid.value) {
-        Get.snackbar(
-          'Error',
-          'Please fill in all required fields',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Validation is handled in the UI layer
         return;
       }
 
@@ -551,7 +551,7 @@ class BookingController extends GetxController {
 
       // Prepare order services from the services in the menu
       // List<Map<String, dynamic>> orderServices = [];
-      
+
       // For custom packages, use _customPackageMenu services
       List<Map<String, dynamic>> servicesToProcess = [];
       if (selectedPackage.value == 'Custom Package') {
@@ -559,7 +559,7 @@ class BookingController extends GetxController {
       } else {
         servicesToProcess = menu['Services'] ?? [];
       }
-      
+
       for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
             .expand(
@@ -644,7 +644,7 @@ class BookingController extends GetxController {
 
         // For custom packages, use _customPackageMenu data
         List<Map<String, dynamic>> foodItems = [];
-        
+
         if (selectedPackage.value == 'Custom Package') {
           foodItems = _customPackageMenu['Food Items'] ?? [];
         } else {
@@ -660,7 +660,9 @@ class BookingController extends GetxController {
         String? customPackageId;
         if (selectedPackage.value == 'Custom Package') {
           final customPkg = apiPackages.firstWhere(
-            (pkg) => (pkg['name']?.toString() ?? pkg['title']?.toString()) == 'Custom Package',
+            (pkg) =>
+                (pkg['name']?.toString() ?? pkg['title']?.toString()) ==
+                'Custom Package',
             orElse: () => {},
           );
           customPackageId = customPkg['id']?.toString();
@@ -671,7 +673,9 @@ class BookingController extends GetxController {
         }
 
         orderPackages.add({
-          "package_id": selectedPackage.value == 'Custom Package' ? customPackageId : selectedPackageId.value,
+          "package_id": selectedPackage.value == 'Custom Package'
+              ? customPackageId
+              : selectedPackageId.value,
           "amount": calculateTotal().toStringAsFixed(2),
           "is_custom": isCustomFlag,
           "order_package_items_attributes": packageItems,
@@ -738,44 +742,25 @@ class BookingController extends GetxController {
         confirmPressCount.value = 0;
         Get.back(); // Close popup
 
-
-        Get.snackbar(
-          'Success',
-          'Booking confirmed successfully! Order ID: ${result['data']?['id'] ?? 'N/A'}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Success - navigation will show the confirmation
 
         // Clear form after successful booking
         clearForm();
-        Get.to(()=>SchedulePage());
-
+        Get.to(() => SchedulePage());
       } else {
         throw Exception(result['error'] ?? 'Failed to create order');
       }
     } catch (e) {
       Get.back();
-      Get.snackbar(
-        'Error',
-        'Failed to save booking: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Error handling - can be shown in UI if needed
+      print('Failed to save booking: $e');
     }
   }
 
   Future<void> completeInquiryBooking() async {
     try {
       if (!isFormValid.value) {
-        Get.snackbar(
-          'Error',
-          'Please fill in all required fields',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Validation is handled in the UI layer
         return;
       }
 
@@ -783,8 +768,6 @@ class BookingController extends GetxController {
       final menu = menuForPackage(selectedPackage.value, guests.value);
       final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
-
-      
       // For custom packages, use _customPackageMenu services
       List<Map<String, dynamic>> servicesToProcess = [];
       if (selectedPackage.value == 'Custom Package') {
@@ -792,7 +775,7 @@ class BookingController extends GetxController {
       } else {
         servicesToProcess = menu['Services'] ?? [];
       }
-      
+
       for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
             .expand(
@@ -917,14 +900,20 @@ class BookingController extends GetxController {
         "event_time": formatTimeForApi(startTime.value),
         "start_time": formatTimeForApi(startTime.value),
         "end_time": formatTimeForApi(endTime.value),
-        "requirement": specialRequirementsController.text.isEmpty ? "No special requirements" : specialRequirementsController.text,
+        "requirement": specialRequirementsController.text.isEmpty
+            ? "No special requirements"
+            : specialRequirementsController.text,
         "payment_method_id": 1,
         "total_amount": totalAmount,
         "service_amount": serviceCost,
         "food_beverage_amount": foodAndBeverageCost,
         "discount_amount": discountAmount.value.toString() ?? 0.0,
-        "discount_id": selectedDiscount.value?.id == 0? null:selectedDiscount.value?.id.toString(),
-        "discount": selectedDiscount.value?.id == 0? null:selectedDiscount.value,
+        "discount_id": selectedDiscount.value?.id == 0
+            ? null
+            : selectedDiscount.value?.id.toString(),
+        "discount": selectedDiscount.value?.id == 0
+            ? null
+            : selectedDiscount.value,
         // Include order services if any
         if (orderServices.isNotEmpty)
           "order_services_attributes": orderServices,
@@ -944,13 +933,7 @@ class BookingController extends GetxController {
         confirmPressCount.value = 0;
         Get.back(); // Close popup
 
-        Get.snackbar(
-          'Success',
-          'Inquiry sent successfully! Order ID: ${result['data']?['id'] ?? 'N/A'}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Success - navigation handles confirmation
 
         // Clear form after successful inquiry
         clearForm();
@@ -960,13 +943,8 @@ class BookingController extends GetxController {
       }
     } catch (e) {
       Get.back();
-      Get.snackbar(
-        'Error',
-        'Failed to send inquiry: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Error handling
+      print('Failed to send inquiry: $e');
     }
   }
 
@@ -1134,7 +1112,8 @@ class BookingController extends GetxController {
 
     // Find custom package ID from API packages
     final customPkg = apiPackages.firstWhere(
-      (pkg) => (pkg['name']?.toString() ?? pkg['title']?.toString()) == customTitle,
+      (pkg) =>
+          (pkg['name']?.toString() ?? pkg['title']?.toString()) == customTitle,
       orElse: () => {},
     );
     final customPackageId = customPkg['id']?.toString() ?? '';
@@ -1190,13 +1169,7 @@ class BookingController extends GetxController {
 
   void showInquiry() {
     if (!_validateInquiry()) {
-      Get.snackbar(
-        'Error',
-        'Please fill required fields for an inquiry (date, time, guests, event type).',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Validation is handled in the UI layer
       return;
     }
 
@@ -1242,26 +1215,14 @@ class BookingController extends GetxController {
   }
 
   void _sendInquiry() {
-    Get.snackbar(
-      'Inquiry Sent',
-      'Your inquiry has been sent. We will contact you soon.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+    // Inquiry confirmation - navigation handles UI feedback
   }
 
   // Test methods
   Future<void> testOrderData() async {
     try {
       if (!isFormValid.value) {
-        Get.snackbar(
-          'Error',
-          'Please fill in all required fields before testing',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Validation is handled in the UI layer
         return;
       }
 
@@ -1316,26 +1277,14 @@ class BookingController extends GetxController {
         ),
       );
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error preparing test data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      print('Error preparing test data: $e');
     }
   }
 
   Future<void> testInquiryData() async {
     try {
       if (!isFormValid.value) {
-        Get.snackbar(
-          'Error',
-          'Please fill in all required fields before testing',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Validation is handled in the UI layer
         return;
       }
 
@@ -1389,13 +1338,7 @@ class BookingController extends GetxController {
         ),
       );
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error preparing test data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      print('Error preparing test data: $e');
     }
   }
 }
