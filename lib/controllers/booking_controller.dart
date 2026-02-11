@@ -31,7 +31,12 @@ class BookingController extends GetxController {
   final Rx<TimeOfDay?> startTime = Rx<TimeOfDay?>(null);
   final Rx<TimeOfDay?> endTime = Rx<TimeOfDay?>(null);
   final Rx<String?> selectedTimeSlot = Rx<String?>(null);
-  final List<String> timeSlots = ['1:00 PM - 3:00 PM', '5:00 PM - 7:00 PM'];
+  final List<String> timeSlots = [
+    '11:00 AM - 1:00 PM',
+    '1:00 PM - 3:00 PM',
+    '5:00 PM - 7:00 PM',
+    '7:00 PM - 9:00 PM',
+  ];
   final RxInt guests = 1.obs;
   RxDouble advancePayment = 0.0.obs;
   final RxString selectedEventType = ''.obs;
@@ -369,12 +374,18 @@ class BookingController extends GetxController {
 
   void setTimeSlot(String? slot) {
     selectedTimeSlot.value = slot;
-    if (slot == '1:00 PM - 3:00 PM') {
+    if (slot == '11:00 AM - 1:00 PM') {
+      startTime.value = const TimeOfDay(hour: 11, minute: 0);
+      endTime.value = const TimeOfDay(hour: 13, minute: 0);
+    } else if (slot == '1:00 PM - 3:00 PM') {
       startTime.value = const TimeOfDay(hour: 13, minute: 0);
       endTime.value = const TimeOfDay(hour: 15, minute: 0);
     } else if (slot == '5:00 PM - 7:00 PM') {
       startTime.value = const TimeOfDay(hour: 17, minute: 0);
       endTime.value = const TimeOfDay(hour: 19, minute: 0);
+    } else if (slot == '7:00 PM - 9:00 PM') {
+      startTime.value = const TimeOfDay(hour: 19, minute: 0);
+      endTime.value = const TimeOfDay(hour: 21, minute: 0);
     } else {
       startTime.value = null;
       endTime.value = null;
