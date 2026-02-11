@@ -412,33 +412,17 @@ class BookingForm extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTimeField(
+                    child: _buildDropdown(
                       context: context,
-                      label: 'Start Time',
-                      value: controller.startTime.value,
-                      onTap: () async {
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (time != null) controller.setStartTime(time);
-                        print("TESTING START TIME FIELD");
-                        print(time);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTimeField(
-                      context: context,
-                      label: 'End Time',
-                      value: controller.endTime.value,
-                      onTap: () async {
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (time != null) controller.setEndTime(time);
+                      label: 'Time Slot',
+                      value: controller.selectedTimeSlot.value ?? '',
+                      items: controller.timeSlots,
+                      onChanged: (val) => controller.setTimeSlot(val),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a time slot';
+                        }
+                        return null;
                       },
                     ),
                   ),
@@ -762,57 +746,6 @@ class BookingForm extends StatelessWidget {
                   value != null
                       ? '${value.day}/${value.month}/${value.year}'
                       : 'Pick a Date',
-                  style: TextStyle(
-                    color: value != null
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeField({
-    required BuildContext context,
-    required String label,
-    required TimeOfDay? value,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.access_time,
-                  size: 20,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  value != null
-                      ? value.format(context)
-                      : 'Select ${label.split(' ').last} Time',
                   style: TextStyle(
                     color: value != null
                         ? AppColors.textPrimary

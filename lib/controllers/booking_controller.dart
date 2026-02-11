@@ -30,6 +30,8 @@ class BookingController extends GetxController {
   final Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
   final Rx<TimeOfDay?> startTime = Rx<TimeOfDay?>(null);
   final Rx<TimeOfDay?> endTime = Rx<TimeOfDay?>(null);
+  final Rx<String?> selectedTimeSlot = Rx<String?>(null);
+  final List<String> timeSlots = ['1:00 PM - 3:00 PM', '5:00 PM - 7:00 PM'];
   final RxInt guests = 1.obs;
   RxDouble advancePayment = 0.0.obs;
   final RxString selectedEventType = ''.obs;
@@ -69,8 +71,8 @@ class BookingController extends GetxController {
     // Listen to form changes for validation
     ever(selectedCity, (_) => _validateForm());
     ever(selectedDate, (_) => _validateForm());
-    ever(startTime, (_) => _validateForm());
-    ever(endTime, (_) => _validateForm());
+    ever(selectedDate, (_) => _validateForm());
+    ever(selectedTimeSlot, (_) => _validateForm());
     ever(guests, (_) => _validateForm());
     ever(selectedEventType, (_) => _validateForm());
     ever(selectedPackage, (_) => _validateForm());
@@ -364,6 +366,21 @@ class BookingController extends GetxController {
   }
 
   void setDate(DateTime date) => selectedDate.value = date;
+
+  void setTimeSlot(String? slot) {
+    selectedTimeSlot.value = slot;
+    if (slot == '1:00 PM - 3:00 PM') {
+      startTime.value = const TimeOfDay(hour: 13, minute: 0);
+      endTime.value = const TimeOfDay(hour: 15, minute: 0);
+    } else if (slot == '5:00 PM - 7:00 PM') {
+      startTime.value = const TimeOfDay(hour: 17, minute: 0);
+      endTime.value = const TimeOfDay(hour: 19, minute: 0);
+    } else {
+      startTime.value = null;
+      endTime.value = null;
+    }
+  }
+
   void setStartTime(TimeOfDay time) => startTime.value = time;
   void setEndTime(TimeOfDay time) => endTime.value = time;
   void setGuests(int count) => guests.value = count;
@@ -957,6 +974,8 @@ class BookingController extends GetxController {
     selectedCity.value = '';
     selectedCityId.value = '';
     selectedDate.value = null;
+    selectedDate.value = null;
+    selectedTimeSlot.value = null;
     startTime.value = null;
     endTime.value = null;
     guests.value = 1;
