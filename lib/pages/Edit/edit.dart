@@ -184,7 +184,6 @@ class _EditPageState extends State<EditPage> {
   }
 }
 
-
 class BookingForm extends StatelessWidget {
   const BookingForm({super.key});
 
@@ -285,7 +284,9 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -311,7 +312,10 @@ class BookingForm extends StatelessWidget {
                           return 'Please enter your contact number';
                         }
                         // Remove all non-digit characters for validation
-                        final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        final digitsOnly = value.replaceAll(
+                          RegExp(r'[^0-9]'),
+                          '',
+                        );
                         if (digitsOnly.length < 10) {
                           return 'Contact number must be at least 10 digits';
                         }
@@ -395,31 +399,17 @@ class BookingForm extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTimeField(
+                    child: _buildDropdown(
                       context: context,
-                      label: 'Start Time',
-                      value: controller.startTime.value,
-                      onTap: () async {
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (time != null) controller.setStartTime(time);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTimeField(
-                      context: context,
-                      label: 'End Time',
-                      value: controller.endTime.value,
-                      onTap: () async {
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (time != null) controller.setEndTime(time);
+                      label: 'Time Slot',
+                      value: controller.selectedTimeSlot.value ?? '',
+                      items: controller.timeSlots,
+                      onChanged: (val) => controller.setTimeSlot(val),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a time slot';
+                        }
+                        return null;
                       },
                     ),
                   ),
@@ -436,11 +426,10 @@ class BookingForm extends StatelessWidget {
                     children: [
                       Text(
                         'Guests',
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -464,10 +453,12 @@ class BookingForm extends StatelessWidget {
                                   : null,
                             ),
                             const SizedBox(width: 8),
-                            Obx(() => Text(
-                              controller.guests.value.toString(),
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            )),
+                            Obx(
+                              () => Text(
+                                controller.guests.value.toString(),
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             IconButton(
                               padding: EdgeInsets.zero,
@@ -487,7 +478,7 @@ class BookingForm extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(width: 20,),
+                  SizedBox(width: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -502,7 +493,8 @@ class BookingForm extends StatelessWidget {
                       Container(
                         width: 150, // Add this line
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12, // Increased padding for better appearance
+                          horizontal:
+                              12, // Increased padding for better appearance
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
@@ -512,7 +504,9 @@ class BookingForm extends StatelessWidget {
                         child: TextFormField(
                           controller: controller.advancePaymentController,
                           style: Theme.of(context).textTheme.bodyLarge,
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
@@ -549,7 +543,9 @@ class BookingForm extends StatelessWidget {
 
               // Grid of packages
               Obx(() {
-                print('🔄 Building packages grid with ${controller.packages.length} packages');
+                print(
+                  '🔄 Building packages grid with ${controller.packages.length} packages',
+                );
                 if (controller.packages.isEmpty) {
                   return Container(
                     padding: EdgeInsets.all(20),
@@ -559,7 +555,7 @@ class BookingForm extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -758,57 +754,6 @@ class BookingForm extends StatelessWidget {
       ],
     );
   }
-
-  Widget _buildTimeField({
-    required BuildContext context,
-    required String label,
-    required TimeOfDay? value,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.access_time,
-                  size: 20,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  value != null
-                      ? value.format(context)
-                      : 'Select ${label.split(' ').last} Time',
-                  style: TextStyle(
-                    color: value != null
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class FoodBeverageSelection extends StatefulWidget {
@@ -918,17 +863,12 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // COST CALCULATION METHODS
   // ===========================================================================
 
-
-
   double _parsePriceString(String? priceStr) {
     if (priceStr == null) return 0.0;
     final cleaned = priceStr.replaceAll(RegExp(r'[^0-9.]'), '');
     if (cleaned.isEmpty) return 0.0;
     return double.tryParse(cleaned) ?? 0.0;
   }
-
-
-
 
   // ===========================================================================
   // CUSTOM PACKAGE SWITCHING (matching booking screen)
@@ -939,22 +879,26 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     // Get current menu state from selected items
     final currentMenu = {
       'Food Items': editController.selectedMenuItems
-          .map((item) => {
-                'name': item.name,
-                'price': item.price,
-                'qty': item.qty,
-                'menu_item_id': item.menuItemId,
-                'id': item.id,
-              })
+          .map(
+            (item) => {
+              'name': item.name,
+              'price': item.price,
+              'qty': item.qty,
+              'menu_item_id': item.menuItemId,
+              'id': item.id,
+            },
+          )
           .toList(),
       'Services': editController.selectedServiceItems
-          .map((item) => {
-                'name': item.title,
-                'price': item.price,
-                'qty': item.qty,
-                'menu_item_id': item.serviceId,
-                'id': item.id,
-              })
+          .map(
+            (item) => {
+              'name': item.title,
+              'price': item.price,
+              'qty': item.qty,
+              'menu_item_id': item.serviceId,
+              'id': item.id,
+            },
+          )
           .toList(),
     };
 
@@ -985,7 +929,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       );
       editController.selectedMenuItems.refresh();
       editController.markPackageAsEdited(); // Mark as edited
-      
+
       // Auto switch to custom package when modifying items (like booking screen)
       _autoSwitchToCustomPackage();
     }
@@ -1010,7 +954,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         );
         editController.selectedMenuItems.refresh();
         editController.markPackageAsEdited(); // Mark as edited
-        
+
         // Auto switch to custom package when modifying items (like booking screen)
         _autoSwitchToCustomPackage();
       }
@@ -1044,7 +988,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       qty: editController.guests.value, // Use guest count for food
     );
     editController.markPackageAsEdited(); // Mark as edited
-    
+
     // Auto switch to custom package when modifying items (like booking screen)
     _autoSwitchToCustomPackage();
   }
@@ -1071,7 +1015,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
     editController.markPackageAsEdited(); // Mark as edited
   }
-
 
   // ===========================================================================
   // DIALOG METHODS
@@ -1226,7 +1169,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-
   /// Show dialog to add service items
   void _showAddServiceItemsDialog() {
     final availableMenuItems = availableServiceMenuItems;
@@ -1310,7 +1252,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-
   /// Build item row for display
   Widget buildItemRow(dynamic item, bool isFoodItem) {
     final name = isFoodItem
@@ -1355,32 +1296,35 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove_outlined, size: 20),
-                    onPressed: () => decrementQuantity(item as SelectedMenuItem),
+                    onPressed: () =>
+                        decrementQuantity(item as SelectedMenuItem),
                   ),
                   Text(qty.toString(), style: const TextStyle(fontSize: 16)),
                   IconButton(
                     icon: const Icon(Icons.add, size: 20),
-                    onPressed: () => incrementQuantity(item as SelectedMenuItem),
+                    onPressed: () =>
+                        incrementQuantity(item as SelectedMenuItem),
                   ),
                   // Edit button to input number manually (only for food)
                   IconButton(
                     icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () => _showEditQuantityDialog(item as SelectedMenuItem),
+                    onPressed: () =>
+                        _showEditQuantityDialog(item as SelectedMenuItem),
                   ),
                 ],
               ),
             )
           else if (isFoodItem)
-          // For food items when NOT editing, show simple quantity text
+            // For food items when NOT editing, show simple quantity text
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text("Qty: $qty"),
             )
           else
-          // For non-food items, show simple quantity text
-           SizedBox.shrink(),
+            // For non-food items, show simple quantity text
+            SizedBox.shrink(),
 
-// Remove button (only visible when editing)
+          // Remove button (only visible when editing)
           if (isEditing)
             IconButton(
               icon: const Icon(Icons.close, color: Colors.red, size: 20),
@@ -1403,14 +1347,37 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               "Food & Beverage",
               editController.foodAndBeverageCost.toStringAsFixed(2),
             ),
-            _summaryRow("Service Cost", editController.serviceCost.toStringAsFixed(2)),
+            _summaryRow(
+              "Service Cost",
+              editController.serviceCost.toStringAsFixed(2),
+            ),
             _summaryRow("VAT (20%)", editController.vat.toStringAsFixed(2)),
             const Divider(),
             // _summaryRow("Total Amount", editController.totalAmount.toStringAsFixed(2), isBold: true, fontSize: 18,),
-            Obx(()=>_summaryRow("Total Amount", (editController.foodAndBeverageCost + editController.serviceCost+editController.vat).toStringAsFixed(2), isBold: true, fontSize: 18),),
-            Obx(()=>Visibility(
+            Obx(
+              () => _summaryRow(
+                "Total Amount",
+                (editController.foodAndBeverageCost +
+                        editController.serviceCost +
+                        editController.vat)
+                    .toStringAsFixed(2),
+                isBold: true,
+                fontSize: 18,
+              ),
+            ),
+            Obx(
+              () => Visibility(
                 visible: editController.isDiscountApplied.value,
-                child: Obx(()=>_summaryRow("Grand Total Amount", editController.totalAmount.toStringAsFixed(2), isBold: true, fontSize: 18),))) ,
+                child: Obx(
+                  () => _summaryRow(
+                    "Grand Total Amount",
+                    editController.totalAmount.toStringAsFixed(2),
+                    isBold: true,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1529,10 +1496,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       packageTitle.isEmpty
                           ? "No Package Selected"
                           : packageTitle,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 16),
@@ -1664,8 +1628,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             try {
                               // final success = await editController
                               //     .completeEdit();
-                                editController
-                                  .showEditConfirmation();
+                              editController.showEditConfirmation();
                               // Get.offAll(() => SchedulePage());
 
                               // Hide loading
