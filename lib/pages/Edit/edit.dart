@@ -385,10 +385,23 @@ class BookingForm extends StatelessWidget {
                       label: 'Event Date',
                       value: controller.selectedDate.value,
                       onTap: () async {
+                        final now = DateTime.now();
+                        final firstDate = DateTime(
+                          now.year,
+                          now.month,
+                          now.day,
+                        );
+                        final initialDate =
+                            controller.selectedDate.value ?? firstDate;
+                        // Ensure initialDate is not before firstDate (e.g. if editing a past event)
+                        final validInitialDate = initialDate.isBefore(firstDate)
+                            ? firstDate
+                            : initialDate;
+
                         final date = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
+                          initialDate: validInitialDate,
+                          firstDate: firstDate,
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
                           ),

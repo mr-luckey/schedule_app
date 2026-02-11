@@ -398,10 +398,17 @@ class BookingForm extends StatelessWidget {
                       label: 'Event Date',
                       value: controller.selectedDate.value,
                       onTap: () async {
+                        final now = DateTime.now();
+                        final firstDate = DateTime(
+                          now.year,
+                          now.month,
+                          now.day,
+                        );
                         final date = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
+                          initialDate:
+                              controller.selectedDate.value ?? firstDate,
+                          firstDate: firstDate,
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
                           ),
