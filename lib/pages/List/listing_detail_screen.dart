@@ -3,19 +3,15 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/pages/List/home_controller.dart';
 import 'package:schedule_app/pages/List/order_model%20(1).dart';
-import 'package:schedule_app/pages/List/payment_controller.dart';
-
 
 class ListingDetailScreen extends StatelessWidget {
   final OrderList order;
 
-   ListingDetailScreen({Key? key, required this.order}) : super(key: key);
-  final PaymentController paymentController = Get.put(PaymentController());
+  ListingDetailScreen({Key? key, required this.order}) : super(key: key);
+
   final HomeController homeController = Get.put(HomeController());
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
@@ -35,12 +31,7 @@ class ListingDetailScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  _buildContent(paymentController),
-                ],
-              ),
+              child: Column(children: [_buildHeader(), _buildContent()]),
             ),
           ),
         ),
@@ -79,10 +70,7 @@ class ListingDetailScreen extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       '${order.event?.title ?? 'Wedding'} - ${_formatDate(order.eventDate)}',
-                      style: TextStyle(
-                        fontSize: 17.6,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 17.6, color: Colors.white),
                     ),
                   ],
                 ),
@@ -100,7 +88,10 @@ class ListingDetailScreen extends StatelessWidget {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -113,7 +104,7 @@ class ListingDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(PaymentController paymentController) {
+  Widget _buildContent() {
     return Padding(
       padding: const EdgeInsets.all(40),
       child: Column(
@@ -124,12 +115,10 @@ class ListingDetailScreen extends StatelessWidget {
           if (order.orderPackages != null && order.orderPackages!.isNotEmpty)
             _buildFoodTable(),
           const SizedBox(height: 40),
-          if (order.orderServices != null && order.orderServices!.isNotEmpty )
+          if (order.orderServices != null && order.orderServices!.isNotEmpty)
             _buildServicesTable(),
 
           _buildPricingSummary(),
-          const SizedBox(height: 30),
-          _buildPaymentPanel(paymentController),
         ],
       ),
     );
@@ -163,17 +152,61 @@ class ListingDetailScreen extends StatelessWidget {
               spacing: 20,
               runSpacing: 20,
               children: [
-                _buildDetailCard('Customer Name', '${order.firstname ?? ''} ${order.lastname ?? ''}', constraints.maxWidth),
-                _buildDetailCard('Event Date', _formatDate(order.eventDate), constraints.maxWidth),
-                _buildDetailCard('Time', '${homeController.formatTime(order.startTime!) ?? ''} - ${homeController.formatTime(order.endTime!) ?? ''}', constraints.maxWidth),
-                _buildDetailCard('Guests', '${order.noOfGust ?? '0'} persons', constraints.maxWidth),
-                _buildDetailCard('Package', order.orderPackages?.first.package?.title ?? 'N/A', constraints.maxWidth),
-                _buildDetailCard('Venue', '${order.address ?? ''}, ${order.city?.name ?? ''}', constraints.maxWidth),
-                _buildDetailCard('Contact', order.phone ?? 'N/A', constraints.maxWidth),
-                _buildDetailCard('Email', order.email ?? 'N/A', constraints.maxWidth),
-                _buildDetailCard('Reference', 'ORDER-${order.id}', constraints.maxWidth),
-                _buildDetailCard('Payment Method', order.paymentMethod?.title ?? 'N/A', constraints.maxWidth),
-                _buildDetailCard('Status', order.isInquiry == true ? 'INQUIRY' : 'BOOKING', constraints.maxWidth),
+                _buildDetailCard(
+                  'Customer Name',
+                  '${order.firstname ?? ''} ${order.lastname ?? ''}',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Event Date',
+                  _formatDate(order.eventDate),
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Time',
+                  '${homeController.formatTime(order.startTime!) ?? ''} - ${homeController.formatTime(order.endTime!) ?? ''}',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Guests',
+                  '${order.noOfGust ?? '0'} persons',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Package',
+                  order.orderPackages?.first.package?.title ?? 'N/A',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Venue',
+                  '${order.address ?? ''}, ${order.city?.name ?? ''}',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Contact',
+                  order.phone ?? 'N/A',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Email',
+                  order.email ?? 'N/A',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Reference',
+                  'ORDER-${order.id}',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Payment Method',
+                  order.paymentMethod?.title ?? 'N/A',
+                  constraints.maxWidth,
+                ),
+                _buildDetailCard(
+                  'Status',
+                  order.isInquiry == true ? 'INQUIRY' : 'BOOKING',
+                  constraints.maxWidth,
+                ),
               ],
             );
           },
@@ -228,12 +261,13 @@ class ListingDetailScreen extends StatelessWidget {
       // Iterate through each package
       for (var orderPackage in order.orderPackages!) {
         print("Processing Package: ${orderPackage.package?.title}");
-        print("Package Items Count: ${orderPackage.orderPackageItems?.length ?? 0}");
+        print(
+          "Package Items Count: ${orderPackage.orderPackageItems?.length ?? 0}",
+        );
 
         // Check if this package has items
         if (orderPackage.orderPackageItems != null &&
             orderPackage.orderPackageItems!.isNotEmpty) {
-
           // Add each item from this package
           for (var packageItem in orderPackage.orderPackageItems!) {
             final menuItem = packageItem.menuItem;
@@ -250,19 +284,23 @@ class ListingDetailScreen extends StatelessWidget {
 
             // Parse quantity from packageItem.noOfGust
             int qty = 1;
-            if (packageItem.noOfGust != null && packageItem.noOfGust!.isNotEmpty) {
+            if (packageItem.noOfGust != null &&
+                packageItem.noOfGust!.isNotEmpty) {
               qty = int.tryParse(packageItem.noOfGust!) ?? 1;
             }
 
             double amount = rate * qty;
 
-            print("  Item: $menuItemTitle, ID: $menuItemId, Qty: $qty, Rate: $rate, Amount: $amount");
+            print(
+              "  Item: $menuItemTitle, ID: $menuItemId, Qty: $qty, Rate: $rate, Amount: $amount",
+            );
 
             // Add to list (avoiding duplicates based on menu item ID and quantity)
-            bool isDuplicate = foodItems.any((item) =>
-            item['id'] == menuItemId &&
-                item['title'] == menuItemTitle &&
-                item['qty'] == qty
+            bool isDuplicate = foodItems.any(
+              (item) =>
+                  item['id'] == menuItemId &&
+                  item['title'] == menuItemTitle &&
+                  item['qty'] == qty,
             );
 
             if (!isDuplicate) {
@@ -304,10 +342,7 @@ class ListingDetailScreen extends StatelessWidget {
             ),
             child: Text(
               'No food items available',
-              style: TextStyle(
-                color: const Color(0xFF718096),
-                fontSize: 14.4,
-              ),
+              style: TextStyle(color: const Color(0xFF718096), fontSize: 14.4),
             ),
           ),
         ],
@@ -347,44 +382,40 @@ class ListingDetailScreen extends StatelessWidget {
             ),
             columnWidths: (order.orderPackages!.first.isCustom == true)
                 ? const {
-              0: FlexColumnWidth(3),
-              1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
-              3: FlexColumnWidth(1),
-            }
-                : const {
-              0: FlexColumnWidth(1),
-            },
+                    0: FlexColumnWidth(3),
+                    1: FlexColumnWidth(1),
+                    2: FlexColumnWidth(1),
+                    3: FlexColumnWidth(1),
+                  }
+                : const {0: FlexColumnWidth(1)},
             children: [
               // Header Row
               TableRow(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF8FAFB),
-                ),
+                decoration: const BoxDecoration(color: Color(0xFFF8FAFB)),
                 children: (order.orderPackages!.first.isCustom == true)
                     ? [
-                  _buildTableHeader('Item'),
-                  _buildTableHeader('Quantity'),
-                  _buildTableHeader('Unit Price'),
-                  _buildTableHeader('Total'),
-                ]
-                    : [
-                  _buildTableHeader('Item'),
-                ],
+                        _buildTableHeader('Item'),
+                        _buildTableHeader('Quantity'),
+                        _buildTableHeader('Unit Price'),
+                        _buildTableHeader('Total'),
+                      ]
+                    : [_buildTableHeader('Item')],
               ),
               // Data Rows
               ...foodItems.map((item) {
                 return TableRow(
                   children: (order.orderPackages!.first.isCustom == true)
                       ? [
-                    _buildTableCell(item['title']),
-                    _buildTableCell(item['qty'].toString()),
-                    _buildTableCell('£${item['rate'].toStringAsFixed(2)}'),
-                    _buildTableCell('£${item['amount'].toStringAsFixed(2)}'),
-                  ]
-                      : [
-                    _buildTableCell(item['title']),
-                  ],
+                          _buildTableCell(item['title']),
+                          _buildTableCell(item['qty'].toString()),
+                          _buildTableCell(
+                            '£${item['rate'].toStringAsFixed(2)}',
+                          ),
+                          _buildTableCell(
+                            '£${item['amount'].toStringAsFixed(2)}',
+                          ),
+                        ]
+                      : [_buildTableCell(item['title'])],
                 );
               }).toList(),
             ],
@@ -394,7 +425,7 @@ class ListingDetailScreen extends StatelessWidget {
     );
   }
 
-// Helper method for table headers
+  // Helper method for table headers
   Widget _buildTableHeader(String text) {
     return Padding(
       padding: const EdgeInsets.all(14),
@@ -409,16 +440,13 @@ class ListingDetailScreen extends StatelessWidget {
     );
   }
 
-// Helper method for table cells
+  // Helper method for table cells
   Widget _buildTableCell(String text) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 14.4,
-          color: const Color(0xFF1A202C),
-        ),
+        style: TextStyle(fontSize: 14.4, color: const Color(0xFF1A202C)),
       ),
     );
   }
@@ -461,9 +489,7 @@ class ListingDetailScreen extends StatelessWidget {
             },
             children: [
               TableRow(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF8FAFB),
-                ),
+                decoration: const BoxDecoration(color: Color(0xFFF8FAFB)),
                 children: [
                   _buildTableHeader('Service'),
                   // _buildTableHeader('Rate'),
@@ -471,7 +497,8 @@ class ListingDetailScreen extends StatelessWidget {
                 ],
               ),
               ...order.orderServices!.map((service) {
-                double rate = double.tryParse(service.price.toString() ?? '0') ?? 0;
+                double rate =
+                    double.tryParse(service.price.toString() ?? '0') ?? 0;
                 //TODO: Handle  quantity gracefully
                 int qty = 1;
                 // int qty = int.tryParse(service.quantity ?? '1') ?? 1;
@@ -493,7 +520,6 @@ class ListingDetailScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildPricingSummary() {
     // double servicesTotal = 0;
     // if (order.orderServices != null) {
@@ -513,16 +539,14 @@ class ListingDetailScreen extends StatelessWidget {
     //   }
     // }
 
-
     double serviceCharge = double.tryParse(order.serviceAmount!)!;
     double foodBeverageCharges = double.tryParse(order.foodBeverageAmount!)!;
     double netAmount = serviceCharge + foodBeverageCharges;
     double vat = netAmount * 0.20;
     double discount = 0.0; // Assuming no discount for now
 
-
     double totalAmount = double.tryParse(order.totalAmount!)!;
-    double subtotalAfterDiscount =  totalAmount- discount;
+    double subtotalAfterDiscount = totalAmount - discount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,13 +578,28 @@ class ListingDetailScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildPriceRow('Services Subtotal:', '£${serviceCharge.toStringAsFixed(2)}'),
-              _buildPriceRow('Food and Beverage Subtotal:', '£${foodBeverageCharges.toStringAsFixed(2)}'),
+              _buildPriceRow(
+                'Services Subtotal:',
+                '£${serviceCharge.toStringAsFixed(2)}',
+              ),
+              _buildPriceRow(
+                'Food and Beverage Subtotal:',
+                '£${foodBeverageCharges.toStringAsFixed(2)}',
+              ),
               _buildPriceRow('Net Amount:', '£${netAmount.toStringAsFixed(2)}'),
-              _buildPriceRow('Discount (0%):', '-£${discount.toStringAsFixed(2)}'),
-              _buildPriceRow('Subtotal after Discount:', '£${subtotalAfterDiscount.toStringAsFixed(2)}'),
+              _buildPriceRow(
+                'Discount (0%):',
+                '-£${discount.toStringAsFixed(2)}',
+              ),
+              _buildPriceRow(
+                'Subtotal after Discount:',
+                '£${subtotalAfterDiscount.toStringAsFixed(2)}',
+              ),
               _buildPriceRow('VAT @ 20%:', '£${vat.toStringAsFixed(2)}'),
-              _buildTotalRow('TOTAL AMOUNT:', '£${totalAmount.toStringAsFixed(2)}'),
+              _buildTotalRow(
+                'TOTAL AMOUNT:',
+                '£${totalAmount.toStringAsFixed(2)}',
+              ),
             ],
           ),
         ),
@@ -572,17 +611,12 @@ class ListingDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: const Color(0xFFE2E8F0)),
-        ),
+        border: Border(bottom: BorderSide(color: const Color(0xFFE2E8F0))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 15.2),
-          ),
+          Text(label, style: TextStyle(fontSize: 15.2)),
           Text(
             amount,
             style: TextStyle(fontSize: 15.2, fontWeight: FontWeight.w500),
@@ -618,241 +652,6 @@ class ListingDetailScreen extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: const Color(0xFF10B981),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentPanel(PaymentController controller) {
-    return Container(
-      padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFFD1FAE5),
-            const Color(0xFFA7F3D0),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF10B981), width: 2),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Payment Received',
-            style: TextStyle(
-              color: const Color(0xFF065F46),
-              fontSize: 19.2,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-
-            margin: EdgeInsets.only(bottom: 20),
-            padding: EdgeInsets.all(10),
-
-            decoration: BoxDecoration(
-              color: Colors.white,
-              // gradient: LinearGradient(
-              //   begin: Alignment.topLeft,
-              //   end: Alignment.bottomRight,
-              //   colors: [
-              //     const Color(0xFFD1FAE5),
-              //     const Color(0xFFA7F3D0),
-              //   ],
-              // ),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF10B981), width: 2),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Payment Type',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF065F46),
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(
-                          'Amount Received', // Replace with actual initial amount
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF065F46),
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(
-                          'Received Date', // Replace with actual initial amount
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF065F46),
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Initial Amount (£)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF065F46),
-                            fontSize: 14.4,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(
-                          '5000.00', // Replace with actual initial amount
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF065F46),
-                            fontSize: 14.4,
-                          ),
-                        ),
-                      ),const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(
-                          '10-10-2025', // Replace with actual initial amount
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF065F46),
-                            fontSize: 14.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              ],
-            ),
-          ),
-          SizedBox(height: 10,),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Payment Amount (£)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF065F46),
-                        fontSize: 14.4,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: controller.amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '0.00',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.all(12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Payment Type',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF065F46),
-                        fontSize: 14.4,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Obx(() => DropdownButtonFormField<String>(
-                      value: controller.paymentType.value.isEmpty ? null : controller.paymentType.value,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: const Color(0xFF10B981), width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.all(12),
-                      ),
-                      hint: Text('Select Type'),
-                      items: [
-                        DropdownMenuItem(value: 'second', child: Text('Second Payment')),
-                        DropdownMenuItem(value: 'intermediate', child: Text('Intermediate Payment')),
-                        DropdownMenuItem(value: 'final', child: Text('Final Payment')),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.paymentType.value = value;
-                        }
-                      },
-                    )),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
