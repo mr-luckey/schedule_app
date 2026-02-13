@@ -14,11 +14,35 @@ class CalendarsController extends GetxController {
   final RxList<Event> EditapiEvents = <Event>[].obs;
   Future<void> loadEventsFromApi() async {
     try {
-      final List<Event> apiEvents = await ApiService.getOrders();
+      final List<Event> allEvents = await ApiService.getOrders();
+
+      // Separate bookings and inquiries
+      final bookings = allEvents.where((e) => !e.isInquiry).toList();
+      final inquiries = allEvents.where((e) => e.isInquiry).toList();
+
+      final List<Event> visibleEvents = [...bookings];
+
+      // Add inquiries only if they don't overlap with any booking
+      for (final inquiry in inquiries) {
+        bool isSuperseded = false;
+        for (final booking in bookings) {
+          // Check if inquiry overlaps with booking
+          // Overlap logic: (StartA < EndB) and (EndA > StartB)
+          if (inquiry.startTime.isBefore(booking.endTime) &&
+              inquiry.endTime.isAfter(booking.startTime)) {
+            isSuperseded = true;
+            break;
+          }
+        }
+
+        if (!isSuperseded) {
+          visibleEvents.add(inquiry);
+        }
+      }
 
       events
         ..clear()
-        ..addAll(apiEvents.map((e) => e.toCalendarEvent()));
+        ..addAll(visibleEvents.map((e) => e.toCalendarEvent()));
     } catch (e) {
       print('❌ _loadEventsFromApi error: $e');
     }

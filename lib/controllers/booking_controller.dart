@@ -557,6 +557,11 @@ class BookingController extends GetxController {
         print("DEBUG: New booking time: $newStart - $newEnd");
 
         for (final order in ordersOnDate) {
+          // Skip if the existing order is an inquiry (inquiries don't block anything)
+          if (order.isInquiry == true) {
+            continue;
+          }
+
           String? sTime = order.startTime ?? order.eventTime;
           String? eTime = order.endTime;
 
@@ -973,6 +978,15 @@ class BookingController extends GetxController {
     try {
       if (!isFormValid.value) {
         // Validation is handled in the UI layer
+        return;
+      }
+
+      // Check availability before proceeding
+      // Inquiries are blocked by Bookings, but not by other Inquiries.
+      // checkAvailability() now handles this by ignoring existing inquiries.
+      final isAvailable = await checkAvailability();
+      if (!isAvailable) {
+        // Error dialog is shown in checkAvailability
         return;
       }
 

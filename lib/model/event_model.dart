@@ -15,6 +15,7 @@ class Event {
   final String specialRequirements;
   final Color color;
   final int? guests;
+  final bool isInquiry;
 
   Event({
     required this.id,
@@ -28,6 +29,7 @@ class Event {
     required this.specialRequirements,
     required this.color,
     this.guests,
+    this.isInquiry = false,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -71,7 +73,6 @@ class Event {
     final timeRange =
         '${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}';
 
-
     return Event(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
       title: json['title'] ?? json['event_type'] ?? 'Booking',
@@ -90,6 +91,7 @@ class Event {
           json['description'] ??
           '',
       guests: guests,
+      isInquiry: json['is_inquiry'] == true,
     );
   }
 
