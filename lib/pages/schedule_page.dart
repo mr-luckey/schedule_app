@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -11,6 +10,7 @@ import 'package:schedule_app/pages/List/home_controller.dart';
 import 'package:schedule_app/pages/List/listing_screen.dart';
 // import 'package:schedule_app/pages/List/ListScreen.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../APIS/shared_prefs_service.dart';
 import '../model/user_model.dart';
@@ -48,9 +48,6 @@ class _SchedulePageState extends State<SchedulePage> {
     super.initState();
     calendarsController.loadEventsFromApi();
     homeController.fetchOrders();
-
-
-
   }
 
   void _goToToday() {
@@ -428,14 +425,13 @@ class _SidebarState extends State<Sidebar> {
   String _selectedFilter = 'Confirmed';
   UserModel? currentUser;
 
-
   @override
   void initState() {
-    super.initState();//
+    super.initState(); //
     getUserData();
   }
 
-  getUserData()async{
+  getUserData() async {
     currentUser = await SharedPrefsService.getUserData();
     if (currentUser != null) {
       // print('Welcome ${currentUser!.name}');
@@ -443,6 +439,7 @@ class _SidebarState extends State<Sidebar> {
       // print('Your token: ${currentUser!.token}');
     }
   }
+
   String _getInitials(String name) {
     if (name.isEmpty) return 'U'; // Default for empty name
 
@@ -460,6 +457,7 @@ class _SidebarState extends State<Sidebar> {
       return '${firstInitial.toUpperCase()}${secondInitial.toUpperCase()}';
     }
   }
+
   void _showLogoutPopup() {
     showDialog(
       context: context,
@@ -479,10 +477,7 @@ class _SidebarState extends State<Sidebar> {
                 Navigator.of(context).pop(); // Close dialog
                 _performLogout();
               },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -496,7 +491,6 @@ class _SidebarState extends State<Sidebar> {
       await SharedPrefsService.clearUserData();
       await ApiService.clearToken();
 
-
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -506,7 +500,7 @@ class _SidebarState extends State<Sidebar> {
       );
 
       // Navigate to login screen
-      Get.offAll(()=>AuthScreen());
+      Get.offAll(() => AuthScreen());
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -679,6 +673,45 @@ class _SidebarState extends State<Sidebar> {
                       widget.onSectionChanged(AppSection.settings);
                     },
                   ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Divider(color: AppColors.border, thickness: 0.5),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12, bottom: 8),
+                    child: Text(
+                      'Resources',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.history,
+                    label: 'Package 2025',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-package-Sheet-2025-Oct-v5.pdf',
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.description_outlined,
+                    label: 'Packages 2026',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-Catering-Package-Sheet-2026.pdf',
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.restaurant_menu,
+                    label: 'Menus Feb 2026',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-Menu-Sheet-Feb-2026.pdf',
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -698,9 +731,11 @@ class _SidebarState extends State<Sidebar> {
                       color: Colors.pink,
                       shape: BoxShape.circle,
                     ),
-                    child:  Center(
+                    child: Center(
                       child: Text(
-                          _getInitials(currentUser != null ? currentUser!.name : 'User Name'),
+                        _getInitials(
+                          currentUser != null ? currentUser!.name : 'User Name',
+                        ),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -710,7 +745,7 @@ class _SidebarState extends State<Sidebar> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                   Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -744,6 +779,13 @@ class _SidebarState extends State<Sidebar> {
         ],
       ),
     );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
 
@@ -932,6 +974,45 @@ class _DrawerContentState extends State<DrawerContent> {
                       Navigator.pop(context); // Close drawer
                     },
                   ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Divider(color: AppColors.border, thickness: 0.5),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12, bottom: 8),
+                    child: Text(
+                      'Resources',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.history,
+                    label: 'Package 2025',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-package-Sheet-2025-Oct-v5.pdf',
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.description_outlined,
+                    label: 'Packages 2026',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-Catering-Package-Sheet-2026.pdf',
+                    ),
+                  ),
+                  NavItem(
+                    icon: Icons.restaurant_menu,
+                    label: 'Menus Feb 2026',
+                    isSelected: false,
+                    onTap: () => _launchURL(
+                      'assets/assets/Quaid-E-Azam-Menu-Sheet-Feb-2026.pdf',
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -994,5 +1075,12 @@ class _DrawerContentState extends State<DrawerContent> {
         ],
       ),
     );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
