@@ -9,9 +9,6 @@ import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
 import 'package:schedule_app/widgets/schedule_header.dart';
-import 'package:schedule_app/pages/schedule_page.dart' hide Sidebar;
-
-import 'models/model.dart';
 
 // ignore: must_be_immutable
 class EditPage extends StatefulWidget {

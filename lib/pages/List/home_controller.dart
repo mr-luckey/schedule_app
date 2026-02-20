@@ -6,9 +6,9 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:schedule_app/APIS/Api_Service.dart';
-import 'package:schedule_app/pages/List/order_model%20(1).dart';
+import 'package:schedule_app/model/order/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import '../models/order_model.dart';
+// import 'package:schedule_app/model/order/order_model.dart';
 
 enum CalendarViewType { monthly, weekly, daily }
 
@@ -16,7 +16,7 @@ class HomeController extends GetxController {
   var currentView = CalendarViewType.monthly.obs;
   var currentTab = 'booking'.obs;
   var isLoading = false.obs;
-  var orders = <OrderList>[].obs;
+  var orders = <OrderModel>[].obs;
   var selectedDate = DateTime.now().obs;
   var showBookingForm = false.obs;
 
@@ -45,7 +45,7 @@ class HomeController extends GetxController {
 Future<void> fetchOrders() async {
   try {
     isLoading.value = true;
-    final List<OrderList> fetchedOrders = await ApiService.fetchOrders();
+    final List<OrderModel> fetchedOrders = await ApiService.fetchOrders();
     orders.assignAll(fetchedOrders);
     // print('Successfully loaded ${orders.length} orders');
   } catch (e) {
@@ -98,11 +98,11 @@ Future<void> fetchOrders() async {
   //       }
 
   //       // Parse orders with better error handling
-  //       final List<OrderList> parsedOrders = [];
+  //       final List<OrderModel> parsedOrders = [];
   //       for (var item in ordersList) {
   //         try {
   //           if (item is Map<String, dynamic>) {
-  //             final order = OrderList.fromJson(item);
+  //             final order = OrderModel.fromJson(item);
   //             parsedOrders.add(order);
   //           }
   //         } catch (e) {
@@ -139,7 +139,7 @@ Future<void> fetchOrders() async {
   // }
 
   // Get orders for a specific date
-  List<OrderList> getOrdersForDate(DateTime date) {
+  List<OrderModel> getOrdersForDate(DateTime date) {
     return orders.where((order) {
       try {
         if (order.eventDate == null) return false;
@@ -156,7 +156,7 @@ Future<void> fetchOrders() async {
   }
 
   // Get orders for a specific date and time slot
-  List<OrderList> getOrdersForTimeSlot(DateTime date, int hour) {
+  List<OrderModel> getOrdersForTimeSlot(DateTime date, int hour) {
     return getOrdersForDate(date).where((order) {
       try {
         if (order.startTime == null) return false;
@@ -171,7 +171,7 @@ Future<void> fetchOrders() async {
   }
 
   // Get orders for a specific hour in weekly view
-  List<OrderList> getOrdersForHour(DateTime date, int hour) {
+  List<OrderModel> getOrdersForHour(DateTime date, int hour) {
     return getOrdersForDate(date).where((order) {
       try {
         if (order.startTime == null) return false;
@@ -216,7 +216,7 @@ Future<void> fetchOrders() async {
   }
 
   // Get orders for a specific week
-  List<OrderList> getOrdersForWeek(DateTime startOfWeek) {
+  List<OrderModel> getOrdersForWeek(DateTime startOfWeek) {
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
     return orders.where((order) {
       try {
@@ -256,27 +256,27 @@ Future<void> fetchOrders() async {
   }
 
   // Safe check for isInquiry with null handling
-  bool getIsInquiry(OrderList order) {
+  bool getIsInquiry(OrderModel order) {
     return order.isInquiry ?? false;
   }
 
   // Get color based on inquiry status
-  Color getOrderColor(OrderList order) {
+  Color getOrderColor(OrderModel order) {
     return getIsInquiry(order) ? Colors.red : Colors.green;
   }
 
   // Get background color based on inquiry status
-  Color getOrderBackgroundColor(OrderList order) {
+  Color getOrderBackgroundColor(OrderModel order) {
     return getIsInquiry(order) ? const Color(0xFFFECACA) : const Color(0xFFDCFCE7);
   }
 
   // Get border color based on inquiry status
-  Color getOrderBorderColor(OrderList order) {
+  Color getOrderBorderColor(OrderModel order) {
     return getIsInquiry(order) ? const Color(0xFFFCA5A5) : const Color(0xFF86EFAC);
   }
 
   // Filter orders based on confirmed/inquiry status
-  List<OrderList> getFilteredOrders(List<OrderList> ordersToFilter) {
+  List<OrderModel> getFilteredOrders(List<OrderModel> ordersToFilter) {
     return ordersToFilter.where((order) {
       if (currentTab.value == 'booking') {
         return !getIsInquiry(order); // Show only confirmed orders

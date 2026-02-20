@@ -1,0 +1,475 @@
+Analyzing schedule_app...                                       
+
+   info • The file name 'Api_Service.dart' isn't a lower_case_with_underscores identifier • lib/APIS/Api_Service.dart:1:1 • file_names
+   info • The private field _isInitialized could be 'final' • lib/APIS/Api_Service.dart:18:15 • prefer_final_fields
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:92:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:93:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:94:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:95:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:97:11 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/APIS/Api_Service.dart:237:31 • unnecessary_brace_in_string_interps
+warning • The declaration '_parseError' isn't referenced • lib/APIS/Api_Service.dart:241:17 • unused_element
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:353:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:363:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:379:7 • avoid_print
+   info • The variable name 'OrderModel' isn't a lowerCamelCase identifier • lib/APIS/Api_Service.dart:387:35 • non_constant_identifier_names
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:391:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:392:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:401:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:402:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:417:7 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/APIS/Api_Service.dart:479:44 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/APIS/Api_Service.dart:479:55 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:700:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:712:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:713:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:723:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/Api_Service.dart:732:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/APIS/shared_prefs_service.dart:39:9 • avoid_print
+warning • Unused import: '../pages/booking_recipt.dart' • lib/controllers/booking_controller.dart:11:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:103:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:130:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:132:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:133:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:137:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:528:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:530:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:535:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:546:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:557:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:577:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:582:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:587:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:656:7 • avoid_print
+   info • The local variable '_resolveMenuItemId' starts with an underscore • lib/controllers/booking_controller.dart:811:14 • no_leading_underscores_for_local_identifiers
+   info • The local variable '_addEntryToPackageItems' starts with an underscore • lib/controllers/booking_controller.dart:843:14 • no_leading_underscores_for_local_identifiers
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:950:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:973:7 • avoid_print
+   info • The local variable '_resolveMenuItemId' starts with an underscore • lib/controllers/booking_controller.dart:1035:14 • no_leading_underscores_for_local_identifiers
+   info • The local variable '_addEntryToPackageItems' starts with an underscore • lib/controllers/booking_controller.dart:1067:14 • no_leading_underscores_for_local_identifiers
+warning • The left operand can't be null, so the right operand is never executed • lib/controllers/booking_controller.dart:1136:63 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:1150:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:1173:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:1508:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/booking_controller.dart:1569:7 • avoid_print
+   info • The variable name 'Editevent' isn't a lowerCamelCase identifier • lib/controllers/calender_controller.dart:13:31 • non_constant_identifier_names
+   info • The variable name 'EditapiEvents' isn't a lowerCamelCase identifier • lib/controllers/calender_controller.dart:14:23 • non_constant_identifier_names
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:47:7 • avoid_print
+   info • The variable name 'EditapiEvents' isn't a lowerCamelCase identifier • lib/controllers/calender_controller.dart:64:25 • non_constant_identifier_names
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:70:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:77:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:78:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:79:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:80:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:81:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/controllers/calender_controller.dart:83:7 • avoid_print
+   info • The file name 'Calender_model.dart' isn't a lower_case_with_underscores identifier • lib/model/Calender_model.dart:1:1 • file_names
+   info • The file name 'Data_sorce.dart' isn't a lower_case_with_underscores identifier • lib/model/Source/Data_sorce.dart:1:1 • file_names
+   info • Don't invoke 'print' in production code • lib/model/event_model.dart:59:7 • avoid_print
+   info • Unnecessary 'new' keyword • lib/model/order/city.dart:28:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/city.dart:28:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:29:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:30:20 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:31:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:32:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:33:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/city.dart:34:26 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/event.dart:28:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/event.dart:28:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:29:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:30:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:31:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:32:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:33:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/event.dart:34:26 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:93:35 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:94:37 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:112:11 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:118:28 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:124:28 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_model.dart:133:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/order_model.dart:133:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:134:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:135:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:136:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:137:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:138:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:139:19 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:140:23 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:141:23 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:142:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:143:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:144:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:145:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:146:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:147:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:148:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:149:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:150:33 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:151:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:152:22 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:154:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:155:23 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:157:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:158:32 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:160:36 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:161:30 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:162:31 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:163:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:164:28 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:165:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:166:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:168:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:169:32 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:173:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:174:32 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:178:19 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:179:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_model.dart:180:26 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/order_package_items.dart:36:11 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_package_items.dart:41:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/order_package_items.dart:41:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:42:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:43:32 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:44:28 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:45:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:46:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:47:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:48:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:49:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:50:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_package_items.dart:51:27 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/order_packages.dart:36:11 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_packages.dart:41:32 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_packages.dart:47:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/order_packages.dart:47:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:48:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:49:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:50:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:51:22 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:52:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:53:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:54:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:55:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:56:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:58:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_packages.dart:59:37 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/order_services.dart:33:11 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/order_services.dart:38:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/order_services.dart:38:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:39:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:40:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:41:28 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:42:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:43:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:44:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:45:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:46:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/order_services.dart:47:25 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/package.dart:41:28 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/package.dart:47:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/package.dart:47:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:48:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:49:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:50:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:51:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:52:23 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:53:25 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:54:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:55:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:56:19 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:57:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package.dart:58:32 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/package_item.dart:33:11 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/package_item.dart:38:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/package_item.dart:38:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:39:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:40:32 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:41:28 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:42:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:43:23 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:44:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:45:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:46:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_item.dart:47:27 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/package_title.dart:32:27 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/model/order/package_title.dart:38:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/package_title.dart:38:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:39:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:40:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:41:20 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:42:24 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:43:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:44:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:45:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/package_title.dart:46:31 • unnecessary_this
+   info • Unnecessary 'new' keyword • lib/model/order/service.dart:28:39 • unnecessary_new
+   info • Unnecessary constructor invocation • lib/model/order/service.dart:28:39 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:29:18 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:30:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:31:21 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:32:27 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:33:26 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/model/order/service.dart:34:26 • unnecessary_this
+   info • The file name 'Login_Signup.dart' isn't a lower_case_with_underscores identifier • lib/pages/Auth/Login_Signup.dart:1:1 • file_names
+   info • The import of 'package:get/route_manager.dart' is unnecessary because all of the used elements are also provided by the import of 'package:get/get.dart' • lib/pages/Auth/Login_Signup.dart:3:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:123:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:124:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:176:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:210:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:228:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:280:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:313:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Auth/Login_Signup.dart:517:29 • deprecated_member_use
+   info • The file name 'Booking_Success.dart' isn't a lower_case_with_underscores identifier • lib/pages/Booking_Success.dart:1:1 • file_names
+   info • The file name 'Sample_Data.dart' isn't a lower_case_with_underscores identifier • lib/pages/Calender_Main/Sample_Data.dart:1:1 • file_names
+   info • The file name 'Week_Calender.dart' isn't a lower_case_with_underscores identifier • lib/pages/Calender_Main/Week_Calender.dart:1:1 • file_names
+   info • The import of 'package:get/get_core/src/get_main.dart' is unnecessary because all of the used elements are also provided by the import of 'package:get/get.dart' • lib/pages/Calender_Main/Week_Calender.dart:3:8 • unnecessary_import
+warning • Unused import: 'package:intl/intl.dart' • lib/pages/Calender_Main/Week_Calender.dart:4:8 • unused_import
+warning • Unused import: 'package:schedule_app/pages/booking_page.dart' • lib/pages/Calender_Main/Week_Calender.dart:9:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/pages/Calender_Main/Week_Calender.dart:52:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Calender_Main/Week_Calender.dart:53:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/Calender_Main/Week_Calender.dart:74:24 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/pages/Calender_Main/Week_Calender.dart:131:17 • avoid_print
+   info • The file name 'Confirm_Booking.dart' isn't a lower_case_with_underscores identifier • lib/pages/Confirm_Booking.dart:1:1 • file_names
+warning • Unused import: 'package:schedule_app/pages/booking_page.dart' • lib/pages/Confirm_Booking.dart:3:8 • unused_import
+   info • The file name 'EditController.dart' isn't a lower_case_with_underscores identifier • lib/pages/Edit/EditController.dart:1:1 • file_names
+warning • Unused import: '../../widgets/Payment_Popup.dart' • lib/pages/Edit/EditController.dart:17:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:171:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:173:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:177:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:185:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:193:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:195:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:198:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:201:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:202:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:220:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:247:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:249:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:250:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:254:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:285:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:291:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:302:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:322:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:328:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:352:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:389:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:391:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:392:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:393:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:394:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:400:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:413:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:414:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:432:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:492:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:743:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:745:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:747:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:756:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:757:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:760:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:767:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:772:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:826:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:829:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:843:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:845:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:847:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:849:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:856:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:857:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:858:7 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:861:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:862:7 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:864:11 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:866:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:869:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:869:11 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:869:42 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:870:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:871:7 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:873:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:877:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:877:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:882:7 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:882:13 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:882:33 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:884:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:884:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:885:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:886:7 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:888:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:892:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:892:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:894:7 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:895:9 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:897:13 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:899:13 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:901:13 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:905:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:906:7 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:909:7 • avoid_print
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:910:9 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:912:13 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:914:13 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/pages/Edit/EditController.dart:916:13 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:987:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:988:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:989:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:992:5 • avoid_print
+  error • The name 'OrderPackageItems' isn't a type, so it can't be used as a type argument • lib/pages/Edit/EditController.dart:1003:23 • non_type_as_type_argument
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1062:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1065:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1105:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1106:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1107:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1114:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1119:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1127:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1140:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1141:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1147:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1156:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1163:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1170:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1267:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1268:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1275:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1280:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1298:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1314:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1460:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1461:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1462:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1469:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1470:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1471:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1474:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1479:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1481:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1490:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1499:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1507:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1508:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1580:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1673:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1678:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1685:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1687:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1692:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1697:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1706:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1707:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1717:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1720:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1725:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1726:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1727:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1731:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1734:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1742:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1762:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1771:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/EditController.dart:1811:7 • avoid_print
+   info • The prefix 'EditModels' isn't a lower_case_with_underscores identifier • lib/pages/Edit/edit.dart:6:67 • library_prefixes
+   info • The prefix 'MenuItemModel' isn't a lower_case_with_underscores identifier • lib/pages/Edit/edit.dart:7:66 • library_prefixes
+warning • Unused import: 'package:schedule_app/model/order/order_model.dart' • lib/pages/Edit/edit.dart:12:8 • unused_import
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/pages/Edit/edit.dart:17:3 • prefer_const_constructors_in_immutables
+   info • The local variable '_showEditGuestsDialog' starts with an underscore • lib/pages/Edit/edit.dart:194:10 • no_leading_underscores_for_local_identifiers
+   info • Don't invoke 'print' in production code • lib/pages/Edit/edit.dart:557:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/edit.dart:582:21 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/Edit/edit.dart:592:27 • avoid_print
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/pages/Edit/edit.dart:694:11 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/pages/Edit/edit.dart:774:3 • library_private_types_in_public_api
+warning • The declaration '_parsePriceString' isn't referenced • lib/pages/Edit/edit.dart:877:10 • unused_element
+   info • Unnecessary use of 'toList' in a spread • lib/pages/Edit/edit.dart:1168:34 • unnecessary_to_list_in_spreads
+   info • Unnecessary use of 'toList' in a spread • lib/pages/Edit/edit.dart:1253:30 • unnecessary_to_list_in_spreads
+warning • Unused import: 'package:schedule_app/controllers/booking_controller.dart' • lib/pages/Edit/edit_booking_recipt.dart:4:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/pages/Edit/edit_booking_recipt.dart:83:5 • avoid_print
+   info • Unnecessary use of 'toList' in a spread • lib/pages/Edit/edit_booking_recipt.dart:503:12 • unnecessary_to_list_in_spreads
+   info • Unnecessary braces in a string interpolation • lib/pages/Edit/edit_booking_recipt.dart:862:13 • unnecessary_brace_in_string_interps
+   info • The file name 'EditModel.dart' isn't a lower_case_with_underscores identifier • lib/pages/Edit/models/EditModel.dart:1:1 • file_names
+   info • The file name 'MenuItem.dart' isn't a lower_case_with_underscores identifier • lib/pages/Edit/models/MenuItem.dart:1:1 • file_names
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/pages/List/home_controller.dart:1:8 • unnecessary_import
+warning • Unused import: 'dart:convert' • lib/pages/List/home_controller.dart:6:8 • unused_import
+warning • Unused import: 'package:http/http.dart' • lib/pages/List/home_controller.dart:7:8 • unused_import
+warning • Unused import: 'package:shared_preferences/shared_preferences.dart' • lib/pages/List/home_controller.dart:10:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:58:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:152:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:167:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:197:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:211:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:229:9 • avoid_print
+warning • The declaration '_convertTimeSlotToHour' isn't referenced • lib/pages/List/home_controller.dart:236:7 • unused_element
+   info • Don't invoke 'print' in production code • lib/pages/List/home_controller.dart:253:7 • avoid_print
+   info • Parameter 'key' could be a super parameter • lib/pages/List/listing_detail_screen.dart:10:3 • use_super_parameters
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/List/listing_detail_screen.dart:28:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/List/listing_detail_screen.dart:90:49 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_detail_screen.dart:167:69 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_detail_screen.dart:167:122 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/pages/List/listing_detail_screen.dart:263:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/listing_detail_screen.dart:264:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/listing_detail_screen.dart:294:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/pages/List/listing_detail_screen.dart:320:5 • avoid_print
+   info • Unnecessary use of 'toList' in a spread • lib/pages/List/listing_detail_screen.dart:420:18 • unnecessary_to_list_in_spreads
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_detail_screen.dart:501:65 • dead_null_aware_expression
+   info • Unnecessary use of 'toList' in a spread • lib/pages/List/listing_detail_screen.dart:515:18 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/pages/List/listing_screen.dart:33:41 • deprecated_member_use
+   info • 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/pages/List/listing_screen.dart:185:30 • deprecated_member_use
+   info • 'dataRowHeight' is deprecated and shouldn't be used. Migrate to use dataRowMinHeight and dataRowMaxHeight instead. This feature was deprecated after v3.7.0-5.0.pre • lib/pages/List/listing_screen.dart:187:13 • deprecated_member_use
+warning • The value of the local variable 'index' isn't used • lib/pages/List/listing_screen.dart:216:19 • unused_local_variable
+   info • 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/pages/List/listing_screen.dart:223:24 • deprecated_member_use
+   info • 'MaterialState' is deprecated and shouldn't be used. Use WidgetState instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/pages/List/listing_screen.dart:224:28 • deprecated_member_use
+   info • 'MaterialState' is deprecated and shouldn't be used. Use WidgetState instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/pages/List/listing_screen.dart:225:41 • deprecated_member_use
+warning • Dead code • lib/pages/List/listing_screen.dart:228:37 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_screen.dart:321:56 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_screen.dart:321:105 • dead_null_aware_expression
+warning • The value of the local variable 'total' isn't used • lib/pages/List/listing_screen.dart:404:12 • unused_local_variable
+warning • The left operand can't be null, so the right operand is never executed • lib/pages/List/listing_screen.dart:407:63 • dead_null_aware_expression
+  error • The name 'Payment' isn't a type, so it can't be used as a type argument • lib/pages/List/payment_controller.dart:13:16 • non_type_as_type_argument
+  error • The name 'Payment' isn't a type, so it can't be used as a type argument • lib/pages/List/payment_controller.dart:13:37 • non_type_as_type_argument
+  error • Undefined class 'Payment' • lib/pages/List/payment_controller.dart:59:5 • undefined_class
+  error • The method 'Payment' isn't defined for the type 'PaymentController' • lib/pages/List/payment_controller.dart:59:23 • undefined_method
+  error • The property 'orderId' can't be unconditionally accessed because the receiver can be 'null' • lib/pages/List/payment_controller.dart:88:37 • unchecked_use_of_nullable_value
+  error • The property 'amount' can't be unconditionally accessed because the receiver can be 'null' • lib/pages/List/payment_controller.dart:89:53 • unchecked_use_of_nullable_value
+  error • The name 'Payment' isn't a type, so it can't be used as a type argument • lib/pages/List/payment_controller.dart:92:8 • non_type_as_type_argument
+  error • The property 'orderId' can't be unconditionally accessed because the receiver can be 'null' • lib/pages/List/payment_controller.dart:93:48 • unchecked_use_of_nullable_value
+   info • An uninitialized field should have an explicit type annotation • lib/pages/booking_page.dart:13:9 • prefer_typing_uninitialized_variables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/pages/booking_page.dart:14:3 • prefer_const_constructors_in_immutables
+warning • The value of the local variable 'controller' isn't used • lib/pages/booking_page.dart:19:11 • unused_local_variable
+   info • The local variable '_showEditGuestsDialog' starts with an underscore • lib/pages/booking_page.dart:141:10 • no_leading_underscores_for_local_identifiers
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/pages/booking_page.dart:695:11 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/pages/booking_page.dart:775:3 • library_private_types_in_public_api
+warning • The declaration '_parsePriceString' isn't referenced • lib/pages/booking_page.dart:935:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/pages/booking_page.dart:1097:47 • avoid_print
+   info • Unnecessary use of 'toList' in a spread • lib/pages/booking_page.dart:1114:38 • unnecessary_to_list_in_spreads
+   info • Unnecessary use of 'toList' in a spread • lib/pages/booking_recipt.dart:495:12 • unnecessary_to_list_in_spreads
+   info • Unnecessary braces in a string interpolation • lib/pages/booking_recipt.dart:650:13 • unnecessary_brace_in_string_interps
+   info • The import of 'package:get/get_core/src/get_main.dart' is unnecessary because all of the used elements are also provided by the import of 'package:get/get.dart' • lib/pages/schedule_page.dart:3:8 • unnecessary_import
+warning • Unused import: '../widgets/calendar_grid.dart' • lib/pages/schedule_page.dart:18:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/pages/schedule_page.dart:495:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/pages/schedule_page.dart:505:28 • use_build_context_synchronously
+   info • The file name 'Button.dart' isn't a lower_case_with_underscores identifier • lib/widgets/Button.dart:1:1 • file_names
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/Button.dart:65:3 • prefer_const_constructors_in_immutables
+   info • The file name 'Payment_Popup.dart' isn't a lower_case_with_underscores identifier • lib/widgets/Payment_Popup.dart:1:1 • file_names
+   info • The import of 'package:get/get_core/get_core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:get/get.dart' • lib/widgets/Payment_Popup.dart:4:8 • unnecessary_import
+warning • Unused import: 'package:http/http.dart' • lib/widgets/Payment_Popup.dart:5:8 • unused_import
+warning • Unused import: 'package:schedule_app/pages/schedule_page.dart' • lib/widgets/Payment_Popup.dart:8:8 • unused_import
+warning • The declaration '_handlePaymentConfirmation' isn't referenced • lib/widgets/Payment_Popup.dart:61:8 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/Payment_Popup.dart:352:35 • deprecated_member_use
+warning • The operand can't be 'null', so the condition is always 'true' • lib/widgets/Payment_Popup.dart:483:28 • unnecessary_null_comparison
+warning • Unused import: 'package:schedule_app/pages/booking_page.dart' • lib/widgets/booking_summary.dart:5:8 • unused_import
+warning • Unused import: 'package:schedule_app/pages/Calender_Main/Sample_Data.dart' • lib/widgets/calendar_grid.dart:4:8 • unused_import
+warning • Unused import: 'package:intl/intl.dart' • lib/widgets/calendar_grid.dart:7:8 • unused_import
+warning • Unused import: 'event_card.dart' • lib/widgets/calendar_grid.dart:11:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar_grid.dart:89:48 • deprecated_member_use
+warning • The declaration '_showEventPopover' isn't referenced • lib/widgets/calendar_grid.dart:181:8 • unused_element
+   info • The import of 'package:get/get_core/get_core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:get/get.dart' • lib/widgets/edit_payment_popup.dart:4:8 • unnecessary_import
+warning • The declaration '_handlePaymentConfirmation' isn't referenced • lib/widgets/edit_payment_popup.dart:62:8 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/edit_payment_popup.dart:347:35 • deprecated_member_use
+warning • The operand can't be 'null', so the condition is always 'true' • lib/widgets/edit_payment_popup.dart:483:28 • unnecessary_null_comparison
+   info • Invalid use of a private type in a public API • lib/widgets/menu.dart:11:3 • library_private_types_in_public_api
+

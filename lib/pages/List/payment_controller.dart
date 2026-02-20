@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule_app/pages/List/order_model%20(1).dart';
+import 'package:schedule_app/model/order/payment.dart';
 
 class PaymentController extends GetxController {
   // Text editing controllers

@@ -31,10 +31,10 @@ class ServiceMode {
 }
 
 class MenuItem {
-  final int id;
-  final int menuId;
-  final String title;
-  final double price;
+  final int? id;
+  final int? menuId;
+  final String? title;
+  final double? price;
   final int? vatId;
   final int? discountId;
   final String? description;
@@ -43,10 +43,10 @@ class MenuItem {
   final DateTime? updatedAt;
 
   MenuItem({
-    required this.id,
-    required this.menuId,
-    required this.title,
-    required this.price,
+    this.id,
+    this.menuId,
+    this.title,
+    this.price,
     this.vatId,
     this.discountId,
     this.description,
@@ -57,16 +57,22 @@ class MenuItem {
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
-      id: json['id'] as int,
-      menuId: json['menu_id'] as int,
-      title: json['title'] as String,
-      price: double.parse(json['price'] as String),
+      id: json['id'] as int?,
+      menuId: json['menu_id'] as int?,
+      title: json['title'] as String?,
+      price: json['price'] != null
+          ? double.tryParse(json['price'].toString())
+          : null,
       vatId: json['vat_id'] as int?,
       discountId: json['discount_id'] as int?,
       description: json['description'] as String?,
       reorder: json['reorder'] as int?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'].toString())
+          : null,
     );
   }
 
@@ -75,13 +81,13 @@ class MenuItem {
       'id': id,
       'menu_id': menuId,
       'title': title,
-      'price': price.toString(),
+      'price': price?.toString(),
       'vat_id': vatId,
       'discount_id': discountId,
       'description': description,
       'reorder': reorder,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 }

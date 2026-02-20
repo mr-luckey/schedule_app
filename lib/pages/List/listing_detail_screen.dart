@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/pages/List/home_controller.dart';
-import 'package:schedule_app/pages/List/order_model%20(1).dart';
+import 'package:schedule_app/model/order/order_model.dart';
 
 class ListingDetailScreen extends StatelessWidget {
-  final OrderList order;
+  final OrderModel order;
 
   ListingDetailScreen({Key? key, required this.order}) : super(key: key);
 

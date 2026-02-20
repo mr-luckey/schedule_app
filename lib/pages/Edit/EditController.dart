@@ -5,11 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/Edit/models/EditModel.dart';
 import 'package:schedule_app/pages/Edit/models/MenuItem.dart' hide MenuItem;
-import 'package:schedule_app/pages/Edit/models/model.dart';
+import 'package:schedule_app/model/order/order_model.dart';
+import 'package:schedule_app/model/order/city.dart';
+import 'package:schedule_app/model/order/event.dart';
+import 'package:schedule_app/model/order/package.dart';
+import 'package:schedule_app/model/order/order_services.dart';
+import 'package:schedule_app/model/order/order_packages.dart';
+import 'package:schedule_app/model/order/order_package_items.dart';
 import 'package:schedule_app/widgets/edit_payment_popup.dart';
 
 import '../../model/discount_model.dart';
-import '../../widgets/Payment_Popup.dart';
 import '../schedule_page.dart';
 
 class EditController extends GetxController {
@@ -18,7 +23,7 @@ class EditController extends GetxController {
   // ===========================================================================
 
   // Current order being edited
-  final Rx<EditOrderModel?> currentEditOrder = Rx<EditOrderModel?>(null);
+  final Rx<OrderModel?> currentEditOrder = Rx<OrderModel?>(null);
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
@@ -368,7 +373,7 @@ class EditController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final EditOrderModel? order = await ApiService.getOrderById(
+      final OrderModel? order = await ApiService.getOrderById(
         orderId.toString(),
       );
 
@@ -404,7 +409,7 @@ class EditController extends GetxController {
   }
 
   /// Populate form fields from order model
-  void _populateFormFromOrder(EditOrderModel order) {
+  void _populateFormFromOrder(OrderModel order) {
     print("TESTING ORDER DATA IN POPULATE FUNCTION");
     print(order.toJson());
     // Personal information
@@ -744,7 +749,7 @@ class EditController extends GetxController {
       // Call API to update order
       final response = await ApiService.updateOrder(
         orderId: orderId,
-        EditOrderModel: body,
+        OrderModel: body,
       );
 
       // Debug: response snapshot
@@ -772,7 +777,7 @@ class EditController extends GetxController {
   }
 
   /// Prepare order model with updated form data
-  EditOrderModel _prepareOrderForUpdate() {
+  OrderModel _prepareOrderForUpdate() {
     final order = currentEditOrder.value!;
 
     // Name handling
@@ -827,7 +832,7 @@ class EditController extends GetxController {
   }
 
   /// Prepare API payload with order data and selected items
-  Map<String, dynamic> _prepareApiPayload(EditOrderModel order) {
+  Map<String, dynamic> _prepareApiPayload(OrderModel order) {
     final orderJson = order.toJson();
 
     // Convert selected items to API format
@@ -1568,7 +1573,7 @@ class EditController extends GetxController {
     // Find and set the actual custom package ID from API packages
     final customPkg = apiPackages.firstWhere(
       (pkg) => pkg.title == 'Custom Package',
-      orElse: () => Package(),
+      orElse: () => Package(title: 'Custom Package'),
     );
     selectedPackageId.value = customPkg.id?.toString() ?? '';
 

@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:schedule_app/pages/List/home_controller.dart';
 import 'package:schedule_app/pages/List/listing_detail_screen.dart';
-import 'package:schedule_app/pages/List/order_model%20(1).dart';
+import 'package:schedule_app/model/order/order_model.dart';
 
-// import '../models/order_model.dart';
+// import 'package:schedule_app/model/order/order_model.dart';
 // import '../views/listing_detail_screen.dart';
 
 
@@ -214,7 +214,7 @@ class ListingScreen extends StatelessWidget {
             ],
             rows: controller.orders.reversed.toList().asMap().entries.map((entry) {
               int index = entry.key;
-              OrderList order = entry.value;
+              OrderModel order = entry.value;
               //TODO: Determine if the wedding is within the next 7 days
               bool isUpcoming = false;
               // bool isUpcoming = controller.isUpcomingWedding(order);
@@ -263,7 +263,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCoupleNames(OrderList order, bool isUpcoming) {
+  Widget _buildCoupleNames(OrderModel order, bool isUpcoming) {
     return Row(
       children: [
         Expanded(
@@ -298,7 +298,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWeddingDate(OrderList order,HomeController controller) {
+  Widget _buildWeddingDate(OrderModel order,HomeController controller) {
     if (order.eventDate == null) return const SizedBox();
 
     DateTime date = DateTime.parse(order.eventDate!);
@@ -329,7 +329,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGuestCount(OrderList order) {
+  Widget _buildGuestCount(OrderModel order) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
@@ -347,7 +347,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPackageType(OrderList order) {
+  Widget _buildPackageType(OrderModel order) {
     // Assuming package info might be in orderPackages
     String packageType = 'default'; // default
     Color bgColor = const Color(0xFFD1FAE5);
@@ -387,7 +387,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVenue(OrderList order) {
+  Widget _buildVenue(OrderModel order) {
     return Text(
       '${order.address ?? ''}, ${order.city?.name ?? ''}',
       style: TextStyle(
@@ -399,7 +399,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAmount(OrderList order) {
+  Widget _buildAmount(OrderModel order) {
     // Calculate total from orderServices and orderPackages
     double total = 0;
     if (order.orderServices != null) {
@@ -424,7 +424,7 @@ class ListingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatus(OrderList order) {
+  Widget _buildStatus(OrderModel order) {
     String status = order.isInquiry == true ? 'inquiry' : 'booking';
     Color bgColor = status == 'booking'
         ? const Color(0xFFD1FAE5)

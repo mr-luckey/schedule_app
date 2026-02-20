@@ -4,16 +4,14 @@ import 'package:schedule_app/APIS/shared_prefs_service.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:schedule_app/model/event_model.dart';
-import 'package:schedule_app/pages/Edit/models/model.dart' hide Event;
-import 'package:schedule_app/pages/List/order_model%20(1).dart' hide Event;
+import 'package:schedule_app/model/order/order_model.dart';
 // import 'package:schedule_app/pages/List/ListModel.dart' hide Event;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/user_model.dart';
 
 class ApiService {
-  static const String baseUrl =
-      'https://qaidhall-admin.nettechltd.com/api/v1';
+  static const String baseUrl = 'https://qaidhall-admin.nettechltd.com/api/v1';
 
   static String? _bearerToken;
   static SharedPreferences? _prefs;
@@ -34,7 +32,6 @@ class ApiService {
   // ---------------------------
   static String? get bearerToken => _bearerToken;
 
-
   static bool get isLoggedIn =>
       _bearerToken != null && _bearerToken!.isNotEmpty;
 
@@ -42,7 +39,6 @@ class ApiService {
     _bearerToken = token;
     await _prefs?.setString('token', token);
   }
-
 
   static Future<void> clearToken() async {
     _bearerToken = null;
@@ -106,7 +102,7 @@ class ApiService {
     return result;
   }
 
-// Helper method to extract token (if you don't already have this)
+  // Helper method to extract token (if you don't already have this)
   static String? _extractToken(Map<String, dynamic> data) {
     return data['token']?.toString();
   }
@@ -351,7 +347,7 @@ class ApiService {
   }
 
   // Get Order by ID
-  static Future<EditOrderModel?> getOrderById(var orderId) async {
+  static Future<OrderModel?> getOrderById(var orderId) async {
     try {
       final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
       print('🔄 Fetching order by ID: $uri');
@@ -363,7 +359,7 @@ class ApiService {
       if (response['success'] == true) {
         final data = response['data'];
         if (data is Map) {
-          final order = EditOrderModel.fromJson(data);
+          final order = OrderModel.fromJson(data);
           print('✅ Successfully parsed order: ${order.id}');
           return order;
         } else {
@@ -388,22 +384,22 @@ class ApiService {
   // Update Order - PUT API
   static Future<Map<String, dynamic>> updateOrder({
     required int orderId,
-    required Map<String, dynamic> EditOrderModel,
+    required Map<String, dynamic> OrderModel,
   }) async {
     try {
       final Uri uri = Uri.parse('$baseUrl/orders/$orderId');
       print('🔄 Updating order at: $uri');
-      print('📦 Update data: ${jsonEncode(EditOrderModel)}');
+      print('📦 Update data: ${jsonEncode(OrderModel)}');
 
       final response = await _handleRequest(
         http.put(
           uri,
           headers: await getHeaders(),
-          body: jsonEncode(EditOrderModel), //FIXME:
+          body: jsonEncode(OrderModel), //FIXME:
         ),
       );
       print("UPDATED NEW BODY WILL BE HERE ");
-      print(jsonEncode(EditOrderModel));
+      print(jsonEncode(OrderModel));
 
       if (response['success'] == true) {
         return response;
@@ -645,11 +641,11 @@ class ApiService {
       http.get(uri, headers: await getHeaders(token: token)),
     );
   }
+
   // ---------------------------
   // Get Discounts
   // ---------------------------
-  static String getDiscounts=  '$baseUrl/discounts';
-
+  static String getDiscounts = '$baseUrl/discounts';
 
   // ---------------------------
   // Get Services (menus filtered by service)
@@ -660,82 +656,81 @@ class ApiService {
       http.get(uri, headers: await getHeaders(token: token)),
     );
   }
+
   // ---------------------------
-// Get Orders with OrderList model
-// ---------------------------
-static Future<List<OrderList>> fetchOrders() async {
-  try {
-    final Uri uri = Uri.parse('$baseUrl/orders');
-    // print('🔄 Fetching orders from: $uri');
+  // Get Orders with OrderModel model
+  // ---------------------------
+  static Future<List<OrderModel>> fetchOrders() async {
+    try {
+      final Uri uri = Uri.parse('$baseUrl/orders');
+      // print('🔄 Fetching orders from: $uri');
 
-    final response = await _handleRequest(
-      http.get(uri, headers: await getHeaders()),
-    );
+      final response = await _handleRequest(
+        http.get(uri, headers: await getHeaders()),
+      );
 
-    // print('📦 Raw API Response:');
-    // final prettyJson = JsonEncoder.withIndent('  ').convert(response);
-    //
-    // print(prettyJson);
+      // print('📦 Raw API Response:');
+      // final prettyJson = JsonEncoder.withIndent('  ').convert(response);
+      //
+      // print(prettyJson);
 
-    if (response['success'] == true) {
-      final data = response['data'];
-      // print('📊 Response data type: ${data.runtimeType}');
-      // print('📊 Response data: $data');
+      if (response['success'] == true) {
+        final data = response['data'];
+        // print('📊 Response data type: ${data.runtimeType}');
+        // print('📊 Response data: $data');
 
-      // Handle different response structures
-      List<dynamic> ordersList = [];
+        // Handle different response structures
+        List<dynamic> ordersList = [];
 
-      if (data is List) {
-        ordersList = data;
-        // print('✅ Processing as List with ${ordersList.length} items');
-      } else if (data is Map<String, dynamic>) {
-        // Check common keys for data
-        if (data['data'] is List) {
-          ordersList = data['data'];
-        } else if (data['orders'] is List) {
-          ordersList = data['orders'];
-        } else if (data['results'] is List) {
-          ordersList = data['results'];
-        } else {
-          // If it's a single order object, wrap it in a list
-          ordersList = [data];
-        }
-        print('✅ Processing as Map with ${ordersList.length} items');
-      }
-
-      // Parse orders with better error handling
-      final List<OrderList> parsedOrders = [];
-      for (var item in ordersList) {
-        try {
-          if (item is Map<String, dynamic>) {
-            final order = OrderList.fromJson(item);
-            parsedOrders.add(order);
+        if (data is List) {
+          ordersList = data;
+          // print('✅ Processing as List with ${ordersList.length} items');
+        } else if (data is Map<String, dynamic>) {
+          // Check common keys for data
+          if (data['data'] is List) {
+            ordersList = data['data'];
+          } else if (data['orders'] is List) {
+            ordersList = data['orders'];
+          } else if (data['results'] is List) {
+            ordersList = data['results'];
+          } else {
+            // If it's a single order object, wrap it in a list
+            ordersList = [data];
           }
-        } catch (e) {
-          print('❌ Error parsing order: $e');
-          print('⚠️ Problematic order data: $item');
-          // Continue with other orders even if one fails
+          print('✅ Processing as Map with ${ordersList.length} items');
         }
+
+        // Parse orders with better error handling
+        final List<OrderModel> parsedOrders = [];
+        for (var item in ordersList) {
+          try {
+            if (item is Map<String, dynamic>) {
+              final order = OrderModel.fromJson(item);
+              parsedOrders.add(order);
+            }
+          } catch (e) {
+            print('❌ Error parsing order: $e');
+            print('⚠️ Problematic order data: $item');
+            // Continue with other orders even if one fails
+          }
+        }
+
+        // print('✅ Successfully parsed ${parsedOrders.length} orders');
+        return parsedOrders;
+      } else {
+        final status = response['statusCode'];
+        final error = response['error'] ?? 'Unknown error';
+        print('❌ API returned error ($status): $error');
+
+        if (status == 401) {
+          throw Exception('Unauthorized. Please login again.');
+        }
+
+        throw Exception('Failed to load orders: $error');
       }
-
-      // print('✅ Successfully parsed ${parsedOrders.length} orders');
-      return parsedOrders;
-
-    } else {
-      final status = response['statusCode'];
-      final error = response['error'] ?? 'Unknown error';
-      print('❌ API returned error ($status): $error');
-
-      if (status == 401) {
-        throw Exception('Unauthorized. Please login again.');
-      }
-
-      throw Exception('Failed to load orders: $error');
+    } catch (e) {
+      print('❌ Error fetching orders: $e');
+      throw Exception('Error fetching orders: $e');
     }
-  } catch (e) {
-    print('❌ Error fetching orders: $e');
-    throw Exception('Error fetching orders: $e');
   }
-}
-
 }

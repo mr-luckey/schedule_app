@@ -9,7 +9,7 @@ import 'package:schedule_app/widgets/Payment_Popup.dart';
 
 import '../model/discount_model.dart';
 import '../pages/booking_recipt.dart';
-import 'package:schedule_app/pages/List/order_model%20(1).dart'; // Import OrderList model
+import 'package:schedule_app/model/order/order_model.dart';
 
 class BookingController extends GetxController {
   // Form controllers
@@ -526,7 +526,7 @@ class BookingController extends GetxController {
     isLoading.value = true;
     try {
       print("DEBUG: Starting availability check");
-      final List<OrderList> existingOrders = await ApiService.fetchOrders();
+      final List<OrderModel> existingOrders = await ApiService.fetchOrders();
       print("DEBUG: Fetched ${existingOrders.length} orders");
 
       // Filter orders for the selected date
