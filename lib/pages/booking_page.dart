@@ -1549,9 +1549,47 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
 
             const Divider(),
-            ...controller.menu["Food Items"]!.map(
-              (dish) => buildmenuRow("Food Items", dish),
-            ),
+            ...() {
+              final groupedItems = <String, List<Map<String, dynamic>>>{};
+              for (final dish in controller.menu["Food Items"]!) {
+                final title = dish['packageTitle'] as String? ?? 'Other Items';
+                if (!groupedItems.containsKey(title)) {
+                  groupedItems[title] = [];
+                }
+                groupedItems[title]!.add(dish);
+              }
+
+              final widgets = <Widget>[];
+              for (final entry in groupedItems.entries) {
+                // Add header for the group
+                widgets.add(
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 12.0,
+                      bottom: 8.0,
+                      left: 8.0,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        entry.key,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+
+                // Add dish rows for this group
+                widgets.addAll(
+                  entry.value.map((dish) => buildmenuRow("Food Items", dish)),
+                );
+              }
+              return widgets;
+            }(),
 
             const SizedBox(height: 20),
 

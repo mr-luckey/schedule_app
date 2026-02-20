@@ -538,6 +538,9 @@ class EditController extends GetxController {
                   qty: int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
                   id: packageItem.id,
                   isDeleted: packageItem.isDeleted ?? false,
+                  packageTitle: _findPackageTitleForMenuItem(
+                    packageItem.menuItem!.id,
+                  ),
                 ),
               );
             }
@@ -566,6 +569,30 @@ class EditController extends GetxController {
     _initializePackageStateFromOrder();
   }
 
+  /// Look up the package title from loaded API packages for a given menu item
+  String? _findPackageTitleForMenuItem(int? menuItemId) {
+    if (menuItemId == null) return null;
+
+    for (final pkg in rawApiPackages) {
+      if (pkg['package_titles'] is List) {
+        for (final titleObj in pkg['package_titles'] as List) {
+          final pTitle = titleObj['name']?.toString();
+          if (titleObj['package_items'] is List) {
+            for (final item in titleObj['package_items'] as List) {
+              if (item is Map && item['menu_item'] is Map) {
+                if (item['menu_item']['id']?.toString() ==
+                    menuItemId.toString()) {
+                  return pTitle;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   /// Add menu item to selection
   void addSelectedMenuItem({
     required int? menuItemId,
@@ -573,6 +600,7 @@ class EditController extends GetxController {
     required String price,
     int qty = 1,
     int? id,
+    String? packageTitle,
   }) {
     final exists = selectedMenuItems.any((m) => m.menuItemId == menuItemId);
     if (!exists) {
@@ -584,6 +612,8 @@ class EditController extends GetxController {
           qty: qty,
           id: id,
           isDeleted: false,
+          packageTitle:
+              packageTitle ?? _findPackageTitleForMenuItem(menuItemId),
         ),
       );
     }
@@ -1779,8 +1809,30 @@ class EditController extends GetxController {
     try {
       final items = <Map<String, dynamic>>[];
 
-      // Parse package_items from API response
-      if (package['package_items'] is List) {
+      // Parse nested package_titles from new API response
+      if (package['package_titles'] is List) {
+        for (var packageTitleObj in package['package_titles'] as List) {
+          final pTitle = packageTitleObj['name']?.toString() ?? 'Default';
+          if (packageTitleObj['package_items'] is List) {
+            for (var packageItem in packageTitleObj['package_items'] as List) {
+              if (packageItem is Map<String, dynamic> &&
+                  packageItem['menu_item'] is Map<String, dynamic>) {
+                final menuItem =
+                    packageItem['menu_item'] as Map<String, dynamic>;
+                items.add({
+                  'name': menuItem['title']?.toString() ?? 'Unknown Item',
+                  'price': _parsePriceString(menuItem['price']?.toString()),
+                  'qty': 1,
+                  'menu_item_id': menuItem['id']?.toString(),
+                  'packageTitle': pTitle,
+                });
+              }
+            }
+          }
+        }
+      }
+      // Fallback: Parse direct package_items from legacy API response
+      else if (package['package_items'] is List) {
         for (var packageItem in package['package_items'] as List) {
           if (packageItem is Map<String, dynamic> &&
               packageItem['menu_item'] is Map<String, dynamic>) {
@@ -1845,6 +1897,7 @@ class SelectedMenuItem {
   final int qty;
   final int? id;
   final bool isDeleted;
+  final String? packageTitle;
 
   SelectedMenuItem({
     required this.menuItemId,
@@ -1853,6 +1906,7 @@ class SelectedMenuItem {
     required this.qty,
     this.id,
     required this.isDeleted,
+    this.packageTitle,
   });
 
   /// Convert to API format

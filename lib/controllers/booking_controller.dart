@@ -280,8 +280,30 @@ class BookingController extends GetxController {
     try {
       final items = <Map<String, dynamic>>[];
 
-      // Parse package_items from API response
-      if (package['package_items'] is List) {
+      // Parse nested package_titles from new API response
+      if (package['package_titles'] is List) {
+        for (var packageTitleObj in package['package_titles'] as List) {
+          final pTitle = packageTitleObj['name']?.toString() ?? 'Default';
+          if (packageTitleObj['package_items'] is List) {
+            for (var packageItem in packageTitleObj['package_items'] as List) {
+              if (packageItem is Map<String, dynamic> &&
+                  packageItem['menu_item'] is Map<String, dynamic>) {
+                final menuItem =
+                    packageItem['menu_item'] as Map<String, dynamic>;
+                items.add({
+                  'name': menuItem['title']?.toString() ?? 'Unknown Item',
+                  'price': _parsePriceString(menuItem['price']?.toString()),
+                  'qty': 1,
+                  'menu_item_id': menuItem['id']?.toString(),
+                  'packageTitle': pTitle,
+                });
+              }
+            }
+          }
+        }
+      }
+      // Fallback: Parse direct package_items from legacy API response
+      else if (package['package_items'] is List) {
         for (var packageItem in package['package_items'] as List) {
           if (packageItem is Map<String, dynamic> &&
               packageItem['menu_item'] is Map<String, dynamic>) {
@@ -1271,6 +1293,7 @@ class BookingController extends GetxController {
         'qty': finalQty,
         'menu_item_id': item['menu_item_id'] ?? item['id'],
         'id': item['id'],
+        'packageTitle': item['packageTitle'],
       };
 
       if (isFood) {

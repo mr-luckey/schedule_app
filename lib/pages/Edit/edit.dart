@@ -1546,9 +1546,45 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   ),
                 )
               else
-                ...editController.selectedMenuItems.map(
-                  (item) => buildItemRow(item, true),
-                ),
+                ...() {
+                  // Group items by packageTitle
+                  final groupedItems = <String, List<SelectedMenuItem>>{};
+                  for (final item in editController.selectedMenuItems) {
+                    final title = item.packageTitle ?? 'Other Items';
+                    if (!groupedItems.containsKey(title)) {
+                      groupedItems[title] = [];
+                    }
+                    groupedItems[title]!.add(item);
+                  }
+
+                  final widgets = <Widget>[];
+                  for (final entry in groupedItems.entries) {
+                    // Add header for the group
+                    widgets.add(
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 12.0,
+                          bottom: 8.0,
+                          left: 8.0,
+                        ),
+                        child: Text(
+                          entry.key,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ),
+                    );
+
+                    // Add items under this group
+                    widgets.addAll(
+                      entry.value.map((item) => buildItemRow(item, true)),
+                    );
+                  }
+                  return widgets;
+                }(),
 
               const SizedBox(height: 20),
 
