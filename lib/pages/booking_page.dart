@@ -974,7 +974,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     _updateControllerMenu();
   }
 
-  void addDish(String category) {
+  void addDish(String category, {String? targetPackageTitle}) {
     final options = category == "Food Items"
         ? availableFoodLocal
         : availableServicesLocal;
@@ -1066,6 +1066,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                               "menu_item_id": item["id"],
                                               "category":
                                                   item["category"] ?? "Other",
+                                              if (targetPackageTitle != null)
+                                                "packageTitle":
+                                                    targetPackageTitle,
                                             });
 
                                             if (category == "Food Items") {
@@ -1109,6 +1112,167 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           _updateControllerMenu();
                                           Navigator.pop(ctx);
                                         },
+                                      ),
+                                    );
+                                  }).toList(),
+                                  const Divider(),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSwapDialog(Map<String, dynamic> currentDish, String category) {
+    final options = category == "Food Items"
+        ? availableFoodLocal
+        : availableServicesLocal;
+    final groupedOptions = _groupItemsByCategory(options);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return SafeArea(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: Text(
+                        'Swap ${currentDish["name"]}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ),
+                    if (options.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'No more options available.',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (var categoryName in groupedOptions.keys)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      8,
+                                    ),
+                                    child: Text(
+                                      categoryName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.blue[700],
+                                      ),
+                                    ),
+                                  ),
+                                  ...groupedOptions[categoryName]!.map((item) {
+                                    return ListTile(
+                                      title: Text(item["name"]),
+                                      subtitle: Text(
+                                        '£${(item["price"] as num).toStringAsFixed(2)}',
+                                      ),
+                                      trailing: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        onPressed: () {
+                                          _autoSwitchToCustomPackage();
+                                          setState(() {
+                                            // Add old item back
+                                            if (category == "Food Items") {
+                                              availableFoodLocal.add({
+                                                "name": currentDish["name"],
+                                                "price": currentDish["price"],
+                                                "id": currentDish["id"],
+                                                "category":
+                                                    currentDish["category"] ??
+                                                    "Other",
+                                              });
+                                              availableFoodLocal.removeWhere(
+                                                (f) => f['id'] == item['id'],
+                                              );
+                                            } else {
+                                              availableServicesLocal.add({
+                                                "name": currentDish["name"],
+                                                "price": currentDish["price"],
+                                                "id": currentDish["id"],
+                                                "category":
+                                                    currentDish["category"] ??
+                                                    "Other",
+                                              });
+                                              availableServicesLocal
+                                                  .removeWhere(
+                                                    (s) =>
+                                                        s['id'] == item['id'],
+                                                  );
+                                            }
+
+                                            // Swap
+                                            final idx = controller
+                                                .menu[category]!
+                                                .indexOf(currentDish);
+                                            if (idx != -1) {
+                                              controller
+                                                  .menu[category]![idx] = {
+                                                "name": item["name"],
+                                                "price": item["price"],
+                                                "qty": currentDish["qty"],
+                                                "id": item["id"],
+                                                "menu_item_id": item["id"],
+                                                "category":
+                                                    item["category"] ?? "Other",
+                                                if (currentDish["packageTitle"] !=
+                                                    null)
+                                                  "packageTitle":
+                                                      currentDish["packageTitle"],
+                                              };
+                                            }
+                                          });
+                                          _syncAvailableListsWithMenu();
+                                          _updateControllerMenu();
+                                          Navigator.pop(ctx);
+                                        },
+                                        child: const Text('Swap'),
                                       ),
                                     );
                                   }).toList(),
@@ -1263,6 +1427,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   Widget buildmenuRow(String category, Map<String, dynamic> dish) {
     final isFoodItem = category == "Food Items";
+    final isPackageItem =
+        dish['packageTitle'] != null && dish['packageTitle'] != 'Other Items';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
@@ -1278,7 +1444,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   "£${(dish["price"] as num).toStringAsFixed(2)} per unit",
                   style: const TextStyle(color: Colors.grey, fontSize: 10),
                 ),
-                if (isFoodItem)
+                if (isFoodItem && !isPackageItem)
                   Text(
                     "Max: ${controller.guests.value} guests",
                     style: const TextStyle(color: Colors.orange, fontSize: 9),
@@ -1288,46 +1454,70 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           ),
 
           if (isEditing || !isFoodItem)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
+            Row(
+              children: [
+                if (isPackageItem && isEditing) ...[
+                  TextButton.icon(
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: const Text("Swap"),
+                    onPressed: () => _showSwapDialog(dish, category),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ] else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_outlined, size: 20),
+                          onPressed: () => decrement(dish, category),
+                        ),
+                        Text(
+                          dish["qty"].toString(),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add, size: 20),
+                          onPressed: () {
+                            if (isFoodItem &&
+                                (dish["qty"] >= controller.guests.value)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Cannot exceed ${controller.guests.value} guests',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              increment(dish, category);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 18),
+                          onPressed: () =>
+                              _showEditDishQuantityDialog(dish, category),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Remove button for all items when editing
+                if (isEditing || !isFoodItem)
                   IconButton(
-                    icon: const Icon(Icons.remove_outlined, size: 20),
-                    onPressed: () => decrement(dish, category),
+                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                    onPressed: () => removeDish(category, dish),
                   ),
-                  Text(
-                    dish["qty"].toString(),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 20),
-                    onPressed: () {
-                      if (isFoodItem &&
-                          (dish["qty"] >= controller.guests.value)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Cannot exceed ${controller.guests.value} guests',
-                            ),
-                          ),
-                        );
-                      } else {
-                        increment(dish, category);
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () =>
-                        _showEditDishQuantityDialog(dish, category),
-                  ),
-                ],
-              ),
+              ],
             )
           else
             Padding(
@@ -1343,12 +1533,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     ),
                 ],
               ),
-            ),
-
-          if (isEditing || !isFoodItem)
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.red, size: 20),
-              onPressed: () => removeDish(category, dish),
             ),
         ],
       ),
@@ -1569,16 +1753,32 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       bottom: 8.0,
                       left: 8.0,
                     ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          entry.key,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey,
+                          ),
                         ),
-                      ),
+                        if (isEditing && entry.key != 'Other Items')
+                          IconButton(
+                            icon: const Icon(
+                              Icons.add_circle_outline,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                            onPressed: () => addDish(
+                              "Food Items",
+                              targetPackageTitle: entry.key,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                      ],
                     ),
                   ),
                 );
