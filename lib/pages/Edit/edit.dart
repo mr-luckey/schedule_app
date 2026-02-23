@@ -884,38 +884,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   // CUSTOM PACKAGE SWITCHING (matching booking screen)
   // ===========================================================================
 
-  /// Auto switch to custom package when editing (like booking screen)
-  void _autoSwitchToCustomPackage() {
-    // Get current menu state from selected items
-    final currentMenu = {
-      'Food Items': editController.selectedMenuItems
-          .map(
-            (item) => {
-              'name': item.name,
-              'price': item.price,
-              'qty': item.qty,
-              'menu_item_id': item.menuItemId,
-              'id': item.id,
-            },
-          )
-          .toList(),
-      'Services': editController.selectedServiceItems
-          .map(
-            (item) => {
-              'name': item.title,
-              'price': item.price,
-              'qty': item.qty,
-              'menu_item_id': item.serviceId,
-              'id': item.id,
-            },
-          )
-          .toList(),
-    };
-
-    // Switch to custom package and update with current menu
-    editController.switchToCustomPackageAndUpdate(currentMenu);
-  }
-
   // ===========================================================================
   // ITEM MANAGEMENT METHODS
   // ===========================================================================
@@ -939,9 +907,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       );
       editController.selectedMenuItems.refresh();
       editController.markPackageAsEdited(); // Mark as edited
-
-      // Auto switch to custom package when modifying items (like booking screen)
-      _autoSwitchToCustomPackage();
     }
   }
 
@@ -964,9 +929,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         );
         editController.selectedMenuItems.refresh();
         editController.markPackageAsEdited(); // Mark as edited
-
-        // Auto switch to custom package when modifying items (like booking screen)
-        _autoSwitchToCustomPackage();
       }
     }
   }
@@ -977,8 +939,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       editController.removeSelectedMenuItemByMenuItemId(
         (item as SelectedMenuItem).menuItemId,
       );
-      // Auto switch to custom package only for food items (like booking screen)
-      _autoSwitchToCustomPackage();
     } else {
       editController.removeSelectedServiceItemById(
         (item as SelectedServiceItem).serviceId,
@@ -998,9 +958,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       qty: editController.guests.value, // Use guest count for food
     );
     editController.markPackageAsEdited(); // Mark as edited
-
-    // Auto switch to custom package when modifying items (like booking screen)
-    _autoSwitchToCustomPackage();
   }
 
   /// Add service item to selection
@@ -1333,13 +1290,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           else
             // For non-food items, show simple quantity text
             SizedBox.shrink(),
-
-          // Remove button (only visible when editing)
-          if (isEditing)
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.red, size: 20),
-              onPressed: () => removeItem(item, isFoodItem),
-            ),
         ],
       ),
     );

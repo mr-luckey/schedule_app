@@ -1004,7 +1004,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             "id": removedDish["id"],
             "category": removedDish["category"] ?? "Other",
           });
-          _autoSwitchToCustomPackage();
         } else if (category == "Services") {
           availableServicesLocal.add({
             "name": removedDish["name"],
@@ -1101,10 +1100,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           color: Colors.green,
                                         ),
                                         onPressed: () {
-                                          if (targetPackageTitle == null &&
-                                              category != "Services") {
-                                            _autoSwitchToCustomPackage();
-                                          }
                                           setState(() {
                                             controller.menu[category]!.add({
                                               "name": item["name"],
@@ -1382,7 +1377,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                     return;
                   }
 
-                  _autoSwitchToCustomPackage();
                   setState(() {
                     dish['qty'] = val;
                   });
@@ -1402,27 +1396,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         );
       },
     );
-  }
-
-  void _autoSwitchToCustomPackage() {
-    // Get current menu state
-    final currentMenu = {
-      'Food Items': List<Map<String, dynamic>>.from(
-        controller.menu['Food Items']!,
-      ),
-      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
-    };
-
-    controller.switchToCustomPackageAndUpdate(currentMenu);
-    setState(() {
-      controller.menu = controller.menuForPackage(
-        'Custom Package',
-        controller.guests.value > 0 ? controller.guests.value : 1,
-      );
-      _syncAvailableListsWithMenu();
-      isEditing = true;
-      controller.toggleEditMode(true);
-    });
   }
 
   void _updateControllerMenu() {
@@ -1457,7 +1430,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         dish["qty"] = currentQty + 1;
       }
     });
-    _autoSwitchToCustomPackage();
 
     // Immediately update controller to persist changes
     _updateControllerMenu();
@@ -1470,7 +1442,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         dish["qty"] = currentQty - 1;
       }
     });
-    _autoSwitchToCustomPackage();
 
     // Immediately update controller to persist changes
     _updateControllerMenu();
@@ -1561,13 +1532,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       ],
                     ),
                   ),
-
-                // Remove button for all items when editing
-                if (isEditing || !isFoodItem)
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                    onPressed: () => removeDish(category, dish),
-                  ),
               ],
             )
           else
@@ -1591,8 +1555,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   Widget buildServiceRow(String category, Map<String, dynamic> dish) {
-    final isFoodItem = category == "Services";
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: Row(
@@ -1610,12 +1572,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               ],
             ),
           ),
-
-          if (isEditing || !isFoodItem)
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.red, size: 20),
-              onPressed: () => removeDish(category, dish),
-            ),
         ],
       ),
     );
