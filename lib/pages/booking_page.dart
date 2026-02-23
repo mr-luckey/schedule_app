@@ -786,6 +786,54 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   String previousPackage = '';
   final List<Worker> _workers = [];
+
+  /// Keyword map: if the packageTitle contains any of these keywords,
+  /// filter `availableFoodLocal` to those API category names.
+  static const Map<String, List<String>> _keywordCategoryMapping = {
+    'drink': ['juice', 'mocktail', 'soft drink', 'beverage', 'sharbat'],
+    'juice': ['juice', 'mocktail', 'soft drink', 'beverage'],
+    'mocktail': ['juice', 'mocktail', 'soft drink', 'beverage'],
+    'starter': ['starter', 'appetizer'],
+    'appetizer': ['starter', 'appetizer'],
+    'main': ['main course', 'mains', 'main'],
+    'sundri': ['sundri'],
+    'chutne': ['chutne'],
+    'dessert': ['dessert', 'sweet'],
+    'sweet': ['dessert', 'sweet'],
+    'salad': ['salad'],
+    'bread': ['bread', 'naan'],
+    'naan': ['bread', 'naan'],
+    'rice': ['rice'],
+  };
+
+  /// Returns food items from [availableFoodLocal] whose API category names
+  /// are relevant to the given package header title.
+  /// Falls back to ALL available food items when no keyword matches.
+  List<Map<String, dynamic>> _filteredOptionsForHeader(String? headerTitle) {
+    if (headerTitle == null || headerTitle.isEmpty) return availableFoodLocal;
+
+    final lowerHeader = headerTitle.toLowerCase();
+
+    // Collect the set of allowed sub-strings (lower-cased) for category matching
+    final Set<String> allowedSubstrings = {};
+    for (final entry in _keywordCategoryMapping.entries) {
+      // If the header title contains this keyword, add its allowed category keywords
+      if (lowerHeader.contains(entry.key)) {
+        allowedSubstrings.addAll(entry.value);
+      }
+    }
+
+    if (allowedSubstrings.isEmpty) return availableFoodLocal;
+
+    return availableFoodLocal.where((item) {
+      final itemCategory = (item['category'] as String? ?? '').toLowerCase();
+      // Match if the item's category name contains ANY of the allowed sub-strings
+      return allowedSubstrings.any(
+        (sub) => itemCategory.contains(sub) || sub.contains(itemCategory),
+      );
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -975,8 +1023,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   void addDish(String category, {String? targetPackageTitle}) {
+    // Filter to relevant items if we have a packageTitle mapping
     final options = category == "Food Items"
-        ? availableFoodLocal
+        ? _filteredOptionsForHeader(targetPackageTitle)
         : availableServicesLocal;
     final groupedOptions = _groupItemsByCategory(options);
 
@@ -1052,9 +1101,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           color: Colors.green,
                                         ),
                                         onPressed: () {
-                                          category == "Services"
-                                              ? null
-                                              : _autoSwitchToCustomPackage();
+                                           if (targetPackageTitle == null &&
+                                               category != "Services") {
+                                             _autoSwitchToCustomPackage();
+                                           }
                                           setState(() {
                                             controller.menu[category]!.add({
                                               "name": item["name"],
@@ -1132,8 +1182,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   void _showSwapDialog(Map<String, dynamic> currentDish, String category) {
+    final headerTitle = currentDish['packageTitle'] as String?;
+    // Filter to relevant items based on package header mapping
     final options = category == "Food Items"
-        ? availableFoodLocal
+        ? _filteredOptionsForHeader(headerTitle)
         : availableServicesLocal;
     final groupedOptions = _groupItemsByCategory(options);
 
@@ -1216,7 +1268,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                               MaterialTapTargetSize.shrinkWrap,
                                         ),
                                         onPressed: () {
-                                          _autoSwitchToCustomPackage();
                                           setState(() {
                                             // Add old item back
                                             if (category == "Food Items") {
