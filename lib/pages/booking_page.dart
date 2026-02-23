@@ -1101,10 +1101,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                           color: Colors.green,
                                         ),
                                         onPressed: () {
-                                           if (targetPackageTitle == null &&
-                                               category != "Services") {
-                                             _autoSwitchToCustomPackage();
-                                           }
+                                          if (targetPackageTitle == null &&
+                                              category != "Services") {
+                                            _autoSwitchToCustomPackage();
+                                          }
                                           setState(() {
                                             controller.menu[category]!.add({
                                               "name": item["name"],
@@ -1798,21 +1798,28 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
               for (final entry in groupedItems.entries) {
                 // Add header for the group
                 widgets.add(
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 12.0,
-                      bottom: 8.0,
-                      left: 8.0,
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10.0,
+                      horizontal: 12.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey[50],
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          entry.key,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey,
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
                         if (isEditing && entry.key != 'Other Items')
@@ -1820,7 +1827,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                             icon: const Icon(
                               Icons.add_circle_outline,
                               color: Colors.green,
-                              size: 20,
+                              size: 24,
                             ),
                             onPressed: () => addDish(
                               "Food Items",

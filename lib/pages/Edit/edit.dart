@@ -1561,18 +1561,23 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   for (final entry in groupedItems.entries) {
                     // Add header for the group
                     widgets.add(
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 12.0,
-                          bottom: 8.0,
-                          left: 8.0,
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 12.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[50],
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           entry.key,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
