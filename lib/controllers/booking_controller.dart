@@ -8,7 +8,6 @@ import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 
 import '../model/discount_model.dart';
-import '../pages/booking_recipt.dart';
 import 'package:schedule_app/model/order/order_model.dart';
 
 class BookingController extends GetxController {
@@ -284,6 +283,7 @@ class BookingController extends GetxController {
       if (package['package_titles'] is List) {
         for (var packageTitleObj in package['package_titles'] as List) {
           final pTitle = packageTitleObj['name']?.toString() ?? 'Default';
+          final maxItem = packageTitleObj['max_item'];
           if (packageTitleObj['package_items'] is List) {
             for (var packageItem in packageTitleObj['package_items'] as List) {
               if (packageItem is Map<String, dynamic> &&
@@ -296,6 +296,7 @@ class BookingController extends GetxController {
                   'qty': 1,
                   'menu_item_id': menuItem['id']?.toString(),
                   'packageTitle': pTitle,
+                  'maxItem': maxItem,
                 });
               }
             }
@@ -472,8 +473,32 @@ class BookingController extends GetxController {
     }
 
     double total = 0.0;
+
+    final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
     for (var item in menu['Food Items']!) {
-      total += (item['price'] as num).toDouble() * (item['qty'] as int);
+      final title = item['packageTitle']?.toString() ?? 'Other';
+      itemsByTitle.putIfAbsent(title, () => []).add(item);
+    }
+
+    for (var entry in itemsByTitle.entries) {
+      final title = entry.key;
+      final items = entry.value;
+
+      int maxItem = 999;
+      if (title != 'Other' &&
+          items.isNotEmpty &&
+          items.first['maxItem'] != null) {
+        maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
+      }
+
+      for (int i = 0; i < items.length; i++) {
+        final item = items[i];
+        if (title != 'Other' && i < maxItem) {
+          // Included
+          continue;
+        }
+        total += (item['price'] as num).toDouble() * (item['qty'] as int);
+      }
     }
     return total;
   }
@@ -736,14 +761,73 @@ class BookingController extends GetxController {
       );
       final packagePrice = _parsePriceString(pkg['price']?.toString());
       final guestCount = guests.value;
-      return packagePrice * guestCount;
+
+      // Calculate additional cost from items exceeding maxItem
+      double additionalCost = 0.0;
+      final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
+
+      if (menu.containsKey('Food Items') && menu['Food Items'] != null) {
+        for (var dish in menu['Food Items']!) {
+          final title = dish['packageTitle']?.toString() ?? 'Other';
+          itemsByTitle.putIfAbsent(title, () => []).add(dish);
+        }
+
+        for (var entry in itemsByTitle.entries) {
+          final title = entry.key;
+          final items = entry.value;
+
+          int maxItem = 999;
+          if (title != 'Other' &&
+              items.isNotEmpty &&
+              items.first['maxItem'] != null) {
+            maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
+          }
+
+          for (int i = 0; i < items.length; i++) {
+            final dish = items[i];
+            if (title != 'Other' && i < maxItem) {
+              continue;
+            }
+            final price = (dish['price'] as num).toDouble();
+            additionalCost += price * guestCount;
+          }
+        }
+      }
+
+      return (packagePrice * guestCount) + additionalCost;
     }
   }
 
   double _calculateTotalFromItems() {
     double total = 0.0;
+
+    final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
     for (var dish in menu['Food Items']!) {
-      total += (dish['price'] as num).toDouble() * (dish['qty'] as int);
+      final title = dish['packageTitle']?.toString() ?? 'Other';
+      itemsByTitle.putIfAbsent(title, () => []).add(dish);
+    }
+
+    for (var entry in itemsByTitle.entries) {
+      final title = entry.key;
+      final items = entry.value;
+
+      int maxItem = 999;
+      if (title != 'Other' &&
+          items.isNotEmpty &&
+          items.first['maxItem'] != null) {
+        maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
+      }
+
+      for (int i = 0; i < items.length; i++) {
+        final dish = items[i];
+        if (title != 'Other' && i < maxItem) {
+          // Included
+          continue;
+        }
+        final price = (dish['price'] as num).toDouble();
+        // Additional items are multiplied by total guest count, NOT item qty
+        total += price * guests.value;
+      }
     }
     return total;
   }
@@ -1294,6 +1378,7 @@ class BookingController extends GetxController {
         'menu_item_id': item['menu_item_id'] ?? item['id'],
         'id': item['id'],
         'packageTitle': item['packageTitle'],
+        'maxItem': item['maxItem'],
       };
 
       if (isFood) {

@@ -1452,6 +1452,27 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     final isPackageItem =
         dish['packageTitle'] != null && dish['packageTitle'] != 'Other Items';
 
+    final String title = dish['packageTitle']?.toString() ?? 'Other';
+    int maxItem = 999;
+    bool isAdditional = false;
+    if (title != 'Other') {
+      final itemsWithSameTitle = controller.menu[category]!
+          .where((d) => d['packageTitle'] == title)
+          .toList();
+      if (itemsWithSameTitle.isNotEmpty &&
+          itemsWithSameTitle.first['maxItem'] != null) {
+        maxItem =
+            int.tryParse(itemsWithSameTitle.first['maxItem'].toString()) ?? 999;
+      }
+      final localIndex = itemsWithSameTitle.indexOf(dish);
+      isAdditional = localIndex >= maxItem;
+    }
+
+    final priceNum = (dish["price"] as num).toDouble();
+    final priceText = isAdditional || !isPackageItem
+        ? "£${priceNum.toStringAsFixed(2)} per unit"
+        : "Included";
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: Row(
@@ -1461,10 +1482,47 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(dish["name"], style: const TextStyle(fontSize: 15)),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        dish["name"],
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    if (isAdditional)
+                      Container(
+                        margin: const EdgeInsets.only(left: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Additional',
+                          style: TextStyle(
+                            color: Colors.deepOrange,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 Text(
-                  "£${(dish["price"] as num).toStringAsFixed(2)} per unit",
-                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                  priceText,
+                  style: TextStyle(
+                    color: isAdditional || !isPackageItem
+                        ? Colors.grey
+                        : Colors.green,
+                    fontSize: 10,
+                    fontWeight: isAdditional || !isPackageItem
+                        ? FontWeight.normal
+                        : FontWeight.bold,
+                  ),
                 ),
                 if (isFoodItem && !isPackageItem)
                   Text(
@@ -1489,6 +1547,13 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ),
+                  if (isAdditional)
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () => removeDish(category, dish),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
                   const SizedBox(width: 8),
                 ] else
                   Container(

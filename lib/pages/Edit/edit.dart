@@ -1231,6 +1231,30 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
         ? (item as SelectedMenuItem).qty
         : (item as SelectedServiceItem).qty;
 
+    final isPackageItem =
+        isFoodItem && (item as SelectedMenuItem).packageTitle != null;
+
+    bool isAdditional = false;
+    if (isFoodItem && isPackageItem) {
+      final title = item.packageTitle!;
+      final itemsWithSameTitle = editController.selectedMenuItems
+          .where((d) => d.packageTitle == title)
+          .toList();
+      int maxItem = 999;
+      if (itemsWithSameTitle.isNotEmpty &&
+          itemsWithSameTitle.first.maxItem != null) {
+        maxItem =
+            int.tryParse(itemsWithSameTitle.first.maxItem.toString()) ?? 999;
+      }
+      final localIndex = itemsWithSameTitle.indexOf(item);
+      isAdditional = localIndex >= maxItem;
+    }
+
+    final priceNum = (double.tryParse(price) ?? 0.0);
+    final priceText = isAdditional || !isPackageItem
+        ? "£${priceNum.toStringAsFixed(2)} ${isFoodItem ? 'per unit' : 'service'}"
+        : "Included";
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: Row(
@@ -1241,10 +1265,44 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontSize: 15)),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(name, style: const TextStyle(fontSize: 15)),
+                    ),
+                    if (isAdditional)
+                      Container(
+                        margin: const EdgeInsets.only(left: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Additional',
+                          style: TextStyle(
+                            color: Colors.deepOrange,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 Text(
-                  "£${(double.tryParse(price) ?? 0.0).toStringAsFixed(2)} ${isFoodItem ? 'per unit' : 'service'}",
-                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                  priceText,
+                  style: TextStyle(
+                    color: isAdditional || !isPackageItem
+                        ? Colors.grey
+                        : Colors.green,
+                    fontSize: 10,
+                    fontWeight: isAdditional || !isPackageItem
+                        ? FontWeight.normal
+                        : FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -1253,33 +1311,47 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
           // Quantity controls (visible when editing for food, always for services)
           // Quantity controls - only show for food items when editing
           if (isFoodItem && isEditing)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_outlined, size: 20),
-                    onPressed: () =>
-                        decrementQuantity(item as SelectedMenuItem),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  Text(qty.toString(), style: const TextStyle(fontSize: 16)),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 20),
-                    onPressed: () =>
-                        incrementQuantity(item as SelectedMenuItem),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_outlined, size: 20),
+                        onPressed: () =>
+                            decrementQuantity(item as SelectedMenuItem),
+                      ),
+                      Text(
+                        qty.toString(),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add, size: 20),
+                        onPressed: () =>
+                            incrementQuantity(item as SelectedMenuItem),
+                      ),
+                      // Edit button to input number manually (only for food)
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 18),
+                        onPressed: () =>
+                            _showEditQuantityDialog(item as SelectedMenuItem),
+                      ),
+                    ],
                   ),
-                  // Edit button to input number manually (only for food)
+                ),
+                if (isAdditional)
                   IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () =>
-                        _showEditQuantityDialog(item as SelectedMenuItem),
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: () => removeItem(item, isFoodItem),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    constraints: const BoxConstraints(),
                   ),
-                ],
-              ),
+              ],
             )
           else if (isFoodItem)
             // For food items when NOT editing, show simple quantity text

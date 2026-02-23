@@ -593,6 +593,30 @@ class EditController extends GetxController {
     return null;
   }
 
+  /// Look up the package maxItem from loaded API packages for a given menu item
+  int? _findPackageMaxItemForMenuItem(int? menuItemId) {
+    if (menuItemId == null) return null;
+
+    for (final pkg in rawApiPackages) {
+      if (pkg['package_titles'] is List) {
+        for (final titleObj in pkg['package_titles'] as List) {
+          if (titleObj['package_items'] is List) {
+            for (final item in titleObj['package_items'] as List) {
+              if (item is Map && item['menu_item'] is Map) {
+                if (item['menu_item']['id']?.toString() ==
+                    menuItemId.toString()) {
+                  final maxItemStr = titleObj['max_item']?.toString();
+                  return maxItemStr != null ? int.tryParse(maxItemStr) : null;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   /// Add menu item to selection
   void addSelectedMenuItem({
     required int? menuItemId,
@@ -601,6 +625,7 @@ class EditController extends GetxController {
     int qty = 1,
     int? id,
     String? packageTitle,
+    int? maxItem,
   }) {
     final exists = selectedMenuItems.any((m) => m.menuItemId == menuItemId);
     if (!exists) {
@@ -614,6 +639,7 @@ class EditController extends GetxController {
           isDeleted: false,
           packageTitle:
               packageTitle ?? _findPackageTitleForMenuItem(menuItemId),
+          maxItem: maxItem ?? _findPackageMaxItemForMenuItem(menuItemId),
         ),
       );
     }
@@ -662,15 +688,68 @@ class EditController extends GetxController {
       );
       final packagePrice = _parsePriceString(pkg.price);
       final guestCount = guests.value;
-      return packagePrice * guestCount;
+
+      // Calculate additional cost from items exceeding maxItem
+      double additionalCost = 0.0;
+      final Map<String, List<SelectedMenuItem>> itemsByTitle = {};
+      for (var item in selectedMenuItems) {
+        final title = item.packageTitle ?? 'Other';
+        itemsByTitle.putIfAbsent(title, () => []).add(item);
+      }
+
+      for (var entry in itemsByTitle.entries) {
+        final title = entry.key;
+        final items = entry.value;
+
+        int maxItem = 999;
+        if (title != 'Other' &&
+            items.isNotEmpty &&
+            items.first.maxItem != null) {
+          maxItem = int.tryParse(items.first.maxItem.toString()) ?? 999;
+        }
+
+        for (int i = 0; i < items.length; i++) {
+          final item = items[i];
+          if (title != 'Other' && i < maxItem) {
+            continue;
+          }
+          final price = double.tryParse(item.price) ?? 0.0;
+          additionalCost += price * guestCount;
+        }
+      }
+
+      return (packagePrice * guestCount) + additionalCost;
     }
   }
 
   double _calculateTotalFromItems() {
     double total = 0.0;
+
+    final Map<String, List<SelectedMenuItem>> itemsByTitle = {};
     for (var item in selectedMenuItems) {
-      final price = double.tryParse(item.price) ?? 0.0;
-      total += price * item.qty;
+      final title = item.packageTitle ?? 'Other';
+      itemsByTitle.putIfAbsent(title, () => []).add(item);
+    }
+
+    for (var entry in itemsByTitle.entries) {
+      final title = entry.key;
+      final items = entry.value;
+
+      int maxItem = 999;
+      if (title != 'Other' && items.isNotEmpty && items.first.maxItem != null) {
+        maxItem = int.tryParse(items.first.maxItem.toString()) ?? 999;
+      }
+
+      for (int i = 0; i < items.length; i++) {
+        final item = items[i];
+        if (title != 'Other' && i < maxItem) {
+          // Included
+          continue;
+        }
+        final price = double.tryParse(item.price) ?? 0.0;
+        // Additional items are multiplied by total guest count, NOT item qty
+        total += price * guests.value;
+      }
     }
     return total;
   }
@@ -1317,6 +1396,8 @@ class EditController extends GetxController {
             qty: foodItem['qty'],
             id: null, // Will be set by API
             isDeleted: false,
+            packageTitle: foodItem['packageTitle'],
+            maxItem: foodItem['maxItem'],
           ),
         );
       }
@@ -1364,6 +1445,8 @@ class EditController extends GetxController {
               'qty': item.qty,
               'menu_item_id': item.menuItemId,
               'id': item.id,
+              'packageTitle': item.packageTitle,
+              'maxItem': item.maxItem,
             },
           )
           .toList(),
@@ -1393,6 +1476,8 @@ class EditController extends GetxController {
         qty: newCount,
         id: selectedMenuItems[i].id,
         isDeleted: selectedMenuItems[i].isDeleted,
+        packageTitle: selectedMenuItems[i].packageTitle,
+        maxItem: selectedMenuItems[i].maxItem,
       );
     }
     selectedMenuItems.refresh();
@@ -1561,6 +1646,8 @@ class EditController extends GetxController {
               'qty': int.tryParse(packageItem.noOfGust ?? '1') ?? 1,
               'menu_item_id': menuItem.id,
               'id': packageItem.id,
+              'packageTitle': _findPackageTitleForMenuItem(menuItem.id),
+              'maxItem': _findPackageMaxItemForMenuItem(menuItem.id),
             };
 
             if (!isService) {
@@ -1787,6 +1874,8 @@ class EditController extends GetxController {
         'qty': finalQty,
         'menu_item_id': item['menu_item_id'] ?? item['id'],
         'id': null, // Will be set when saved
+        'packageTitle': item['packageTitle'],
+        'maxItem': item['maxItem'],
       };
 
       print('🔍 Item processed: $entry (isFood: $isFood)');
@@ -1813,6 +1902,7 @@ class EditController extends GetxController {
       if (package['package_titles'] is List) {
         for (var packageTitleObj in package['package_titles'] as List) {
           final pTitle = packageTitleObj['name']?.toString() ?? 'Default';
+          final maxItem = packageTitleObj['max_item'];
           if (packageTitleObj['package_items'] is List) {
             for (var packageItem in packageTitleObj['package_items'] as List) {
               if (packageItem is Map<String, dynamic> &&
@@ -1825,6 +1915,7 @@ class EditController extends GetxController {
                   'qty': 1,
                   'menu_item_id': menuItem['id']?.toString(),
                   'packageTitle': pTitle,
+                  'maxItem': maxItem,
                 });
               }
             }
@@ -1898,6 +1989,7 @@ class SelectedMenuItem {
   final int? id;
   final bool isDeleted;
   final String? packageTitle;
+  final dynamic maxItem;
 
   SelectedMenuItem({
     required this.menuItemId,
@@ -1907,6 +1999,7 @@ class SelectedMenuItem {
     this.id,
     required this.isDeleted,
     this.packageTitle,
+    this.maxItem,
   });
 
   /// Convert to API format
