@@ -164,6 +164,8 @@ class OrderModel {
     data['total_amount'] = this.totalAmount;
     if (this.discount != null) {
       data['discount'] = this.discount!.toJson();
+    } else {
+      data['discount'] = null;
     }
     if (this.orderServices != null) {
       data['order_services'] = this.orderServices!

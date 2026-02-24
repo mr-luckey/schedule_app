@@ -1090,9 +1090,12 @@ class BookingController extends GetxController {
         "service_amount": serviceCost,
         "food_beverage_amount": foodAndBeverageCost,
         "discount_amount": discountAmount.value,
-        "discount_id": selectedDiscount.value != null
-            ? selectedDiscount.value!.id.toString()
-            : "0",
+        "discount_id": selectedDiscount.value?.id == 0
+            ? null
+            : selectedDiscount.value?.id.toString(),
+        "discount": selectedDiscount.value?.id == 0
+            ? null
+            : selectedDiscount.value,
 
         "is_inquiry": false,
         // Include order services if any
