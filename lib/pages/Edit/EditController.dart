@@ -110,6 +110,73 @@ class EditController extends GetxController {
     super.onClose();
   }
 
+  List<String> validateEdit() {
+    final List<String> errors = [];
+
+    if (nameController.text.trim().isEmpty) {
+      errors.add("Customer name is required");
+    }
+    if (emailController.text.trim().isEmpty) {
+      errors.add("Email address is required");
+    }
+    final contactValue = contactController.text.trim();
+    final hasValidContact =
+        contactValue.isNotEmpty &&
+        contactValue.replaceAll(RegExp(r'[^0-9]'), '').length >= 8;
+    if (!hasValidContact) {
+      errors.add("A valid contact number is required");
+    }
+    if (selectedCity.value.isEmpty) {
+      errors.add("Venue selection is required");
+    }
+    if (selectedEventType.value.isEmpty) {
+      errors.add("Event type is required");
+    }
+    if (selectedDate.value == null) {
+      errors.add("Event date is required");
+    }
+    if (startTime.value == null || endTime.value == null) {
+      errors.add("Time slot selection is required");
+    }
+    if (guests.value <= 0) {
+      errors.add("Number of guests must be at least 1");
+    }
+    if (selectedPackage.value.isEmpty) {
+      errors.add("Package selection is required");
+    }
+
+    // Check minimum items for categories
+    final menu = isEditingItems.value
+        ? _customPackageMenu
+        : menuForPackage(selectedPackage.value, guests.value);
+
+    if (menu.containsKey('Food Items') && menu['Food Items'] != null) {
+      final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
+      for (var dish in menu['Food Items']!) {
+        final title = dish['packageTitle']?.toString() ?? 'Other';
+        itemsByTitle.putIfAbsent(title, () => []).add(dish);
+      }
+
+      for (var entry in itemsByTitle.entries) {
+        final title = entry.key;
+        final items = entry.value;
+
+        if (title != 'Other' &&
+            items.isNotEmpty &&
+            items.first['minItem'] != null) {
+          final minItem = int.tryParse(items.first['minItem'].toString()) ?? 0;
+          if (items.length < minItem) {
+            errors.add(
+              "$title requires at least $minItem item(s). You have selected ${items.length}.",
+            );
+          }
+        }
+      }
+    }
+
+    return errors;
+  }
+
   // ===========================================================================
   // SECTION 3: API DATA LOADING METHODS
   // ===========================================================================

@@ -562,16 +562,37 @@ class BookingForm extends StatelessWidget {
                       onPressed: () {
                         // Validate the form first
                         if (formKey.currentState?.validate() ?? false) {
-                          // Check if all required reactive fields are filled
-                          if (!controller.isFormValid.value) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Please fill in all required fields',
-                                ),
-                                backgroundColor: Colors.orange,
-                                duration: const Duration(seconds: 3),
-                              ),
+                          final List<String> errors = controller
+                              .validateBooking();
+
+                          if (errors.isNotEmpty) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Incomplete Information"),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          "Please fill in all required fields before confirming your booking:",
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ...errors.map((e) => Text("• $e")),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("OK"),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
                             return;
                           }
@@ -781,6 +802,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   late BookingController controller;
 
+  // Track expanded/collapsed state for package title categories. Default collapsed (false)
+  final Map<String, bool> _expandedCategories = {};
+
   late List<Map<String, dynamic>> availableFoodLocal;
   late List<Map<String, dynamic>> availableServicesLocal;
 
@@ -892,21 +916,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       }),
     );
   }
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   controller = Get.find<BookingController>();
-
-  //   previousPackage = controller.selectedPackage.value;
-
-  //   menu = controller.menuForPackage(
-  //     previousPackage,
-  //     controller.guests.value > 0 ? controller.guests.value : 1,
-  //   );
-
-  //   availableFoodLocal = List.from(controller.masterAvailableFood);
-  //   availableServicesLocal = List.from(controller.masterAvailableServices);
-
   //   _syncAvailableListsWithMenu();
 
   //   _workers.add(
@@ -1817,55 +1826,77 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
               final widgets = <Widget>[];
               for (final entry in groupedItems.entries) {
+                final isExpanded = _expandedCategories[entry.key] ?? false;
+
                 // Add header for the group
                 widgets.add(
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                      horizontal: 12.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey[50],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _expandedCategories[entry.key] = !isExpanded;
+                      });
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 12.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  entry.key,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  isExpanded
+                                      ? Icons.keyboard_arrow_down
+                                      : Icons.keyboard_arrow_right,
+                                  color: Colors.black54,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        if (isEditing && entry.key != 'Other Items')
-                          IconButton(
-                            icon: const Icon(
-                              Icons.add_circle_outline,
-                              color: Colors.green,
-                              size: 24,
+                          if (isEditing && entry.key != 'Other Items')
+                            IconButton(
+                              icon: const Icon(
+                                Icons.add_circle_outline,
+                                color: Colors.green,
+                                size: 24,
+                              ),
+                              onPressed: () => addDish(
+                                "Food Items",
+                                targetPackageTitle: entry.key,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
-                            onPressed: () => addDish(
-                              "Food Items",
-                              targetPackageTitle: entry.key,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
 
-                // Add dish rows for this group
-                widgets.addAll(
-                  entry.value.map((dish) => buildmenuRow("Food Items", dish)),
-                );
+                // Add dish rows for this group only if expanded
+                if (isExpanded) {
+                  widgets.addAll(
+                    entry.value.map((dish) => buildmenuRow("Food Items", dish)),
+                  );
+                }
               }
               return widgets;
             }(),
@@ -1925,6 +1956,39 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 ElevatedButton(
                   onPressed: () {
                     commitEditsToController();
+                    final List<String> errors = controller.validateBooking();
+
+                    if (errors.isNotEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Incomplete Information"),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    "Please fill in all required fields before confirming your booking:",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...errors.map((e) => Text("• $e")),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("OK"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
                     controller.showBookingConfirmation();
                   },
                   child: const Text("Confirm Booking"),

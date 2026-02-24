@@ -774,9 +774,12 @@ class FoodBeverageSelection extends StatefulWidget {
 }
 
 class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
-  final EditController editController = Get.find<EditController>();
+  final editController = Get.find<EditController>();
   bool isEditing = false;
   bool isEdited = false;
+
+  // Track expanded/collapsed state for package title categories. Default collapsed (false)
+  final Map<String, bool> _expandedCategories = {};
 
   // ===========================================================================
   // LIFECYCLE METHODS
@@ -1581,34 +1584,56 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
                   final widgets = <Widget>[];
                   for (final entry in groupedItems.entries) {
+                    final isExpanded = _expandedCategories[entry.key] ?? false;
+
                     // Add header for the group
                     widgets.add(
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10.0,
-                          horizontal: 12.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          entry.key,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _expandedCategories[entry.key] = !isExpanded;
+                          });
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10.0,
+                            horizontal: 12.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                entry.key,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_down
+                                    : Icons.keyboard_arrow_right,
+                                color: Colors.black54,
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     );
 
-                    // Add items under this group
-                    widgets.addAll(
-                      entry.value.map((item) => buildItemRow(item, true)),
-                    );
+                    // Add items under this group only if expanded
+                    if (isExpanded) {
+                      widgets.addAll(
+                        entry.value.map((item) => buildItemRow(item, true)),
+                      );
+                    }
                   }
                   return widgets;
                 }(),
@@ -1689,6 +1714,41 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                   ElevatedButton(
                     onPressed: _isFormValid
                         ? () async {
+                            final List<String> errors = editController
+                                .validateEdit();
+
+                            if (errors.isNotEmpty) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Incomplete Information"),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            "Please fill in all required fields before confirming your booking:",
+                                          ),
+                                          const SizedBox(height: 12),
+                                          ...errors.map((e) => Text("• $e")),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                              return;
+                            }
+
                             // Show loading
                             showDialog(
                               context: context,

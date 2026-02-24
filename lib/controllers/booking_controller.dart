@@ -74,17 +74,17 @@ class BookingController extends GetxController {
     loadApiData();
 
     // Listen to form changes for validation
-    ever(selectedCity, (_) => _validateForm());
-    ever(selectedDate, (_) => _validateForm());
-    ever(selectedDate, (_) => _validateForm());
-    ever(selectedTimeSlot, (_) => _validateForm());
-    ever(guests, (_) => _validateForm());
-    ever(selectedEventType, (_) => _validateForm());
-    ever(selectedPackage, (_) => _validateForm());
+    ever(selectedCity, (_) => validateBooking());
+    ever(selectedDate, (_) => validateBooking());
+    ever(selectedDate, (_) => validateBooking());
+    ever(selectedTimeSlot, (_) => validateBooking());
+    ever(guests, (_) => validateBooking());
+    ever(selectedEventType, (_) => validateBooking());
+    ever(selectedPackage, (_) => validateBooking());
 
-    nameController.addListener(_validateForm);
-    emailController.addListener(_validateForm);
-    contactController.addListener(_validateForm);
+    nameController.addListener(validateBooking);
+    emailController.addListener(validateBooking);
+    contactController.addListener(validateBooking);
   }
 
   @override
@@ -335,23 +335,72 @@ class BookingController extends GetxController {
     }
   }
 
-  void _validateForm() {
-    // Check if contact number is filled and valid
-    final contactValue = contactController.text;
+  List<String> validateBooking() {
+    final List<String> errors = [];
+
+    if (nameController.text.trim().isEmpty) {
+      errors.add("Customer name is required");
+    }
+    if (emailController.text.trim().isEmpty) {
+      errors.add("Email address is required");
+    }
+
+    final contactValue = contactController.text.trim();
     final hasValidContact =
         contactValue.isNotEmpty &&
         contactValue.replaceAll(RegExp(r'[^0-9]'), '').length >= 8;
+    if (!hasValidContact) {
+      errors.add("A valid contact number is required");
+    }
 
-    isFormValid.value =
-        nameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty &&
-        hasValidContact &&
-        selectedCity.value.isNotEmpty &&
-        selectedDate.value != null &&
-        startTime.value != null &&
-        endTime.value != null &&
-        guests.value > 0 &&
-        selectedEventType.value.isNotEmpty;
+    if (selectedCity.value.isEmpty) {
+      errors.add("Venue selection is required");
+    }
+    if (selectedEventType.value.isEmpty) {
+      errors.add("Event type is required");
+    }
+    if (selectedDate.value == null) {
+      errors.add("Event date is required");
+    }
+    if (startTime.value == null || endTime.value == null) {
+      errors.add("Time slot selection is required");
+    }
+    if (guests.value <= 0) {
+      errors.add("Number of guests must be at least 1");
+    }
+    if (selectedPackage.value.isEmpty) {
+      errors.add("Package selection is required");
+    }
+
+    // Check minimum items for categories
+    if (menu.containsKey('Food Items') && menu['Food Items'] != null) {
+      final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
+      for (var dish in menu['Food Items']!) {
+        final title = dish['packageTitle']?.toString() ?? 'Other';
+        itemsByTitle.putIfAbsent(title, () => []).add(dish);
+      }
+
+      for (var entry in itemsByTitle.entries) {
+        final title = entry.key;
+        final items = entry.value;
+
+        if (title != 'Other' &&
+            items.isNotEmpty &&
+            items.first['minItem'] != null) {
+          final minItem = int.tryParse(items.first['minItem'].toString()) ?? 0;
+          if (items.length < minItem) {
+            errors.add(
+              "$title requires at least $minItem item(s). You have selected ${items.length}.",
+            );
+          }
+        }
+      }
+    }
+
+    // Still maintain the reactive bool for UI that might depend on it immediately
+    isFormValid.value = errors.isEmpty;
+
+    return errors;
   }
 
   // Form setters
