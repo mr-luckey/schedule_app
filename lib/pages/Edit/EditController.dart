@@ -533,15 +533,31 @@ class EditController extends GetxController {
     // This ensures custom packages are properly detected
     selectedPackage.value = '';
     selectedPackageId.value = '';
-    selectedDiscount.value = discounts.firstWhere(
-      (state) => state.id.toString() == order.discountId.toString(),
-    );
-    if (selectedDiscount.value!.id != 0) {
+    Discount? foundDiscount;
+    if (order.discountId != null) {
+      for (var d in discounts) {
+        if (d.id.toString() == order.discountId.toString()) {
+          foundDiscount = d;
+          break;
+        }
+      }
+    }
+
+    selectedDiscount.value =
+        foundDiscount ?? (discounts.isNotEmpty ? discounts.first : null);
+
+    if (selectedDiscount.value != null && selectedDiscount.value!.id != 0) {
       isDiscountApplied.value = true;
     } else {
       isDiscountApplied.value = false;
     }
-    discountAmount.value = double.parse(order.discountAmount!);
+
+    if (order.discountAmount != null) {
+      discountAmount.value =
+          double.tryParse(order.discountAmount.toString()) ?? 0.0;
+    } else {
+      discountAmount.value = 0.0;
+    }
   }
 
   /// Parse time string to TimeOfDay
