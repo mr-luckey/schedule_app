@@ -1204,19 +1204,47 @@ class EditController extends GetxController {
     // Track which items are currently selected
     final Set<String> selectedMenuItemIds = {};
 
+    // Group selected items to determine which are extras
+    final Map<String, List<SelectedMenuItem>> itemsByTitle = {};
+    for (var m in selectedMenuItems) {
+      final title = m.packageTitle ?? 'Other';
+      itemsByTitle.putIfAbsent(title, () => []).add(m);
+    }
+
+    final Set<String> extraItemIds = {};
+    for (var entry in itemsByTitle.entries) {
+      final title = entry.key;
+      final items = entry.value;
+
+      int maxItem = 999;
+      if (title != 'Other' && items.isNotEmpty && items.first.maxItem != null) {
+        maxItem = int.tryParse(items.first.maxItem?.toString() ?? '999') ?? 999;
+      }
+
+      for (int i = 0; i < items.length; i++) {
+        if (title == 'Other' || i >= maxItem) {
+          final mItemId = items[i].menuItemId?.toString();
+          if (mItemId != null) extraItemIds.add(mItemId);
+        }
+      }
+    }
+
     // Add/Update selected menu items (food items only)
     for (final m in selectedMenuItems) {
       if (m.menuItemId != null) {
         final menuItemIdStr = m.menuItemId!.toString();
         selectedMenuItemIds.add(menuItemIdStr);
 
+        final isExtra = extraItemIds.contains(menuItemIdStr);
         final existingItem = existingItemsByMenuItemId[menuItemIdStr];
+
         packageItems.add({
           if (existingItem?.id != null) "id": existingItem!.id,
           "menu_item_id": menuItemIdStr,
           "price": m.price,
           "no_of_gust": m.qty.toString(),
           "is_deleted": false,
+          "is_extra": isExtra,
         });
       }
     }

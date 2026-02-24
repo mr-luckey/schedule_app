@@ -917,20 +917,12 @@ class BookingController extends GetxController {
       // Availability check is now done in showBookingConfirmation.
       // We proceed to create the order.
 
-      // Get the current menu for the selected package
-      final menu = menuForPackage(selectedPackage.value, guests.value);
+      // Get the current menu for the selected package (this includes UI modifications)
+      final menu = this.menu;
       final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
       // Prepare order services from the services in the menu
-      // List<Map<String, dynamic>> orderServices = [];
-
-      // For custom packages, use _customPackageMenu services
-      List<Map<String, dynamic>> servicesToProcess = [];
-      if (selectedPackage.value == 'Custom Package') {
-        servicesToProcess = _customPackageMenu['Services'] ?? [];
-      } else {
-        servicesToProcess = menu['Services'] ?? [];
-      }
+      List<Map<String, dynamic>> servicesToProcess = menu['Services'] ?? [];
 
       for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
@@ -998,6 +990,7 @@ class BookingController extends GetxController {
         void _addEntryToPackageItems(
           Map<String, dynamic> entry, {
           required bool isFood,
+          bool isExtra = false,
         }) {
           final int? menuItemId = _resolveMenuItemId(entry);
           if (menuItemId == null) return;
@@ -1011,21 +1004,35 @@ class BookingController extends GetxController {
             "price": priceNum.toString(),
             "no_of_gust": qty.toString(),
             "is_deleted": false,
+            "is_extra": isExtra,
           });
         }
 
-        // For custom packages, use _customPackageMenu data
-        List<Map<String, dynamic>> foodItems = [];
+        List<Map<String, dynamic>> foodItems = menu['Food Items'] ?? [];
 
-        if (selectedPackage.value == 'Custom Package') {
-          foodItems = _customPackageMenu['Food Items'] ?? [];
-        } else {
-          foodItems = menu['Food Items'] ?? [];
+        // Group by packageTitle to identify extras
+        final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
+        for (var dish in foodItems) {
+          final title = dish['packageTitle']?.toString() ?? 'Other';
+          itemsByTitle.putIfAbsent(title, () => []).add(dish);
         }
 
-        // Add only food items to package items (services go to order_services_attributes)
-        for (final food in foodItems) {
-          _addEntryToPackageItems(food, isFood: true);
+        for (var entry in itemsByTitle.entries) {
+          final title = entry.key;
+          final items = entry.value;
+
+          int maxItem = 999;
+          if (title != 'Other' &&
+              items.isNotEmpty &&
+              items.first['maxItem'] != null) {
+            maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
+          }
+
+          for (int i = 0; i < items.length; i++) {
+            final dish = items[i];
+            bool isExtra = (title == 'Other' || i >= maxItem);
+            _addEntryToPackageItems(dish, isFood: true, isExtra: isExtra);
+          }
         }
 
         // Get custom package ID from API packages
@@ -1148,17 +1155,12 @@ class BookingController extends GetxController {
         return;
       }
 
-      // Get the current menu for the selected package
-      final menu = menuForPackage(selectedPackage.value, guests.value);
+      // Get the current menu for the selected package (this includes UI modifications)
+      final menu = this.menu;
       final bool isCustomFlag = selectedPackage.value == 'Custom Package';
 
       // For custom packages, use _customPackageMenu services
-      List<Map<String, dynamic>> servicesToProcess = [];
-      if (selectedPackage.value == 'Custom Package') {
-        servicesToProcess = _customPackageMenu['Services'] ?? [];
-      } else {
-        servicesToProcess = menu['Services'] ?? [];
-      }
+      List<Map<String, dynamic>> servicesToProcess = menu['Services'] ?? [];
 
       for (var service in servicesToProcess) {
         final serviceItem = apiServiceItems
@@ -1225,6 +1227,7 @@ class BookingController extends GetxController {
         void _addEntryToPackageItems(
           Map<String, dynamic> entry, {
           required bool isFood,
+          bool isExtra = false,
         }) {
           final int? menuItemId = _resolveMenuItemId(entry);
           if (menuItemId == null) return;
@@ -1238,12 +1241,35 @@ class BookingController extends GetxController {
             "price": priceNum.toString(),
             "no_of_gust": qty.toString(),
             "is_deleted": false,
+            "is_extra": isExtra,
           });
         }
 
-        // Add only food items to package items (services go to order_services_attributes)
-        for (final food in menu['Food Items']!) {
-          _addEntryToPackageItems(food, isFood: true);
+        List<Map<String, dynamic>> foodItems = menu['Food Items'] ?? [];
+
+        // Group by packageTitle to identify extras
+        final Map<String, List<Map<String, dynamic>>> itemsByTitle = {};
+        for (var dish in foodItems) {
+          final title = dish['packageTitle']?.toString() ?? 'Other';
+          itemsByTitle.putIfAbsent(title, () => []).add(dish);
+        }
+
+        for (var entry in itemsByTitle.entries) {
+          final title = entry.key;
+          final items = entry.value;
+
+          int maxItem = 999;
+          if (title != 'Other' &&
+              items.isNotEmpty &&
+              items.first['maxItem'] != null) {
+            maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
+          }
+
+          for (int i = 0; i < items.length; i++) {
+            final dish = items[i];
+            bool isExtra = (title == 'Other' || i >= maxItem);
+            _addEntryToPackageItems(dish, isFood: true, isExtra: isExtra);
+          }
         }
 
         orderPackages.add({
