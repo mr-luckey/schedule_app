@@ -811,50 +811,47 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   String previousPackage = '';
   final List<Worker> _workers = [];
 
-  /// Keyword map: if the packageTitle contains any of these keywords,
-  /// filter `availableFoodLocal` to those API category names.
-  static const Map<String, List<String>> _keywordCategoryMapping = {
-    'drink': ['juice', 'mocktail', 'soft drink', 'beverage', 'sharbat'],
-    'juice': ['juice', 'mocktail', 'soft drink', 'beverage'],
-    'mocktail': ['juice', 'mocktail', 'soft drink', 'beverage'],
-    'starter': ['starter', 'appetizer'],
-    'appetizer': ['starter', 'appetizer'],
-    'main': ['main course', 'mains', 'main'],
-    'sundri': ['sundri'],
-    'chutne': ['chutne'],
-    'dessert': ['dessert', 'sweet'],
-    'sweet': ['dessert', 'sweet'],
-    'salad': ['salad'],
-    'bread': ['bread', 'naan'],
-    'naan': ['bread', 'naan'],
-    'rice': ['rice'],
-  };
-
   /// Returns food items from [availableFoodLocal] whose API category names
   /// are relevant to the given package header title.
-  /// Falls back to ALL available food items when no keyword matches.
   List<Map<String, dynamic>> _filteredOptionsForHeader(String? headerTitle) {
     if (headerTitle == null || headerTitle.isEmpty) return availableFoodLocal;
 
-    final lowerHeader = headerTitle.toLowerCase();
+    // We want to find the items from the package API that match this headerTitle
+    // The current package data is available in `controller.selectedPackage`
+    final pkg = controller.packages.firstWhere(
+      (p) => p['title'] == controller.selectedPackage.value,
+      orElse: () => <String, dynamic>{},
+    );
 
-    // Collect the set of allowed sub-strings (lower-cased) for category matching
-    final Set<String> allowedSubstrings = {};
-    for (final entry in _keywordCategoryMapping.entries) {
-      // If the header title contains this keyword, add its allowed category keywords
-      if (lowerHeader.contains(entry.key)) {
-        allowedSubstrings.addAll(entry.value);
+    if (pkg.isEmpty || !pkg.containsKey('items')) return availableFoodLocal;
+
+    final packageItems = (pkg['items'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
+
+    // Find all menu items that the package defines under this headerTitle
+    final itemsUnderHeader = packageItems
+        .where((i) => i['packageTitle'] == headerTitle)
+        .toList();
+
+    // From these items, find their corresponding categories in masterAvailableFood
+    final Set<String> allowedCategories = {};
+    for (var pItem in itemsUnderHeader) {
+      final name = pItem['name'];
+      final targetFood = controller.masterAvailableFood.firstWhere(
+        (f) => f['name'] == name,
+        orElse: () => <String, dynamic>{},
+      );
+      if (targetFood.isNotEmpty && targetFood['category'] != null) {
+        allowedCategories.add((targetFood['category'] as String).toLowerCase());
       }
     }
 
-    if (allowedSubstrings.isEmpty) return availableFoodLocal;
+    if (allowedCategories.isEmpty) return availableFoodLocal;
 
+    // Filter available food by matching the exact category from the menus API
     return availableFoodLocal.where((item) {
       final itemCategory = (item['category'] as String? ?? '').toLowerCase();
-      // Match if the item's category name contains ANY of the allowed sub-strings
-      return allowedSubstrings.any(
-        (sub) => itemCategory.contains(sub) || sub.contains(itemCategory),
-      );
+      return allowedCategories.contains(itemCategory);
     }).toList();
   }
 
