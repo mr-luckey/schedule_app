@@ -8,6 +8,8 @@ class MenuCategory {
   final String? description;
   final int? reorder;
   final bool? isPremium;
+  final int? menuCategoryId;
+  final ParentMenuCategory? menuCategory;
   final List<MenuItem>? menuItems;
   final String? createdAt;
   final String? updatedAt;
@@ -21,6 +23,8 @@ class MenuCategory {
     this.description,
     this.reorder,
     this.isPremium,
+    this.menuCategoryId,
+    this.menuCategory,
     this.menuItems,
     this.createdAt,
     this.updatedAt,
@@ -36,6 +40,10 @@ class MenuCategory {
       description: json['description'],
       reorder: json['reorder'],
       isPremium: json['is_premium'],
+      menuCategoryId: json['menu_category_id'],
+      menuCategory: json['menu_category'] != null
+          ? ParentMenuCategory.fromJson(json['menu_category'])
+          : null,
       menuItems: json['menu_items'] != null
           ? (json['menu_items'] as List)
                 .map((item) => MenuItem.fromJson(item))
@@ -56,6 +64,8 @@ class MenuCategory {
       'description': description,
       'reorder': reorder,
       'is_premium': isPremium,
+      'menu_category_id': menuCategoryId,
+      'menu_category': menuCategory?.toJson(),
       'menu_items': menuItems?.map((item) => item.toJson()).toList(),
       'created_at': createdAt,
       'updated_at': updatedAt,
@@ -94,7 +104,7 @@ class MenuItem {
       id: json['id'],
       menuId: json['menu_id'],
       title: json['title'],
-      price: json['price'],
+      price: json['price']?.toString(),
       vatId: json['vat_id'],
       discountId: json['discount_id'],
       description: json['description'],
@@ -114,6 +124,46 @@ class MenuItem {
       'discount_id': discountId,
       'description': description,
       'reorder': reorder,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
+  }
+}
+
+class ParentMenuCategory {
+  final int? id;
+  final String? name;
+  final String? description;
+  final bool? isActive;
+  final String? createdAt;
+  final String? updatedAt;
+
+  ParentMenuCategory({
+    this.id,
+    this.name,
+    this.description,
+    this.isActive,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory ParentMenuCategory.fromJson(Map<String, dynamic> json) {
+    return ParentMenuCategory(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      isActive: json['is_active'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'is_active': isActive,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
