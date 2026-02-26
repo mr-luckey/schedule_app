@@ -1478,6 +1478,8 @@ class BookingController extends GetxController {
       final List<Map<String, dynamic>> allFoodItems = [];
 
       for (var category in apiMenuItems) {
+        final bool isPremiumCategory =
+            category['is_premium'] == true || category['is_premium'] == 1;
         if (category['menu_items'] is List) {
           for (var item in category['menu_items'] as List) {
             allFoodItems.add({
@@ -1486,6 +1488,7 @@ class BookingController extends GetxController {
               "id": item['id']?.toString(),
               "category": category['title']?.toString() ?? 'Uncategorized',
               "menu_item_id": item['id']?.toString(),
+              "is_premium": isPremiumCategory,
             });
           }
         }

@@ -952,13 +952,16 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   /// Add menu item to selection
-  /// Add menu item to selection
-  void addMenuItem(MenuItemModel.MenuItem menuItem) {
+  void addMenuItem(
+    MenuItemModel.MenuItem menuItem, [
+    String? targetPackageTitle,
+  ]) {
     editController.addSelectedMenuItem(
       menuItemId: menuItem.id ?? 0,
       name: menuItem.title ?? 'Unknown Item',
       price: menuItem.price?.toString() ?? '0',
       qty: editController.guests.value, // Use guest count for food
+      packageTitle: targetPackageTitle,
     );
     editController.markPackageAsEdited(); // Mark as edited
   }
@@ -1049,8 +1052,63 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
   }
 
   /// Show dialog to add menu items (with categories)
-  void _showAddMenuItemsDialog() {
-    final availableCategories = availableMenuCategories;
+  void _showAddMenuItemsDialog([String? targetPackageTitle]) {
+    var availableCategories = availableMenuCategories;
+
+    if (targetPackageTitle != null && targetPackageTitle.isNotEmpty) {
+      // Find the items under this package
+      final pkg = editController.rawApiPackages.firstWhere(
+        (p) => p['title'] == editController.selectedPackage.value,
+        orElse: () => <String, dynamic>{},
+      );
+
+      if (pkg.isNotEmpty && pkg.containsKey('items')) {
+        final packageItems = (pkg['items'] as List<dynamic>)
+            .cast<Map<String, dynamic>>();
+        final itemsUnderHeader = packageItems
+            .where((i) => i['packageTitle'] == targetPackageTitle)
+            .toList();
+
+        final Set<String> allowedCategories = {};
+        for (var pItem in itemsUnderHeader) {
+          final name = pItem['name'];
+          // Find this item's category in the menu items
+          for (var cat in editController.menuCategories) {
+            if (cat.menuItems?.any((i) => i.title == name) == true) {
+              if (cat.title != null) {
+                allowedCategories.add(cat.title!.toLowerCase());
+              }
+            }
+          }
+        }
+
+        final lowerHeader = targetPackageTitle.toLowerCase();
+        if (lowerHeader.contains('main')) {
+          for (var cat in editController.menuCategories) {
+            final catTitle = cat.title?.toLowerCase() ?? '';
+            if ((cat.isPremium == true || catTitle.contains('premium')) &&
+                catTitle.contains('main')) {
+              allowedCategories.add(catTitle);
+            }
+          }
+        }
+        if (lowerHeader.contains('starter')) {
+          for (var cat in editController.menuCategories) {
+            final catTitle = cat.title?.toLowerCase() ?? '';
+            if ((cat.isPremium == true || catTitle.contains('premium')) &&
+                catTitle.contains('starter')) {
+              allowedCategories.add(catTitle);
+            }
+          }
+        }
+
+        if (allowedCategories.isNotEmpty) {
+          availableCategories = availableCategories.where((cat) {
+            return allowedCategories.contains(cat.title?.toLowerCase() ?? '');
+          }).toList();
+        }
+      }
+    }
 
     showModalBottomSheet(
       context: context,
@@ -1119,7 +1177,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                       color: Colors.green,
                                     ),
                                     onPressed: () {
-                                      addMenuItem(item);
+                                      addMenuItem(item, targetPackageTitle);
                                       Navigator.pop(ctx);
                                     },
                                   ),
@@ -1608,20 +1666,39 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                entry.key,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      entry.key,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      isExpanded
+                                          ? Icons.keyboard_arrow_down
+                                          : Icons.keyboard_arrow_right,
+                                      color: Colors.black54,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Icon(
-                                isExpanded
-                                    ? Icons.keyboard_arrow_down
-                                    : Icons.keyboard_arrow_right,
-                                color: Colors.black54,
-                              ),
+                              if (isEditing && entry.key != 'Other Items')
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: Colors.green,
+                                    size: 24,
+                                  ),
+                                  onPressed: () =>
+                                      _showAddMenuItemsDialog(entry.key),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
                             ],
                           ),
                         ),

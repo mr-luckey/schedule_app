@@ -846,6 +846,28 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       }
     }
 
+    final lowerHeader = headerTitle.toLowerCase();
+    if (lowerHeader.contains('main')) {
+      final premiumMains = controller.masterAvailableFood.where((f) {
+        final cat = f['category'].toString().toLowerCase();
+        return (f['is_premium'] == true || cat.contains('premium')) &&
+            cat.contains('main');
+      });
+      for (var pm in premiumMains) {
+        allowedCategories.add((pm['category'] as String).toLowerCase());
+      }
+    }
+    if (lowerHeader.contains('starter')) {
+      final premiumStarters = controller.masterAvailableFood.where((f) {
+        final cat = f['category'].toString().toLowerCase();
+        return (f['is_premium'] == true || cat.contains('premium')) &&
+            cat.contains('starter');
+      });
+      for (var ps in premiumStarters) {
+        allowedCategories.add((ps['category'] as String).toLowerCase());
+      }
+    }
+
     if (allowedCategories.isEmpty) return availableFoodLocal;
 
     // Filter available food by matching the exact category from the menus API
