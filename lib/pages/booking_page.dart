@@ -1129,6 +1129,24 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                         ),
                                         onPressed: () {
                                           setState(() {
+                                            dynamic existingMaxItem;
+                                            if (targetPackageTitle != null) {
+                                              final matching = controller
+                                                  .menu[category]!
+                                                  .where(
+                                                    (d) =>
+                                                        d["packageTitle"] ==
+                                                        targetPackageTitle,
+                                                  )
+                                                  .toList();
+                                              if (matching.isNotEmpty &&
+                                                  matching.first["maxItem"] !=
+                                                      null) {
+                                                existingMaxItem =
+                                                    matching.first["maxItem"];
+                                              }
+                                            }
+
                                             controller.menu[category]!.add({
                                               "name": item["name"],
                                               "price": item["price"],
@@ -1142,6 +1160,8 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                               if (targetPackageTitle != null)
                                                 "packageTitle":
                                                     targetPackageTitle,
+                                              if (existingMaxItem != null)
+                                                "maxItem": existingMaxItem,
                                             });
 
                                             if (category == "Food Items") {
@@ -1339,6 +1359,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                                     null)
                                                   "packageTitle":
                                                       currentDish["packageTitle"],
+                                                if (currentDish["maxItem"] !=
+                                                    null)
+                                                  "maxItem":
+                                                      currentDish["maxItem"],
                                               };
                                             }
                                           });

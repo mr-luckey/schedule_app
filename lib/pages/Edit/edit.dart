@@ -8,7 +8,6 @@ import 'package:schedule_app/pages/Edit/models/MenuItem.dart' as MenuItemModel;
 import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
 import 'package:flutter/services.dart';
-import 'package:schedule_app/widgets/schedule_header.dart';
 
 // ignore: must_be_immutable
 class EditPage extends StatefulWidget {
@@ -96,6 +95,33 @@ class _EditPageState extends State<EditPage> {
     );
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Get.back(),
+          ),
+          const SizedBox(width: 16),
+          const Text(
+            'Edit Booking',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLayout(BuildContext context) {
     final bool isMobile = ResponsiveBreakpoints.of(context).smallerThan(TABLET);
     final bool isTablet = ResponsiveBreakpoints.of(
@@ -110,7 +136,7 @@ class _EditPageState extends State<EditPage> {
   Widget _buildMobileLayout() {
     return Column(
       children: [
-        ScheduleHeader(),
+        _buildHeader(context),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -134,6 +160,7 @@ class _EditPageState extends State<EditPage> {
         Expanded(
           child: Column(
             children: [
+              _buildHeader(context),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -160,6 +187,7 @@ class _EditPageState extends State<EditPage> {
         Expanded(
           child: Column(
             children: [
+              _buildHeader(context),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
