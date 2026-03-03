@@ -26,6 +26,7 @@ class EditController extends GetxController {
 
       if (order != null) {
         currentEditOrder.value = order;
+        swapCharges.value = 0.0;
         _populateFormFromOrder(order);
       } else {
         errorMessage.value = 'Order not found';
@@ -313,6 +314,21 @@ class EditController extends GetxController {
   final RxString selectedPackageId = ''.obs;
 
   RxDouble discountAmount = 0.0.obs;
+  RxDouble swapCharges = 0.0.obs;
+
+  void addSwapCharge(String packageTitle) {
+    if (currentEditOrder.value?.isInquiry != true) {
+      final titleLower = packageTitle.toLowerCase();
+      // Ensure we have at least 1 guest for the calculation
+      final int numGuests = guests.value > 0 ? guests.value : 1;
+      if (titleLower.contains('starter')) {
+        swapCharges.value += (2.0 * numGuests);
+      } else if (titleLower.contains('main')) {
+        swapCharges.value += (2.50 * numGuests);
+      }
+    }
+  }
+
   // Prepare order services from the services in the menu
   List<Map<String, dynamic>> orderServices = [];
 
@@ -808,7 +824,7 @@ class EditController extends GetxController {
         total += (item['price'] as num).toDouble() * (item['qty'] as int);
       }
     }
-    return total;
+    return total + swapCharges.value;
   }
 
   double calculateTax() {
@@ -1099,7 +1115,7 @@ class EditController extends GetxController {
         }
       }
 
-      return (packagePrice * guestCount) + additionalCost;
+      return (packagePrice * guestCount) + additionalCost + swapCharges.value;
     }
   }
 
@@ -1135,7 +1151,7 @@ class EditController extends GetxController {
         total += price * guests.value;
       }
     }
-    return total;
+    return total + swapCharges.value;
   }
 
   double get serviceCost {

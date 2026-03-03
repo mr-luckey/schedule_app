@@ -1359,10 +1359,19 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                                             }
 
                                             // Swap
-                                            final idx = controller
+                                            final int idx = controller
                                                 .menu[category]!
                                                 .indexOf(currentDish);
                                             if (idx != -1) {
+                                              // Track swap charge for bookings
+                                              if (category == "Food Items") {
+                                                controller.addSwapCharge(
+                                                  currentDish["packageTitle"]
+                                                          ?.toString() ??
+                                                      "",
+                                                );
+                                              }
+
                                               controller
                                                   .menu[category]![idx] = {
                                                 "name": item["name"],
