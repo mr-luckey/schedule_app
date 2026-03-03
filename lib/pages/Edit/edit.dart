@@ -356,7 +356,8 @@ class EditForm extends StatelessWidget {
                       items: controller.cities,
                       onChanged: controller.setCity,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        final currentVal = controller.selectedCity.value;
+                        if (currentVal.isEmpty) {
                           return 'Please select a city';
                         }
                         return null;
@@ -396,7 +397,8 @@ class EditForm extends StatelessWidget {
                 items: controller.eventTypes,
                 onChanged: controller.setEventType,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  final currentVal = controller.selectedEventType.value;
+                  if (currentVal.isEmpty) {
                     return 'Please select an event type';
                   }
                   return null;
@@ -441,7 +443,8 @@ class EditForm extends StatelessWidget {
                       items: controller.timeSlots,
                       onChanged: (val) => controller.setTimeSlot(val),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        final currentVal = controller.selectedTimeSlot.value;
+                        if (currentVal == null || currentVal.isEmpty) {
                           return 'Please select a time slot';
                         }
                         return null;
@@ -728,7 +731,8 @@ class EditForm extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value.isEmpty ? null : value,
-          validator: validator,
+          validator: (val) =>
+              validator?.call(val ?? (value.isEmpty ? null : value)),
           decoration: InputDecoration(
             hintText: 'Select $label',
             border: const OutlineInputBorder(),
