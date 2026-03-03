@@ -163,14 +163,12 @@ class _PaymentPopupState extends State<PaymentPopup> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
-          Obx(
-            () => Text(
-              "£${bookingController.totalAmount.toStringAsFixed(2)}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
+          Text(
+            "£${widget.totalAmount.toStringAsFixed(2)}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
             ),
           ),
         ],

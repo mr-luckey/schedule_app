@@ -864,12 +864,8 @@ class EditController extends GetxController {
       return;
     }
 
-    // Check availability before showing payment popup
-    final isAvailable = await checkAvailability();
-    if (!isAvailable) {
-      // Error dialog is shown in checkAvailability
-      return;
-    }
+    // Skip availability check on edits — user is updating an existing booking
+    // and should be allowed to keep their original time slot.
 
     Get.dialog(
       PaymentPopup(
@@ -1067,7 +1063,10 @@ class EditController extends GetxController {
     }
   }
 
-  late Map<String, List<Map<String, dynamic>>> menu;
+  Map<String, List<Map<String, dynamic>>> menu = {
+    'Food Items': [],
+    'Services': [],
+  };
 
   double get foodAndBeverageCost {
     // Check if package is custom (either currently editing or was edited and saved as custom)
