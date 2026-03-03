@@ -813,7 +813,19 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   /// Returns food items from [availableFoodLocal] whose API category names
   /// are relevant to the given package header title.
-  List<Map<String, dynamic>> _filteredOptionsForHeader(String? headerTitle) {
+  ///
+  /// When [isSwap] is false (adding), premium starters/mains are always
+  /// included alongside regular ones.
+  ///
+  /// When [isSwap] is true (swapping), premium options are only included
+  /// if the item being swapped itself belongs to a premium category
+  /// (determined via [currentItemCategory]). If the item is not premium,
+  /// premium categories are excluded from the options.
+  List<Map<String, dynamic>> _filteredOptionsForHeader(
+    String? headerTitle, {
+    bool isSwap = false,
+    String? currentItemCategory,
+  }) {
     if (headerTitle == null || headerTitle.isEmpty) return availableFoodLocal;
 
     // We want to find the items from the package API that match this headerTitle
@@ -847,24 +859,64 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     }
 
     final lowerHeader = headerTitle.toLowerCase();
-    if (lowerHeader.contains('main')) {
-      final premiumMains = controller.masterAvailableFood.where((f) {
-        final cat = f['category'].toString().toLowerCase();
-        return (f['is_premium'] == true || cat.contains('premium')) &&
-            cat.contains('main');
-      });
-      for (var pm in premiumMains) {
-        allowedCategories.add((pm['category'] as String).toLowerCase());
+
+    if (isSwap) {
+      // --- Swap mode: only include premium if the item being swapped is premium ---
+      final swapCat = (currentItemCategory ?? '').toLowerCase();
+      final itemIsPremium = swapCat.contains('premium');
+
+      if (itemIsPremium) {
+        // Show only premium alternatives of the same sub-type
+        if (swapCat.contains('main')) {
+          // Keep only premium-main categories; remove non-premium main categories
+          allowedCategories.removeWhere(
+            (c) => c.contains('main') && !c.contains('premium'),
+          );
+          final premiumMains = controller.masterAvailableFood.where((f) {
+            final cat = f['category'].toString().toLowerCase();
+            return (f['is_premium'] == true || cat.contains('premium')) &&
+                cat.contains('main');
+          });
+          for (var pm in premiumMains) {
+            allowedCategories.add((pm['category'] as String).toLowerCase());
+          }
+        } else if (swapCat.contains('starter')) {
+          // Keep only premium-starter categories; remove non-premium starter categories
+          allowedCategories.removeWhere(
+            (c) => c.contains('starter') && !c.contains('premium'),
+          );
+          final premiumStarters = controller.masterAvailableFood.where((f) {
+            final cat = f['category'].toString().toLowerCase();
+            return (f['is_premium'] == true || cat.contains('premium')) &&
+                cat.contains('starter');
+          });
+          for (var ps in premiumStarters) {
+            allowedCategories.add((ps['category'] as String).toLowerCase());
+          }
+        }
       }
-    }
-    if (lowerHeader.contains('starter')) {
-      final premiumStarters = controller.masterAvailableFood.where((f) {
-        final cat = f['category'].toString().toLowerCase();
-        return (f['is_premium'] == true || cat.contains('premium')) &&
-            cat.contains('starter');
-      });
-      for (var ps in premiumStarters) {
-        allowedCategories.add((ps['category'] as String).toLowerCase());
+      // If item is NOT premium, leave allowedCategories as-is (no premium added)
+    } else {
+      // --- Add mode: always include premium starters/mains alongside regular ---
+      if (lowerHeader.contains('main')) {
+        final premiumMains = controller.masterAvailableFood.where((f) {
+          final cat = f['category'].toString().toLowerCase();
+          return (f['is_premium'] == true || cat.contains('premium')) &&
+              cat.contains('main');
+        });
+        for (var pm in premiumMains) {
+          allowedCategories.add((pm['category'] as String).toLowerCase());
+        }
+      }
+      if (lowerHeader.contains('starter')) {
+        final premiumStarters = controller.masterAvailableFood.where((f) {
+          final cat = f['category'].toString().toLowerCase();
+          return (f['is_premium'] == true || cat.contains('premium')) &&
+              cat.contains('starter');
+        });
+        for (var ps in premiumStarters) {
+          allowedCategories.add((ps['category'] as String).toLowerCase());
+        }
       }
     }
 
@@ -1226,9 +1278,17 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
 
   void _showSwapDialog(Map<String, dynamic> currentDish, String category) {
     final headerTitle = currentDish['packageTitle'] as String?;
-    // Filter to relevant items based on package header mapping
+    // Determine the category of the item being swapped (used for premium check)
+    final currentItemCategory = (currentDish['category'] as String? ?? '')
+        .toLowerCase();
+    // Filter to relevant items based on package header mapping.
+    // isSwap:true means premium options are only shown if the swapped item is premium.
     final options = category == "Food Items"
-        ? _filteredOptionsForHeader(headerTitle)
+        ? _filteredOptionsForHeader(
+            headerTitle,
+            isSwap: true,
+            currentItemCategory: currentItemCategory,
+          )
         : availableServicesLocal;
     final groupedOptions = _groupItemsByCategory(options);
 
