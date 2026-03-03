@@ -58,26 +58,6 @@ class _PaymentPopupState extends State<PaymentPopup> {
     super.dispose();
   }
 
-  void _handlePaymentConfirmation() {
-    if (!mounted) return;
-
-    setState(() {
-      _isProcessing = true;
-    });
-
-    _processingTimer = Timer(const Duration(seconds: 10), () {
-      if (!mounted) return;
-
-      setState(() {
-        _isProcessing = false;
-        _showSuccessScreen = true;
-      });
-
-      widget.onConfirm();
-      // Get.to(SchedulePage());
-    });
-  }
-
   void _handleSuccessScreenFinish() {
     if (!mounted) return;
 
@@ -480,9 +460,7 @@ class _PaymentPopupState extends State<PaymentPopup> {
               } else {
                 bookingController.isDiscountApplied.value = true;
               }
-              if (newValue != null) {
-                bookingController.calculateDiscount(newValue);
-              }
+              bookingController.calculateDiscount(newValue);
             },
           ),
         ),

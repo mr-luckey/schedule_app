@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/get_core.dart';
 
 import 'package:intl/intl.dart';
-import 'package:schedule_app/pages/Edit/EditController.dart';
+import 'package:schedule_app/pages/Edit/edit_controller.dart';
 
 import 'package:schedule_app/theme/app_colors.dart';
 
@@ -59,26 +59,6 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
     super.dispose();
   }
 
-  void _handlePaymentConfirmation() {
-    if (!mounted) return;
-
-    setState(() {
-      _isProcessing = true;
-    });
-
-    _processingTimer = Timer(const Duration(seconds: 10), () {
-      if (!mounted) return;
-
-      setState(() {
-        _isProcessing = false;
-        _showSuccessScreen = true;
-      });
-
-      widget.onConfirm();
-      // Get.to(SchedulePage());
-    });
-  }
-
   void _handleSuccessScreenFinish() {
     if (!mounted) return;
 
@@ -109,44 +89,44 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
             color: Colors.white,
             child: _isProcessing
                 ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "Processing your payment...",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Processing your payment...",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            )
+                  )
                 : isMobile
                 ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  _eventDetails(context),
-                  const SizedBox(height: 20),
-                  _paymentSection(context),
-                ],
-              ),
-            )
+                    child: Column(
+                      children: [
+                        _eventDetails(context),
+                        const SizedBox(height: 20),
+                        _paymentSection(context),
+                      ],
+                    ),
+                  )
                 : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 2, child: _eventDetails(context)),
-                const SizedBox(width: 20),
-                Expanded(flex: 3, child: _paymentSection(context)),
-              ],
-            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 2, child: _eventDetails(context)),
+                      const SizedBox(width: 20),
+                      Expanded(flex: 3, child: _paymentSection(context)),
+                    ],
+                  ),
           );
         },
       ),
@@ -184,14 +164,16 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
-          Obx(()=>Text(
-            "£${editController.totalAmount.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+          Obx(
+            () => Text(
+              "£${editController.totalAmount.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
-          ),),
+          ),
         ],
       ),
     );
@@ -282,7 +264,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: (){
+                onPressed: () {
                   Get.back();
                   Get.back();
                 },
@@ -306,9 +288,8 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () async{
-                  Get.to(()=>EditReceiptScreen());
-
+                onPressed: () async {
+                  Get.to(() => EditReceiptScreen());
                 },
                 // _handlePaymentConfirmation,
                 child: const Text("Pay Now & Confirm Booking"),
@@ -398,9 +379,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
             border: Border.all(color: Colors.grey.shade300, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -423,10 +402,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
               padding: EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 'Select Discount',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
             ),
             items: editController.discounts.map((Discount discount) {
@@ -480,9 +456,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
               } else {
                 editController.isDiscountApplied.value = true;
               }
-              if (newValue != null) {
-                editController.calculateDiscount(newValue);
-              }
+              editController.calculateDiscount(newValue);
             },
           ),
         ),
@@ -500,11 +474,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.payment,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          Icon(Icons.payment, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Text(
             '£',
@@ -517,9 +487,9 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
           Expanded(
             child: TextFormField(
               controller: editController.advancePaymentController,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -527,9 +497,7 @@ class _EditPaymentPopupState extends State<EditPaymentPopup> {
                 disabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 hintText: '0.00',
-                hintStyle: TextStyle(
-                  color: AppColors.textSecondary,
-                ),
+                hintStyle: TextStyle(color: AppColors.textSecondary),
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
               ),

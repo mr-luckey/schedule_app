@@ -7,10 +7,277 @@ import 'package:schedule_app/APIS/Api_Service.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/widgets/Payment_Popup.dart';
 
-import '../model/discount_model.dart';
-import 'package:schedule_app/model/order/order_model.dart';
+import '../../model/discount_model.dart';
+import '../../model/order/order_model.dart';
 
-class BookingController extends GetxController {
+class EditController extends GetxController {
+  final Rx<OrderModel?> currentEditOrder = Rx<OrderModel?>(null);
+
+  Future<void> loadOrderById(String orderId) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      if (_apiInitFuture != null) {
+        await _apiInitFuture;
+      }
+
+      final OrderModel? order = await ApiService.getOrderById(orderId);
+
+      if (order != null) {
+        currentEditOrder.value = order;
+        _populateFormFromOrder(order);
+      } else {
+        errorMessage.value = 'Order not found';
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to load order: $e';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _populateFormFromOrder(OrderModel order) {
+    nameController.text = '${order.firstname ?? ''} ${order.lastname ?? ''}'
+        .trim();
+    emailController.text = order.email ?? '';
+    contactController.text = order.phone ?? '';
+    specialRequirementsController.text = order.requirement ?? '';
+    advancePaymentController.text = '0.0';
+
+    if (order.event != null) {
+      selectedEventType.value = order.event!.title ?? '';
+    }
+    selectedEventId.value = order.eventId?.toString() ?? '';
+
+    if (order.eventDate != null && order.eventDate!.isNotEmpty) {
+      try {
+        selectedDate.value = DateTime.parse(order.eventDate!);
+      } catch (e) {}
+    } else {
+      selectedDate.value = null;
+    }
+
+    startTime.value = _parseTimeFromString(order.startTime);
+    endTime.value = _parseTimeFromString(order.endTime);
+
+    if (startTime.value != null) {
+      if (startTime.value!.hour == 11) {
+        selectedTimeSlot.value = '11:00 AM - 1:00 PM';
+      } else if (startTime.value!.hour == 13) {
+        selectedTimeSlot.value = '1:00 PM - 3:00 PM';
+      } else if (startTime.value!.hour == 17) {
+        selectedTimeSlot.value = '5:00 PM - 7:00 PM';
+      } else if (startTime.value!.hour == 19) {
+        selectedTimeSlot.value = '7:00 PM - 9:00 PM';
+      } else {
+        selectedTimeSlot.value = null;
+      }
+    }
+
+    guests.value = int.tryParse(order.noOfGust ?? '1') ?? 1;
+
+    if (order.city != null) {
+      selectedCity.value = order.city!.name ?? '';
+      selectedCityId.value = order.cityId?.toString() ?? '';
+    }
+
+    Discount? foundDiscount;
+    if (order.discountId != null) {
+      for (var d in discounts) {
+        if (d.id.toString() == order.discountId.toString()) {
+          foundDiscount = d;
+          break;
+        }
+      }
+    }
+    selectedDiscount.value =
+        foundDiscount ?? (discounts.isNotEmpty ? discounts.first : null);
+    isDiscountApplied.value =
+        (selectedDiscount.value != null && selectedDiscount.value!.id != 0);
+
+    if (order.discountAmount != null) {
+      discountAmount.value =
+          double.tryParse(order.discountAmount.toString()) ?? 0.0;
+    }
+
+    isPackageEditing.value = true;
+
+    // Find the main package (first one, since UI expects single package + custom items)
+    if (order.orderPackages != null && order.orderPackages!.isNotEmpty) {
+      final mainPkg = order.orderPackages!.firstWhere(
+        (op) => op.isCustom == false,
+        orElse: () => order.orderPackages!.first,
+      );
+
+      if (mainPkg.package != null) {
+        selectedPackageId.value = mainPkg.packageId?.toString() ?? '';
+        selectedPackage.value = mainPkg.package!.title ?? '';
+      }
+    }
+
+    // Force Rx reactivity trigger to build initial structural menu based on original package
+    final pkgToLoad = selectedPackage.value;
+    selectedPackage.value = '';
+    selectedPackage.value = pkgToLoad;
+
+    // The 'ever' listener on selectedPackage in edit_controller (if any, or in UI)
+    // usually rebuilds menu. Since we want to ensure custom qty overrides are applied:
+    menu = menuForPackage(
+      selectedPackage.value,
+      guests.value > 0 ? guests.value : 1,
+    );
+
+    // Reset all default structural item quantities to 0 before applying user choices.
+    // This allows unselected package items to still render as empty headers in the UI.
+    if (menu['Food Items'] != null) {
+      for (var item in menu['Food Items']!) {
+        item['qty'] = 0;
+      }
+    }
+    if (menu['Services'] != null) {
+      for (var item in menu['Services']!) {
+        item['qty'] = 0;
+      }
+    }
+
+    // Now populate overridden items from the order into our active menu
+    if (order.orderPackages != null) {
+      for (var op in order.orderPackages!) {
+        if (op.orderPackageItems != null) {
+          for (var item in op.orderPackageItems!) {
+            if (item.menuItem != null && !(item.isDeleted ?? false)) {
+              final menuItemId = item.menuItem!.id?.toString();
+              if (menuItemId == null) continue;
+
+              final qty = int.tryParse(item.noOfGust ?? '1') ?? 1;
+
+              // Check if it exists in current Food Items
+              int existingIdx = menu['Food Items']!.indexWhere(
+                (f) => f['menu_item_id'].toString() == menuItemId,
+              );
+
+              if (existingIdx != -1) {
+                // Update qty of existing structural item
+                menu['Food Items']![existingIdx]['qty'] = qty;
+              } else {
+                // It's an extra item added to the package. Map to native package header.
+                String resolvedPackageTitle = 'Other Items';
+
+                final foodDef = masterAvailableFood.firstWhere(
+                  (f) => f['id'].toString() == menuItemId,
+                  orElse: () => <String, dynamic>{},
+                );
+
+                if (foodDef.isNotEmpty) {
+                  final String cat = (foodDef['category'] ?? '')
+                      .toString()
+                      .toLowerCase();
+
+                  final availableTitles = menu['Food Items']!
+                      .map((e) => e['packageTitle']?.toString() ?? '')
+                      .where((t) => t.isNotEmpty && t != 'Other Items')
+                      .toSet()
+                      .toList();
+
+                  for (String pTitle in availableTitles) {
+                    final lowerTitle = pTitle.toLowerCase();
+                    if ((cat.contains('main') && lowerTitle.contains('main')) ||
+                        (cat.contains('starter') &&
+                            lowerTitle.contains('starter')) ||
+                        (cat.contains('dessert') &&
+                            lowerTitle.contains('dessert')) ||
+                        (cat.contains('drink') &&
+                            lowerTitle.contains('drink')) ||
+                        (cat.contains('canap') &&
+                            lowerTitle.contains('canap')) ||
+                        (lowerTitle.contains(cat))) {
+                      resolvedPackageTitle = pTitle;
+                      break;
+                    }
+                  }
+
+                  // Guaranteed fallback to first available active package head to hide "Other Items"
+                  if (resolvedPackageTitle == 'Other Items') {
+                    if (availableTitles.isNotEmpty) {
+                      resolvedPackageTitle = availableTitles.first;
+                    } else {
+                      // Final structural fallback if menus aren't fully resolved yet
+                      if (cat.contains('main'))
+                        resolvedPackageTitle = 'Mains';
+                      else if (cat.contains('starter'))
+                        resolvedPackageTitle = 'Starters';
+                      else if (cat.contains('dessert'))
+                        resolvedPackageTitle = 'Desserts';
+                      else if (cat.contains('drink'))
+                        resolvedPackageTitle = 'Drinks';
+                      else
+                        resolvedPackageTitle = 'Catering';
+                    }
+                  }
+                }
+
+                menu['Food Items']!.add({
+                  'name': item.menuItem!.title ?? 'Unknown Item',
+                  'price': _parsePriceString(item.menuItem!.price?.toString()),
+                  'qty': qty,
+                  'menu_item_id': menuItemId,
+                  'packageTitle': resolvedPackageTitle,
+                  'id': item.id,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (order.orderServices != null) {
+      for (var svc in order.orderServices!) {
+        if (svc.service != null && !(svc.isDeleted ?? false)) {
+          final serviceId = svc.service!.id?.toString();
+          if (serviceId == null) continue;
+
+          int existingIdx = menu['Services']!.indexWhere(
+            (s) => s['menu_item_id'].toString() == serviceId,
+          );
+          if (existingIdx != -1) {
+            menu['Services']![existingIdx]['qty'] =
+                1; // Services qty is always 1
+          } else {
+            menu['Services']!.add({
+              'name': svc.service!.title ?? '',
+              'price': _parsePriceString(svc.service!.price?.toString()),
+              'qty': 1,
+              'menu_item_id': serviceId,
+              'id': svc.id,
+            });
+          }
+        }
+      }
+    }
+
+    validateEdit();
+  }
+
+  TimeOfDay? _parseTimeFromString(String? timeString) {
+    if (timeString == null || timeString.isEmpty) return null;
+    try {
+      final timePart = timeString.contains('T')
+          ? timeString.split('T')[1].substring(0, 5)
+          : timeString.substring(0, 5);
+      final timeParts = timePart.split(':');
+      if (timeParts.length >= 2) {
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    } catch (e) {
+      print('Error parsing time: $timeString');
+    }
+    return null;
+  }
+
   // Form controllers
   final RxList<Map<String, dynamic>> apiMenuItems =
       <Map<String, dynamic>>[].obs;
@@ -68,23 +335,25 @@ class BookingController extends GetxController {
   var discounts = <Discount>[].obs;
   var selectedDiscount = Rx<Discount?>(null);
 
+  Future<void>? _apiInitFuture;
+
   @override
   void onInit() {
     super.onInit();
-    loadApiData();
+    _apiInitFuture = loadApiData();
 
     // Listen to form changes for validation
-    ever(selectedCity, (_) => validateBooking());
-    ever(selectedDate, (_) => validateBooking());
-    ever(selectedDate, (_) => validateBooking());
-    ever(selectedTimeSlot, (_) => validateBooking());
-    ever(guests, (_) => validateBooking());
-    ever(selectedEventType, (_) => validateBooking());
-    ever(selectedPackage, (_) => validateBooking());
+    ever(selectedCity, (_) => validateEdit());
+    ever(selectedDate, (_) => validateEdit());
+    ever(selectedDate, (_) => validateEdit());
+    ever(selectedTimeSlot, (_) => validateEdit());
+    ever(guests, (_) => validateEdit());
+    ever(selectedEventType, (_) => validateEdit());
+    ever(selectedPackage, (_) => validateEdit());
 
-    nameController.addListener(validateBooking);
-    emailController.addListener(validateBooking);
-    contactController.addListener(validateBooking);
+    nameController.addListener(validateEdit);
+    emailController.addListener(validateEdit);
+    contactController.addListener(validateEdit);
   }
 
   @override
@@ -335,7 +604,7 @@ class BookingController extends GetxController {
     }
   }
 
-  List<String> validateBooking() {
+  List<String> validateEdit() {
     final List<String> errors = [];
 
     if (nameController.text.trim().isEmpty) {
@@ -385,6 +654,7 @@ class BookingController extends GetxController {
         final items = entry.value;
 
         if (title != 'Other' &&
+            title != 'Other Items' &&
             items.isNotEmpty &&
             items.first['minItem'] != null) {
           final minItem = int.tryParse(items.first['minItem'].toString()) ?? 0;
@@ -482,16 +752,12 @@ class BookingController extends GetxController {
   double calculateSubtotal() {
     if (selectedPackage.value.isEmpty) return 0.0;
 
-    if (selectedPackage.value == 'Custom Package') {
-      // For custom package, always calculate from items
-      return calculateSubtotalFromItems();
-    } else {
-      // For regular packages, use package price
-      final pkg = _findPackage(selectedPackage.value);
-      if (pkg == null) return 0.0;
-      final packagePrice = _parsePriceString(pkg['price']?.toString());
-      return packagePrice * guests.value;
-    }
+    // We shouldn't use _customPackageMenu logic anymore.
+    // If it's a fixed package price, we return package price * guests.
+    // However, if the menu has been edited (additional items added),
+    // it's safer to always calculate from items directly to account for modifications
+    return calculateSubtotalFromItems();
+    // }
   }
 
   double calculateServicesCost() {
@@ -511,15 +777,7 @@ class BookingController extends GetxController {
   double calculateSubtotalFromItems() {
     Map<String, List<Map<String, dynamic>>> menu;
 
-    // For custom packages, use _customPackageMenu directly
-    if (selectedPackage.value == 'Custom Package') {
-      menu = _customPackageMenu;
-    } else {
-      menu = menuForPackage(
-        selectedPackage.value,
-        guests.value > 0 ? guests.value : 1,
-      );
-    }
+    menu = this.menu;
 
     double total = 0.0;
 
@@ -535,6 +793,7 @@ class BookingController extends GetxController {
 
       int maxItem = 999;
       if (title != 'Other' &&
+          title != 'Other Items' &&
           items.isNotEmpty &&
           items.first['maxItem'] != null) {
         maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
@@ -542,7 +801,7 @@ class BookingController extends GetxController {
 
       for (int i = 0; i < items.length; i++) {
         final item = items[i];
-        if (title != 'Other' && i < maxItem) {
+        if (title != 'Other' && title != 'Other Items' && i < maxItem) {
           // Included
           continue;
         }
@@ -571,7 +830,7 @@ class BookingController extends GetxController {
   }
 
   bool isCurrentPackageCustomized() {
-    return isPackageEditing.value && selectedPackage.value == 'Custom Package';
+    return isPackageEditing.value;
   }
 
   String getPackageDisplay() {
@@ -579,15 +838,11 @@ class BookingController extends GetxController {
     final perGuestCost = (subtotal / (guests.value > 0 ? guests.value : 1))
         .toStringAsFixed(0);
 
-    if (selectedPackage.value == 'Custom Package') {
-      return 'Custom Package - Â£$perGuestCost/Guest';
-    } else {
-      return '${selectedPackage.value} (Â£$perGuestCost/Guest)';
-    }
+    return '${selectedPackage.value} (Â£$perGuestCost/Guest)';
   }
 
   // Confirmation UI
-  Future<void> showBookingConfirmation() async {
+  Future<void> showEditConfirmation() async {
     if (!isFormValid.value) {
       // Validation is handled in the UI layer
       return;
@@ -612,7 +867,7 @@ class BookingController extends GetxController {
         totalAmount: totalAmount,
         customerName: nameController.text,
         customerEmail: emailController.text,
-        onConfirm: completeBooking,
+        onConfirm: completeEdit,
         onCancel: cancelBookingPopup,
       ),
     );
@@ -827,6 +1082,7 @@ class BookingController extends GetxController {
 
           int maxItem = 999;
           if (title != 'Other' &&
+              title != 'Other Items' &&
               items.isNotEmpty &&
               items.first['maxItem'] != null) {
             maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
@@ -834,7 +1090,7 @@ class BookingController extends GetxController {
 
           for (int i = 0; i < items.length; i++) {
             final dish = items[i];
-            if (title != 'Other' && i < maxItem) {
+            if (title != 'Other' && title != 'Other Items' && i < maxItem) {
               continue;
             }
             final price = (dish['price'] as num).toDouble();
@@ -862,6 +1118,7 @@ class BookingController extends GetxController {
 
       int maxItem = 999;
       if (title != 'Other' &&
+          title != 'Other Items' &&
           items.isNotEmpty &&
           items.first['maxItem'] != null) {
         maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
@@ -869,7 +1126,7 @@ class BookingController extends GetxController {
 
       for (int i = 0; i < items.length; i++) {
         final dish = items[i];
-        if (title != 'Other' && i < maxItem) {
+        if (title != 'Other' && title != 'Other Items' && i < maxItem) {
           // Included
           continue;
         }
@@ -906,7 +1163,7 @@ class BookingController extends GetxController {
     }
   }
 
-  Future<void> completeBooking() async {
+  Future<void> completeEdit() async {
     try {
       if (!isFormValid.value) {
         return;
@@ -914,7 +1171,7 @@ class BookingController extends GetxController {
 
       isLoading.value = true;
 
-      // Availability check is now done in showBookingConfirmation.
+      // Availability check is now done in showEditConfirmation.
       // We proceed to create the order.
 
       // Get the current menu for the selected package (this includes UI modifications)
@@ -925,6 +1182,12 @@ class BookingController extends GetxController {
       List<Map<String, dynamic>> servicesToProcess = menu['Services'] ?? [];
 
       for (var service in servicesToProcess) {
+        final int qty = (service['qty'] is int)
+            ? service['qty'] as int
+            : int.tryParse(service['qty']?.toString() ?? '0') ?? 0;
+
+        if (qty <= 0) continue;
+
         final serviceItem = apiServiceItems
             .expand(
               (category) => (category['menu_items'] as List<dynamic>? ?? []),
@@ -999,6 +1262,9 @@ class BookingController extends GetxController {
               ? entry['qty'] as int
               : int.tryParse(entry['qty']?.toString() ?? '') ??
                     (isFood ? guests.value : 1);
+
+          if (qty <= 0) return;
+
           packageItems.add({
             "menu_item_id": menuItemId,
             "price": priceNum.toString(),
@@ -1023,6 +1289,7 @@ class BookingController extends GetxController {
 
           int maxItem = 999;
           if (title != 'Other' &&
+              title != 'Other Items' &&
               items.isNotEmpty &&
               items.first['maxItem'] != null) {
             maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
@@ -1115,9 +1382,9 @@ class BookingController extends GetxController {
       print('Sending order data: ${jsonEncode(orderData)}');
 
       // Send order to API
-      final result = await ApiService.createOrder(
-        orderData: orderData,
-        token: ApiService.bearerToken,
+      final result = await ApiService.updateOrder(
+        orderId: currentEditOrder.value!.id!,
+        OrderModel: {"order": orderData},
       );
 
       if (result['success'] == true) {
@@ -1260,6 +1527,7 @@ class BookingController extends GetxController {
 
           int maxItem = 999;
           if (title != 'Other' &&
+              title != 'Other Items' &&
               items.isNotEmpty &&
               items.first['maxItem'] != null) {
             maxItem = int.tryParse(items.first['maxItem'].toString()) ?? 999;
@@ -1267,7 +1535,8 @@ class BookingController extends GetxController {
 
           for (int i = 0; i < items.length; i++) {
             final dish = items[i];
-            bool isExtra = (title == 'Other' || i >= maxItem);
+            bool isExtra =
+                (title == 'Other' || title == 'Other Items' || i >= maxItem);
             _addEntryToPackageItems(dish, isFood: true, isExtra: isExtra);
           }
         }
@@ -1334,9 +1603,9 @@ class BookingController extends GetxController {
       print('Sending order data: ${jsonEncode(orderData)}');
 
       // Send order to API
-      final result = await ApiService.createOrder(
-        orderData: orderData,
-        token: ApiService.bearerToken,
+      final result = await ApiService.updateOrder(
+        orderId: currentEditOrder.value!.id!,
+        OrderModel: {"order": orderData},
       );
 
       if (result['success'] == true) {
@@ -1680,7 +1949,7 @@ class BookingController extends GetxController {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {
-                    await completeBooking();
+                    await completeEdit();
                     Get.to(() => SchedulePage());
                   },
                   child: Text('Send Actual Order'),

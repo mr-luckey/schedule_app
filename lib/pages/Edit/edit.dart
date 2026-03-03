@@ -1,122 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:schedule_app/pages/Edit/edit_controller.dart';
 
-import 'package:schedule_app/pages/Edit/EditController.dart';
-import 'package:schedule_app/pages/Edit/models/EditModel.dart' as EditModels;
-import 'package:schedule_app/pages/Edit/models/MenuItem.dart' as MenuItemModel;
-import 'package:schedule_app/theme/app_colors.dart';
 import 'package:schedule_app/widgets/package_card.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/schedule_header.dart';
+import '../../widgets/booking_summary.dart';
 import 'package:flutter/services.dart';
 
-// ignore: must_be_immutable
 class EditPage extends StatefulWidget {
-  final String selectedId;
-  EditPage({super.key, required this.selectedId});
+  final dynamic selectedId;
+  const EditPage({super.key, this.selectedId});
 
   @override
   State<EditPage> createState() => _EditPageState();
 }
 
 class _EditPageState extends State<EditPage> {
-  final EditController editController = Get.put(EditController());
+  late final EditController controller;
 
   @override
   void initState() {
     super.initState();
-    // Load API data first, then order data when the page initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await editController.loadApiData(); // Load packages, cities, events, etc.
-      editController.loadOrderById(widget.selectedId);
-    });
-    editController.loadServiceItems();
+    controller = Get.put(EditController());
+    if (widget.selectedId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.loadOrderById(widget.selectedId.toString());
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      // Floating button for creating/opening the Custom Package
       // floatingActionButton: FloatingActionButton.extended(
       //   onPressed: () {
-      //     Get.snackbar('Info', 'Custom package feature to be implemented');
+      //     controller.createOrOpenCustomPackage();
       //   },
       //   label: const Text('Custom Package'),
       //   icon: const Icon(Icons.edit),
       // ),
-      body: Obx(() {
-        if (editController.isLoading.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Loading order data...'),
-              ],
-            ),
-          );
-        }
-
-        if (editController.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, size: 64, color: Colors.red),
-                SizedBox(height: 16),
-                Text(
-                  'Error loading order',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text(editController.errorMessage.value),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    editController.loadOrderById(widget.selectedId);
-                  },
-                  child: Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ResponsiveBreakpoints.builder(
-          child: _buildLayout(context),
-          breakpoints: const [
-            Breakpoint(start: 0, end: 599, name: MOBILE),
-            Breakpoint(start: 600, end: 1023, name: TABLET),
-            Breakpoint(start: 1024, end: 1439, name: DESKTOP),
-            Breakpoint(start: 1440, end: double.infinity, name: '4K'),
-          ],
-        );
-      }),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Get.back(),
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Edit Booking',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
+      body: ResponsiveBreakpoints.builder(
+        child: _buildLayout(context),
+        breakpoints: const [
+          Breakpoint(start: 0, end: 599, name: MOBILE),
+          Breakpoint(start: 600, end: 1023, name: TABLET),
+          Breakpoint(start: 1024, end: 1439, name: DESKTOP),
+          Breakpoint(start: 1440, end: double.infinity, name: '4K'),
         ],
       ),
     );
@@ -136,15 +69,15 @@ class _EditPageState extends State<EditPage> {
   Widget _buildMobileLayout() {
     return Column(
       children: [
-        _buildHeader(context),
+        const ScheduleHeader(),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                BookingForm(),
+                const EditForm(),
                 const SizedBox(height: 24),
-                FoodBeverageSelection(),
+                const BookingSummary(),
               ],
             ),
           ),
@@ -156,20 +89,23 @@ class _EditPageState extends State<EditPage> {
   Widget _buildTabletLayout() {
     return Row(
       children: [
-        // SizedBox(width: 240, child: Sidebar()),
+        // SizedBox(width: 240, child: const Sidebar()),
         Expanded(
           child: Column(
             children: [
-              _buildHeader(context),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex: 2, child: BookingForm()),
+                      Expanded(flex: 2, child: const EditForm()),
                       const SizedBox(width: 24),
-                      Expanded(flex: 1, child: FoodBeverageSelection()),
+                      Expanded(
+                        flex: 1,
+                        child:
+                            FoodBeverageSelection(), // now reads guests from controller
+                      ),
                     ],
                   ),
                 ),
@@ -187,14 +123,13 @@ class _EditPageState extends State<EditPage> {
         Expanded(
           child: Column(
             children: [
-              _buildHeader(context),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex: 2, child: BookingForm()),
+                      Expanded(flex: 2, child: const EditForm()),
                       const SizedBox(width: 24),
                       Expanded(flex: 1, child: FoodBeverageSelection()),
                     ],
@@ -209,19 +144,19 @@ class _EditPageState extends State<EditPage> {
   }
 }
 
-class BookingForm extends StatelessWidget {
-  const BookingForm({super.key});
+class EditForm extends StatelessWidget {
+  const EditForm({super.key});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<EditController>();
     final formKey = GlobalKey<FormState>();
 
-    /// Helper to open a dialog to edit guests manually
+    // helper to open a dialog to edit guests manually
     void _showEditGuestsDialog() {
       final txtCtrl = TextEditingController(
         text: controller.guests.value.toString(),
-      );
+      ); // initial value
       showDialog(
         context: context,
         builder: (ctx) {
@@ -246,6 +181,7 @@ class BookingForm extends StatelessWidget {
                     controller.setGuests(val);
                     Navigator.pop(ctx);
                   } else {
+                    // show error
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       const SnackBar(
                         content: Text('Please enter a valid number (>0)'),
@@ -271,14 +207,19 @@ class BookingForm extends StatelessWidget {
         ),
         child: Form(
           key: formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Personal Information Section
-              _buildSectionTitle('Personal Information'),
+              Text(
+                'Personal Information',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 16),
 
-              // Name and Email
               Row(
                 children: [
                   Expanded(
@@ -291,9 +232,30 @@ class BookingForm extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
                         }
-                        if (value.trim().length < 2) {
+
+                        final trimmedValue = value.trim();
+
+                        // Check minimum length
+                        if (trimmedValue.length < 2) {
                           return 'Name must be at least 2 characters';
                         }
+
+                        // Check for valid name format (only letters and spaces)
+                        final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
+                        if (!nameRegex.hasMatch(trimmedValue)) {
+                          return 'Name should contain only letters and spaces';
+                        }
+
+                        // Check if name has at least one letter (not just spaces)
+                        if (!trimmedValue.contains(RegExp(r'[a-zA-Z]'))) {
+                          return 'Please enter a valid name';
+                        }
+
+                        // Check for excessive spaces
+                        if (trimmedValue.contains(RegExp(r'\s{2,}'))) {
+                          return 'Name should not contain consecutive spaces';
+                        }
+
                         return null;
                       },
                     ),
@@ -304,16 +266,32 @@ class BookingForm extends StatelessWidget {
                       context: context,
                       controller: controller.emailController,
                       label: 'Email Address',
-                      hint: 'Email Address',
+                      hint: 'your.email@example.com',
+                      // keyboardType: TextInputType.emailAddress,
+                      // textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        ).hasMatch(value)) {
-                          return 'Please enter a valid email address';
+
+                        // Enhanced email validation with regex
+                        final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        );
+
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Please enter a valid email address\nExample: your.name@example.com';
                         }
+
+                        // Additional checks
+                        if (value.contains('..')) {
+                          return 'Email cannot contain consecutive dots';
+                        }
+
+                        if (value.startsWith('.') || value.endsWith('.')) {
+                          return 'Email cannot start or end with a dot';
+                        }
+
                         return null;
                       },
                     ),
@@ -323,7 +301,6 @@ class BookingForm extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Contact and City
               Row(
                 children: [
                   Expanded(
@@ -332,18 +309,40 @@ class BookingForm extends StatelessWidget {
                       controller: controller.contactController,
                       label: 'Contact#',
                       hint: '+44-XXX-XXX-XXX',
+                      // keyboardType: TextInputType.phone,
+                      // inputFormatters: [
+                      //   FilteringTextInputFormatter.digitsOnly,
+                      //   LengthLimitingTextInputFormatter(15), // Reasonable limit for phone numbers
+                      //   // Optional: Add a formatter for phone number formatting
+                      //   // _PhoneNumberFormatter(),
+                      // ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your contact number';
                         }
+
                         // Remove all non-digit characters for validation
                         final digitsOnly = value.replaceAll(
                           RegExp(r'[^0-9]'),
                           '',
                         );
-                        if (digitsOnly.length < 10) {
-                          return 'Contact number must be at least 10 digits';
+
+                        // Check minimum length
+                        if (digitsOnly.length < 8) {
+                          return 'Phone number must be at least 8 digits';
                         }
+
+                        // Check maximum length
+                        if (digitsOnly.length > 15) {
+                          return 'Phone number too long';
+                        }
+
+                        // Optional: Specific country code validation
+                        if (value.startsWith('+44') &&
+                            digitsOnly.length != 12) {
+                          return 'UK numbers should be 12 digits with country code';
+                        }
+
                         return null;
                       },
                     ),
@@ -369,19 +368,24 @@ class BookingForm extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Message
               _buildTextField(
                 context: context,
                 controller: controller.messageController,
                 label: 'Message (If Any)',
                 hint: 'If you have any question?',
                 maxLines: 3,
+                onChanged: controller.updateMessage,
               ),
 
               const SizedBox(height: 32),
 
-              // Event Details Section
-              _buildSectionTitle('Event Details'),
+              Text(
+                'Event Details',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 16),
 
               // Event Type Field
@@ -401,7 +405,6 @@ class BookingForm extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Date and Time
               Row(
                 children: [
                   Expanded(
@@ -416,16 +419,10 @@ class BookingForm extends StatelessWidget {
                           now.month,
                           now.day,
                         );
-                        final initialDate =
-                            controller.selectedDate.value ?? firstDate;
-                        // Ensure initialDate is not before firstDate (e.g. if editing a past event)
-                        final validInitialDate = initialDate.isBefore(firstDate)
-                            ? firstDate
-                            : initialDate;
-
                         final date = await showDatePicker(
                           context: context,
-                          initialDate: validInitialDate,
+                          initialDate:
+                              controller.selectedDate.value ?? firstDate,
                           firstDate: firstDate,
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
@@ -456,7 +453,7 @@ class BookingForm extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Guests control
+              // --- Guests control (added per request) --- Advance Payment Field
               Row(
                 children: [
                   Column(
@@ -491,11 +488,9 @@ class BookingForm extends StatelessWidget {
                                   : null,
                             ),
                             const SizedBox(width: 8),
-                            Obx(
-                              () => Text(
-                                controller.guests.value.toString(),
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
+                            Text(
+                              controller.guests.value.toString(),
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(width: 8),
                             IconButton(
@@ -516,54 +511,11 @@ class BookingForm extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Advance Payment (£)',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: 150, // Add this line
-                        padding: const EdgeInsets.symmetric(
-                          horizontal:
-                              12, // Increased padding for better appearance
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: TextFormField(
-                          controller: controller.advancePaymentController,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          keyboardType: TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            hintText: '0.00',
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
 
               const SizedBox(height: 16),
 
-              // Special Requirements
               _buildTextField(
                 context: context,
                 controller: controller.specialRequirementsController,
@@ -571,78 +523,135 @@ class BookingForm extends StatelessWidget {
                 hint:
                     'Stage Decoration, Seating Arrangement, Dietary Restrictions, etc.',
                 maxLines: 3,
+                onChanged: controller.updateSpecialRequirements,
               ),
 
               const SizedBox(height: 32),
 
-              // Packages Section
-              _buildSectionTitle('Packages'),
+              Text(
+                'Packages',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 16),
 
-              // Grid of packages
-              Obx(() {
-                print(
-                  '🔄 Building packages grid with ${controller.packages.length} packages',
-                );
-                if (controller.packages.isEmpty) {
-                  return Container(
-                    padding: EdgeInsets.all(20),
-                    child: Text(
-                      'No packages available. Loading...',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.2,
-                  ),
-                  itemCount: controller.packages.length,
-                  itemBuilder: (context, index) {
-                    final package = controller.packages[index];
-                    print('📦 Building package card: ${package.title}');
-                    return Obx(() {
-                      final isSelected =
-                          controller.selectedPackage.value == package.title;
-                      return PackageCard(
-                        title: package.title ?? 'Unknown Package',
-                        description: package.description ?? '',
-                        price: package.price ?? '0',
-                        isSelected: isSelected,
-                        onTap: () {
-                          print('📦 Package tapped: ${package.title}');
-                          controller.setPackage(package.title ?? '');
-                        },
-                      );
-                    });
-                  },
-                );
-              }),
+              // Grid of packages (built-ins). Custom package is opened via FAB.
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.2,
+                ),
+                itemCount: controller.packages.length,
+                itemBuilder: (context, index) {
+                  final package = controller.packages[index];
+                  final title = package['title'] as String;
+                  final description = package['description'] as String;
+                  final price = package['price'] as String;
+                  return Obx(() {
+                    final isSelected =
+                        controller.selectedPackage.value == title;
+                    return PackageCard(
+                      title: title,
+                      description: description,
+                      price: price,
+                      isSelected: isSelected,
+                      onTap: () {
+                        controller.setPackage(title);
+                      },
+                    );
+                  });
+                },
+              ),
               const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Validate the form first
+                        if (formKey.currentState?.validate() ?? false) {
+                          final List<String> errors = controller.validateEdit();
+
+                          if (errors.isNotEmpty) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Incomplete Information"),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          "Please fill in all required fields before confirming your booking:",
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ...errors.map((e) => Text("• $e")),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("OK"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                            return;
+                          }
+                          // All validations passed
+                          controller.showEditConfirmation();
+                        } else {
+                          // Form validation failed
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Please fix the errors in the form',
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // inquiry has slightly different validation (name/email optional)
+                        controller.showInquiry();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text('Inquiry'),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // FORM BUILDING METHODS
-  // ===========================================================================
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
       ),
     );
   }
@@ -802,107 +811,215 @@ class FoodBeverageSelection extends StatefulWidget {
 }
 
 class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
-  final editController = Get.find<EditController>();
+  bool isConfirmed = false;
   bool isEditing = false;
-  bool isEdited = false;
+
+  late EditController controller;
 
   // Track expanded/collapsed state for package title categories. Default collapsed (false)
   final Map<String, bool> _expandedCategories = {};
 
-  // ===========================================================================
-  // LIFECYCLE METHODS
-  // ===========================================================================
+  late List<Map<String, dynamic>> availableFoodLocal;
+  late List<Map<String, dynamic>> availableServicesLocal;
+
+  String previousPackage = '';
+  final List<Worker> _workers = [];
+
+  /// Returns food items from [availableFoodLocal] whose API category names
+  /// are relevant to the given package header title.
+  List<Map<String, dynamic>> _filteredOptionsForHeader(String? headerTitle) {
+    if (headerTitle == null || headerTitle.isEmpty) return availableFoodLocal;
+
+    // We want to find the items from the package API that match this headerTitle
+    // The current package data is available in `controller.selectedPackage`
+    final pkg = controller.packages.firstWhere(
+      (p) => p['title'] == controller.selectedPackage.value,
+      orElse: () => <String, dynamic>{},
+    );
+
+    if (pkg.isEmpty || !pkg.containsKey('items')) return availableFoodLocal;
+
+    final packageItems = (pkg['items'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
+
+    // Find all menu items that the package defines under this headerTitle
+    final itemsUnderHeader = packageItems
+        .where((i) => i['packageTitle'] == headerTitle)
+        .toList();
+
+    // From these items, find their corresponding categories in masterAvailableFood
+    final Set<String> allowedCategories = {};
+    for (var pItem in itemsUnderHeader) {
+      final name = pItem['name'];
+      final targetFood = controller.masterAvailableFood.firstWhere(
+        (f) => f['name'] == name,
+        orElse: () => <String, dynamic>{},
+      );
+      if (targetFood.isNotEmpty && targetFood['category'] != null) {
+        allowedCategories.add((targetFood['category'] as String).toLowerCase());
+      }
+    }
+
+    final lowerHeader = headerTitle.toLowerCase();
+    if (lowerHeader.contains('main')) {
+      final premiumMains = controller.masterAvailableFood.where((f) {
+        final cat = f['category'].toString().toLowerCase();
+        return (f['is_premium'] == true || cat.contains('premium')) &&
+            cat.contains('main');
+      });
+      for (var pm in premiumMains) {
+        allowedCategories.add((pm['category'] as String).toLowerCase());
+      }
+    }
+    if (lowerHeader.contains('starter')) {
+      final premiumStarters = controller.masterAvailableFood.where((f) {
+        final cat = f['category'].toString().toLowerCase();
+        return (f['is_premium'] == true || cat.contains('premium')) &&
+            cat.contains('starter');
+      });
+      for (var ps in premiumStarters) {
+        allowedCategories.add((ps['category'] as String).toLowerCase());
+      }
+    }
+
+    if (allowedCategories.isEmpty) return availableFoodLocal;
+
+    // Filter available food by matching the exact category from the menus API
+    return availableFoodLocal.where((item) {
+      final itemCategory = (item['category'] as String? ?? '').toLowerCase();
+      return allowedCategories.contains(itemCategory);
+    }).toList();
+  }
 
   @override
   void initState() {
     super.initState();
+    controller = Get.find<EditController>();
+
+    previousPackage = controller.selectedPackage.value;
+
+    controller.menu = controller.menuForPackage(
+      previousPackage,
+      controller.guests.value > 0 ? controller.guests.value : 1,
+    );
+
+    availableFoodLocal = List.from(controller.masterAvailableFood);
+    availableServicesLocal = List.from(controller.masterAvailableServices);
+
+    _syncAvailableListsWithMenu();
+
+    _workers.add(
+      ever(controller.selectedPackage, (val) {
+        final newPkg = val;
+        if (!mounted) return;
+        setState(() {
+          isEditing = controller.isPackageEditing.value;
+          controller.menu = controller.menuForPackage(
+            newPkg,
+            controller.guests.value > 0 ? controller.guests.value : 1,
+          );
+          previousPackage = newPkg;
+          _syncAvailableListsWithMenu();
+        });
+      }),
+    );
+
+    _workers.add(
+      ever(controller.guests, (g) {
+        final guestsCount = g;
+        if (!mounted) return;
+        setState(() {
+          // Only update quantities for food items, preserve services
+          final currentFoodItems = controller.menu['Food Items']!;
+          final currentServices = controller.menu['Services']!;
+
+          // Update food quantities to match new guest count
+          for (var foodItem in currentFoodItems) {
+            foodItem['qty'] = guestsCount;
+          }
+
+          controller.menu = {
+            'Food Items': currentFoodItems,
+            'Services': currentServices, // Keep existing services
+          };
+
+          _syncAvailableListsWithMenu();
+        });
+      }),
+    );
   }
+  //   _syncAvailableListsWithMenu();
+
+  //   _workers.add(
+  //     ever(controller.selectedPackage, (val) {
+  //       final newPkg = val;
+  //       if (!mounted) return;
+  //       setState(() {
+  //         isEditing = false;
+  //         controller.toggleEditMode(false);
+  //         menu = controller.menuForPackage(
+  //           newPkg,
+  //           controller.guests.value > 0 ? controller.guests.value : 1,
+  //         );
+  //         previousPackage = newPkg;
+  //         _syncAvailableListsWithMenu();
+  //       });
+  //     }),
+  //   );
+
+  //   _workers.add(
+  //     ever(controller.guests, (g) {
+  //       final guestsCount = (g);
+  //       if (!mounted) return;
+  //       setState(() {
+  //         menu = controller.menuForPackage(
+  //           controller.selectedPackage.value,
+  //           guestsCount > 0 ? guestsCount : 1,
+  //         );
+  //         _syncAvailableListsWithMenu();
+  //       });
+  //     }),
+  //   );
+  // }
 
   @override
   void dispose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
     super.dispose();
   }
 
-  // ===========================================================================
-  // DATA GETTERS
-  // ===========================================================================
+  void _syncAvailableListsWithMenu() {
+    availableFoodLocal = List.from(controller.masterAvailableFood);
+    availableServicesLocal = List.from(controller.masterAvailableServices);
 
-  /// Get available menu items grouped by category (excluding already selected ones)
-  List<MenuItemModel.MenuCategory> get availableMenuCategories {
-    final selectedIds = editController.selectedMenuItems
-        .map((item) => item.menuItemId.toString())
+    final foodNames = controller.menu['Food Items']!
+        .map((d) => d['name'])
+        .toSet();
+    final serviceNames = controller.menu['Services']!
+        .map((d) => d['name'])
         .toSet();
 
-    return editController.menuCategories
-        .map((category) {
-          final availableItems = category.menuItems?.where((item) {
-            return !selectedIds.contains(item.id.toString());
-          }).toList();
-
-          return MenuItemModel.MenuCategory(
-            id: category.id,
-            title: category.title,
-            menuItems: availableItems,
-            createdAt: category.createdAt,
-            updatedAt: category.updatedAt,
-            url: category.url,
-          );
-        })
-        .where((category) => category.menuItems?.isNotEmpty == true)
-        .toList();
+    availableFoodLocal.removeWhere((f) => foodNames.contains(f['name']));
+    availableServicesLocal.removeWhere((s) => serviceNames.contains(s['name']));
   }
 
-  /// Get available service MENU ITEMS (not already selected as a menu item)
-  List<MenuItemModel.MenuItem> get availableServiceMenuItems {
-    final selectedIds = editController.selectedMenuItems
-        .map((item) => item.menuItemId.toString())
-        .toSet();
+  Map<String, List<Map<String, dynamic>>> _groupItemsByCategory(
+    List<Map<String, dynamic>> items,
+  ) {
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
 
-    final allMenuItems = <MenuItemModel.MenuItem>[];
-
-    for (final service in editController.apiServiceItems) {
-      final items = service.menuItems ?? <EditModels.MenuItem>[];
-      for (final mi in items) {
-        if (!selectedIds.contains(mi.id.toString())) {
-          allMenuItems.add(
-            MenuItemModel.MenuItem(
-              id: mi.id,
-              menuId: mi.menuId,
-              title: mi.title,
-              price: mi.price.toString(),
-              description: mi.description,
-              createdAt: mi.createdAt?.toIso8601String(),
-              updatedAt: mi.updatedAt?.toIso8601String(),
-            ),
-          );
-        }
+    for (var item in items) {
+      final category = item['category']?.toString() ?? 'Other';
+      if (!grouped.containsKey(category)) {
+        grouped[category] = [];
       }
+      grouped[category]!.add(item);
     }
 
-    return allMenuItems;
+    return grouped;
   }
-  // List<ServiceMode> get availableServiceItems {
-  //   final selectedIds = editController.selectedServiceItems
-  //       .map((item) => item.serviceId.toString())
-  //       .toSet();
-
-  //   return editController.apiServiceItems
-  //       .where((service) => !selectedIds.contains(service.id.toString()))
-  //       .toList();
-  // }
-  // List<ServiceMode> get availableServiceItems {
-  //   final selectedIds = editController.selectedServiceItems
-  //       .map((item) => item.serviceId.toString())
-  //       .toSet();
-
-  //   return editController.apiServiceItems
-  //       .where((item) => !selectedIds.contains(item.id.toString()))
-  //       .toList();
-  // }
-
-  // ===========================================================================
-  // COST CALCULATION METHODS
-  // ===========================================================================
 
   double _parsePriceString(String? priceStr) {
     if (priceStr == null) return 0.0;
@@ -911,130 +1028,397 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     return double.tryParse(cleaned) ?? 0.0;
   }
 
-  // ===========================================================================
-  // CUSTOM PACKAGE SWITCHING (matching booking screen)
-  // ===========================================================================
-
-  // ===========================================================================
-  // ITEM MANAGEMENT METHODS
-  // ===========================================================================
-
-  /// Increment quantity for a food item
-  /// Increment quantity for a food item
-  void incrementQuantity(SelectedMenuItem item) {
-    final index = editController.selectedMenuItems.indexWhere(
-      (i) => i.menuItemId == item.menuItemId,
-    );
-
-    if (index != -1) {
-      final currentQty = editController.selectedMenuItems[index].qty;
-      editController.selectedMenuItems[index] = SelectedMenuItem(
-        menuItemId: item.menuItemId,
-        name: item.name,
-        price: item.price,
-        qty: currentQty + 1,
-        id: item.id,
-        isDeleted: item.isDeleted,
+  void removeDish(String category, Map<String, dynamic> dish) {
+    setState(() {
+      final dishIndex = controller.menu[category]!.indexWhere(
+        (item) =>
+            item["name"] == dish["name"] && item["price"] == dish["price"],
       );
-      editController.selectedMenuItems.refresh();
-      editController.markPackageAsEdited(); // Mark as edited
-    }
-  }
 
-  /// Decrement quantity for a food item
-  void decrementQuantity(SelectedMenuItem item) {
-    final index = editController.selectedMenuItems.indexWhere(
-      (i) => i.menuItemId == item.menuItemId,
-    );
+      if (dishIndex != -1) {
+        final removedDish = controller.menu[category]!.removeAt(dishIndex);
 
-    if (index != -1) {
-      final currentQty = editController.selectedMenuItems[index].qty;
-      if (currentQty > 1) {
-        editController.selectedMenuItems[index] = SelectedMenuItem(
-          menuItemId: item.menuItemId,
-          name: item.name,
-          price: item.price,
-          qty: currentQty - 1,
-          id: item.id,
-          isDeleted: item.isDeleted,
-        );
-        editController.selectedMenuItems.refresh();
-        editController.markPackageAsEdited(); // Mark as edited
+        if (category == "Food Items") {
+          availableFoodLocal.add({
+            "name": removedDish["name"],
+            "price": removedDish["price"],
+            "id": removedDish["id"],
+            "category": removedDish["category"] ?? "Other",
+          });
+        } else if (category == "Services") {
+          availableServicesLocal.add({
+            "name": removedDish["name"],
+            "price": removedDish["price"],
+            "id": removedDish["id"],
+            "category": removedDish["category"] ?? "Other",
+          });
+        }
+
+        _syncAvailableListsWithMenu();
       }
-    }
+    });
+
+    // Update controller menu after removal
+    _updateControllerMenu();
   }
 
-  /// Remove item from selection
-  void removeItem(dynamic item, bool isFoodItem) {
-    if (isFoodItem) {
-      editController.removeSelectedMenuItemByMenuItemId(
-        (item as SelectedMenuItem).menuItemId,
-      );
-    } else {
-      editController.removeSelectedServiceItemById(
-        (item as SelectedServiceItem).serviceId,
-      );
-      // Services are excluded from auto-switching functionality
-    }
-    editController.markPackageAsEdited(); // Mark as edited
-  }
+  void addDish(String category, {String? targetPackageTitle}) {
+    // Filter to relevant items if we have a packageTitle mapping
+    final options = category == "Food Items"
+        ? _filteredOptionsForHeader(targetPackageTitle)
+        : availableServicesLocal;
+    final groupedOptions = _groupItemsByCategory(options);
 
-  /// Add menu item to selection
-  void addMenuItem(
-    MenuItemModel.MenuItem menuItem, [
-    String? targetPackageTitle,
-  ]) {
-    editController.addSelectedMenuItem(
-      menuItemId: menuItem.id ?? 0,
-      name: menuItem.title ?? 'Unknown Item',
-      price: menuItem.price?.toString() ?? '0',
-      qty: editController.guests.value, // Use guest count for food
-      packageTitle: targetPackageTitle,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return SafeArea(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: Text(
+                        'Add $category',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ),
+                    if (options.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'No more ${category.toLowerCase()} available.',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (var categoryName in groupedOptions.keys)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      8,
+                                    ),
+                                    child: Text(
+                                      categoryName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.blue[700],
+                                      ),
+                                    ),
+                                  ),
+                                  ...groupedOptions[categoryName]!.map((item) {
+                                    return ListTile(
+                                      title: Text(item["name"]),
+                                      subtitle: Text(
+                                        '£${(item["price"] as num).toStringAsFixed(2)}',
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.add_circle,
+                                          color: Colors.green,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            dynamic existingMaxItem;
+                                            if (targetPackageTitle != null) {
+                                              final matching = controller
+                                                  .menu[category]!
+                                                  .where(
+                                                    (d) =>
+                                                        d["packageTitle"] ==
+                                                        targetPackageTitle,
+                                                  )
+                                                  .toList();
+                                              if (matching.isNotEmpty &&
+                                                  matching.first["maxItem"] !=
+                                                      null) {
+                                                existingMaxItem =
+                                                    matching.first["maxItem"];
+                                              }
+                                            }
+
+                                            controller.menu[category]!.add({
+                                              "name": item["name"],
+                                              "price": item["price"],
+                                              "qty": category == "Food Items"
+                                                  ? controller.guests.value
+                                                  : 1,
+                                              "id": item["id"],
+                                              "menu_item_id": item["id"],
+                                              "category":
+                                                  item["category"] ?? "Other",
+                                              if (targetPackageTitle != null)
+                                                "packageTitle":
+                                                    targetPackageTitle,
+                                              if (existingMaxItem != null)
+                                                "maxItem": existingMaxItem,
+                                            });
+
+                                            if (category == "Food Items") {
+                                              availableFoodLocal.removeWhere(
+                                                (f) => f['id'] == item['id'],
+                                              );
+                                            } else {
+                                              //Adding Service in order services list
+                                              controller.orderServices.addAll(
+                                                controller.menu['Services']!
+                                                    .where(
+                                                      (service) =>
+                                                          service['id'] ==
+                                                          item['id'],
+                                                    )
+                                                    .map(
+                                                      (service) => {
+                                                        'menu_item_id':
+                                                            service['id'], // or whatever field contains the menu_item_id
+                                                        'price':
+                                                            service['price'],
+                                                        'is_deleted':
+                                                            service['is_deleted'] ??
+                                                            false,
+                                                      },
+                                                    )
+                                                    .toList(),
+                                              );
+                                              print(
+                                                "Order Services after adding service: ${controller.orderServices}",
+                                              );
+
+                                              availableServicesLocal
+                                                  .removeWhere(
+                                                    (s) =>
+                                                        s['id'] == item['id'],
+                                                  );
+                                            }
+                                          });
+                                          _syncAvailableListsWithMenu();
+                                          _updateControllerMenu();
+                                          Navigator.pop(ctx);
+                                        },
+                                      ),
+                                    );
+                                  }).toList(),
+                                  const Divider(),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
-    editController.markPackageAsEdited(); // Mark as edited
   }
 
-  /// Add service item to selection
-  void addServiceItem(EditModels.ServiceMode service) {
-    editController.addSelectedServiceItem(
-      serviceId: service.id ?? 0,
-      title: service.title ?? 'Unknown Service',
-      price:
-          service.price?.toString() ?? '0', // Use service.price, not menuItems
-      qty: 1,
+  void _showSwapDialog(Map<String, dynamic> currentDish, String category) {
+    final headerTitle = currentDish['packageTitle'] as String?;
+    // Filter to relevant items based on package header mapping
+    final options = category == "Food Items"
+        ? _filteredOptionsForHeader(headerTitle)
+        : availableServicesLocal;
+    final groupedOptions = _groupItemsByCategory(options);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return SafeArea(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: Text(
+                        'Swap ${currentDish["name"]}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ),
+                    if (options.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'No more options available.',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (var categoryName in groupedOptions.keys)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      8,
+                                    ),
+                                    child: Text(
+                                      categoryName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.blue[700],
+                                      ),
+                                    ),
+                                  ),
+                                  ...groupedOptions[categoryName]!.map((item) {
+                                    return ListTile(
+                                      title: Text(item["name"]),
+                                      subtitle: Text(
+                                        '£${(item["price"] as num).toStringAsFixed(2)}',
+                                      ),
+                                      trailing: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            // Add old item back
+                                            if (category == "Food Items") {
+                                              availableFoodLocal.add({
+                                                "name": currentDish["name"],
+                                                "price": currentDish["price"],
+                                                "id": currentDish["id"],
+                                                "category":
+                                                    currentDish["category"] ??
+                                                    "Other",
+                                              });
+                                              availableFoodLocal.removeWhere(
+                                                (f) => f['id'] == item['id'],
+                                              );
+                                            } else {
+                                              availableServicesLocal.add({
+                                                "name": currentDish["name"],
+                                                "price": currentDish["price"],
+                                                "id": currentDish["id"],
+                                                "category":
+                                                    currentDish["category"] ??
+                                                    "Other",
+                                              });
+                                              availableServicesLocal
+                                                  .removeWhere(
+                                                    (s) =>
+                                                        s['id'] == item['id'],
+                                                  );
+                                            }
+
+                                            // Swap
+                                            final idx = controller
+                                                .menu[category]!
+                                                .indexOf(currentDish);
+                                            if (idx != -1) {
+                                              controller
+                                                  .menu[category]![idx] = {
+                                                "name": item["name"],
+                                                "price": item["price"],
+                                                "qty": currentDish["qty"],
+                                                "id": item["id"],
+                                                "menu_item_id": item["id"],
+                                                "category":
+                                                    item["category"] ?? "Other",
+                                                if (currentDish["packageTitle"] !=
+                                                    null)
+                                                  "packageTitle":
+                                                      currentDish["packageTitle"],
+                                                if (currentDish["maxItem"] !=
+                                                    null)
+                                                  "maxItem":
+                                                      currentDish["maxItem"],
+                                              };
+                                            }
+                                          });
+                                          _syncAvailableListsWithMenu();
+                                          _updateControllerMenu();
+                                          Navigator.pop(ctx);
+                                        },
+                                        child: const Text('Swap'),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  const Divider(),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
-    editController.markPackageAsEdited(); // Mark as edited
   }
 
-  /// Add a service MENU ITEM directly into Services section
-  void addServiceMenuItem(MenuItemModel.MenuItem menuItem) {
-    editController.addSelectedServiceItem(
-      serviceId: menuItem.id ?? 0,
-      title: menuItem.title ?? 'Unknown Service',
-      price: (menuItem.price ?? '0').toString(),
-      qty: 1,
-    );
-    editController.markPackageAsEdited(); // Mark as edited
-  }
-
-  // ===========================================================================
-  // DIALOG METHODS
-  // ===========================================================================
-
-  /// Show dialog to edit quantity
-  void _showEditQuantityDialog(SelectedMenuItem item) {
-    final txtController = TextEditingController(text: item.qty.toString());
-
+  void _showEditDishQuantityDialog(Map<String, dynamic> dish, String category) {
+    final txt = TextEditingController(text: dish['qty'].toString());
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: Text('Set quantity for ${item.name}'),
+          title: Text('Set quantity for ${dish['name']}'),
           content: TextField(
-            controller: txtController,
+            controller: txt,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: const InputDecoration(hintText: 'Enter quantity'),
+            decoration: InputDecoration(
+              hintText: category == "Food Items"
+                  ? 'Enter quantity (max: ${controller.guests.value})'
+                  : 'Enter quantity',
+            ),
             autofocus: true,
           ),
           actions: [
@@ -1044,29 +1428,29 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
             ElevatedButton(
               onPressed: () {
-                final val = int.tryParse(txtController.text);
-                if (val != null && val > 0) {
-                  final index = editController.selectedMenuItems.indexWhere(
-                    (i) => i.menuItemId == item.menuItemId,
-                  );
-
-                  if (index != -1) {
-                    editController.selectedMenuItems[index] = SelectedMenuItem(
-                      menuItemId: item.menuItemId,
-                      name: item.name,
-                      price: item.price,
-                      qty: val,
-                      id: item.id,
-                      isDeleted: item.isDeleted,
+                final val = int.tryParse(txt.text);
+                if (val != null && val >= 0) {
+                  if (category == "Food Items" &&
+                      val > controller.guests.value) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Food quantity cannot exceed ${controller.guests.value} guests',
+                        ),
+                      ),
                     );
-                    editController.selectedMenuItems.refresh();
-                    editController.markPackageAsEdited(); // Mark as edited
+                    return;
                   }
+
+                  setState(() {
+                    dish['qty'] = val;
+                  });
+                  _updateControllerMenu();
                   Navigator.pop(ctx);
                 } else {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a valid number (>0)'),
+                      content: Text('Please enter a valid number'),
                     ),
                   );
                 }
@@ -1079,269 +1463,79 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-  /// Show dialog to add menu items (with categories)
-  void _showAddMenuItemsDialog([String? targetPackageTitle]) {
-    var availableCategories = availableMenuCategories;
+  void _updateControllerMenu() {
+    // Update the controller's custom package menu with current local menu state
+    final currentMenu = {
+      'Food Items': List<Map<String, dynamic>>.from(
+        controller.menu['Food Items']!,
+      ),
+      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
+    };
 
-    if (targetPackageTitle != null && targetPackageTitle.isNotEmpty) {
-      // Find the items under this package
-      final pkg = editController.rawApiPackages.firstWhere(
-        (p) => p['title'] == editController.selectedPackage.value,
-        orElse: () => <String, dynamic>{},
-      );
+    controller.updateCustomPackageItems('Custom Package', currentMenu);
+  }
 
-      if (pkg.isNotEmpty && pkg.containsKey('items')) {
-        final packageItems = (pkg['items'] as List<dynamic>)
-            .cast<Map<String, dynamic>>();
-        final itemsUnderHeader = packageItems
-            .where((i) => i['packageTitle'] == targetPackageTitle)
-            .toList();
-
-        final Set<String> allowedCategories = {};
-        for (var pItem in itemsUnderHeader) {
-          final name = pItem['name'];
-          // Find this item's category in the menu items
-          for (var cat in editController.menuCategories) {
-            if (cat.menuItems?.any((i) => i.title == name) == true) {
-              if (cat.title != null) {
-                allowedCategories.add(cat.title!.toLowerCase());
-              }
-            }
-          }
+  void increment(Map<String, dynamic> dish, String category) {
+    setState(() {
+      final currentQty = dish["qty"] ?? 0;
+      if (category == "Food Items") {
+        if (currentQty < controller.guests.value) {
+          dish["qty"] = currentQty + 1;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Food quantity cannot exceed number of guests (${controller.guests.value})',
+              ),
+            ),
+          );
         }
-
-        final lowerHeader = targetPackageTitle.toLowerCase();
-        if (lowerHeader.contains('main')) {
-          for (var cat in editController.menuCategories) {
-            final catTitle = cat.title?.toLowerCase() ?? '';
-            if ((cat.isPremium == true || catTitle.contains('premium')) &&
-                catTitle.contains('main')) {
-              allowedCategories.add(catTitle);
-            }
-          }
-        }
-        if (lowerHeader.contains('starter')) {
-          for (var cat in editController.menuCategories) {
-            final catTitle = cat.title?.toLowerCase() ?? '';
-            if ((cat.isPremium == true || catTitle.contains('premium')) &&
-                catTitle.contains('starter')) {
-              allowedCategories.add(catTitle);
-            }
-          }
-        }
-
-        if (allowedCategories.isNotEmpty) {
-          availableCategories = availableCategories.where((cat) {
-            return allowedCategories.contains(cat.title?.toLowerCase() ?? '');
-          }).toList();
-        }
+      } else {
+        // For services, no restriction
+        dish["qty"] = currentQty + 1;
       }
-    }
+    });
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return SafeArea(
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text(
-                    'Add Food Items',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ),
-                if (availableCategories.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'No more food items available to add.',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        for (var category in availableCategories)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  16,
-                                  16,
-                                  8,
-                                ),
-                                child: Text(
-                                  category.title ?? 'Uncategorized',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.blue[700],
-                                  ),
-                                ),
-                              ),
-                              ...(category.menuItems ?? []).map((item) {
-                                return ListTile(
-                                  title: Text(item.title ?? 'Unknown Item'),
-                                  subtitle: Text(
-                                    '£${(double.tryParse(item.price ?? '0') ?? 0.0).toStringAsFixed(2)}',
-                                  ),
-                                  trailing: IconButton(
-                                    icon: const Icon(
-                                      Icons.add_circle,
-                                      color: Colors.green,
-                                    ),
-                                    onPressed: () {
-                                      addMenuItem(item, targetPackageTitle);
-                                      Navigator.pop(ctx);
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                              const Divider(),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    // Immediately update controller to persist changes
+    _updateControllerMenu();
   }
 
-  /// Show dialog to add service items
-  void _showAddServiceItemsDialog() {
-    final availableMenuItems = availableServiceMenuItems;
+  void decrement(Map<String, dynamic> dish, String category) {
+    setState(() {
+      final currentQty = dish["qty"] ?? 0;
+      if (currentQty > 0) {
+        dish["qty"] = currentQty - 1;
+      }
+    });
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return SafeArea(
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text(
-                    'Add Services Menu Items',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ),
-                if (availableMenuItems.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'No more service menu items available to add.',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: Obx(() {
-                      if (editController.isLoadingServices.value) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      return ListView(
-                        shrinkWrap: true,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-                            child: Text(
-                              'Available Service Menu Items',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                          ...availableMenuItems.map((menuItem) {
-                            return ListTile(
-                              title: Text(menuItem.title ?? 'Unknown Item'),
-                              subtitle: Text('£${(menuItem.price ?? '0')}'),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.add_circle,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () {
-                                  addServiceMenuItem(menuItem);
-                                  Navigator.pop(ctx);
-                                },
-                              ),
-                            );
-                          }).toList(),
-                        ],
-                      );
-                    }),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    // Immediately update controller to persist changes
+    _updateControllerMenu();
   }
 
-  /// Build item row for display
-  Widget buildItemRow(dynamic item, bool isFoodItem) {
-    final name = isFoodItem
-        ? (item as SelectedMenuItem).name
-        : (item as SelectedServiceItem).title;
-    final price = isFoodItem
-        ? (item as SelectedMenuItem).price
-        : (item as SelectedServiceItem).price;
-    final qty = isFoodItem
-        ? (item as SelectedMenuItem).qty
-        : (item as SelectedServiceItem).qty;
-
+  Widget buildmenuRow(String category, Map<String, dynamic> dish) {
+    final isFoodItem = category == "Food Items";
     final isPackageItem =
-        isFoodItem && (item as SelectedMenuItem).packageTitle != null;
+        dish['packageTitle'] != null && dish['packageTitle'] != 'Other';
 
+    final String title = dish['packageTitle']?.toString() ?? 'Other';
+    int maxItem = 999;
     bool isAdditional = false;
-    if (isFoodItem && isPackageItem) {
-      final title = item.packageTitle!;
-      final itemsWithSameTitle = editController.selectedMenuItems
-          .where((d) => d.packageTitle == title)
+    if (title != 'Other') {
+      final itemsWithSameTitle = controller.menu[category]!
+          .where((d) => d['packageTitle'] == title)
           .toList();
-      int maxItem = 999;
       if (itemsWithSameTitle.isNotEmpty &&
-          itemsWithSameTitle.first.maxItem != null) {
+          itemsWithSameTitle.first['maxItem'] != null) {
         maxItem =
-            int.tryParse(itemsWithSameTitle.first.maxItem.toString()) ?? 999;
+            int.tryParse(itemsWithSameTitle.first['maxItem'].toString()) ?? 999;
       }
-      final localIndex = itemsWithSameTitle.indexOf(item);
+      final localIndex = itemsWithSameTitle.indexOf(dish);
       isAdditional = localIndex >= maxItem;
     }
 
-    final priceNum = (double.tryParse(price) ?? 0.0);
+    final priceNum = (dish["price"] as num).toDouble();
     final priceText = isAdditional || !isPackageItem
-        ? "£${priceNum.toStringAsFixed(2)} ${isFoodItem ? 'per unit' : 'service'}"
+        ? "£${priceNum.toStringAsFixed(2)} per unit"
         : "Included";
 
     return Padding(
@@ -1349,7 +1543,6 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Item name + price
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1357,7 +1550,10 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(name, style: const TextStyle(fontSize: 15)),
+                      child: Text(
+                        dish["name"],
+                        style: const TextStyle(fontSize: 15),
+                      ),
                     ),
                     if (isAdditional)
                       Container(
@@ -1393,106 +1589,152 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
                         : FontWeight.bold,
                   ),
                 ),
+                if (isFoodItem && !isPackageItem)
+                  Text(
+                    "Max: ${controller.guests.value} guests",
+                    style: const TextStyle(color: Colors.orange, fontSize: 9),
+                  ),
               ],
             ),
           ),
 
-          // Quantity controls (visible when editing for food, always for services)
-          // Quantity controls - only show for food items when editing
-          if (isFoodItem && isEditing)
+          if (isEditing || !isFoodItem)
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10),
+                if (isPackageItem && isEditing) ...[
+                  TextButton.icon(
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: const Text("Swap"),
+                    onPressed: () => _showSwapDialog(dish, category),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_outlined, size: 20),
-                        onPressed: () =>
-                            decrementQuantity(item as SelectedMenuItem),
-                      ),
-                      Text(
-                        qty.toString(),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add, size: 20),
-                        onPressed: () =>
-                            incrementQuantity(item as SelectedMenuItem),
-                      ),
-                      // Edit button to input number manually (only for food)
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 18),
-                        onPressed: () =>
-                            _showEditQuantityDialog(item as SelectedMenuItem),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isAdditional)
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: () => removeItem(item, isFoodItem),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    constraints: const BoxConstraints(),
+                  if (isAdditional)
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () => removeDish(category, dish),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                  const SizedBox(width: 8),
+                ] else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_outlined, size: 20),
+                          onPressed: () => decrement(dish, category),
+                        ),
+                        Text(
+                          dish["qty"].toString(),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add, size: 20),
+                          onPressed: () {
+                            if (isFoodItem &&
+                                (dish["qty"] >= controller.guests.value)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Cannot exceed ${controller.guests.value} guests',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              increment(dish, category);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 18),
+                          onPressed: () =>
+                              _showEditDishQuantityDialog(dish, category),
+                        ),
+                      ],
+                    ),
                   ),
               ],
             )
-          else if (isFoodItem)
-            // For food items when NOT editing, show simple quantity text
+          else
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text("Qty: $qty"),
-            )
-          else
-            // For non-food items, show simple quantity text
-            SizedBox.shrink(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Qty: ${dish["qty"]}"),
+                  if (isFoodItem)
+                    Text(
+                      "Matches guests",
+                      style: TextStyle(color: Colors.green, fontSize: 10),
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  /// Build cost summary section
-  Widget _buildSummary() {
+  Widget buildServiceRow(String category, Map<String, dynamic> dish) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(dish["name"], style: const TextStyle(fontSize: 15)),
+                Text(
+                  "£${(dish["price"] as num).toStringAsFixed(2)} per unit",
+                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildSummary() {
     return Card(
       margin: const EdgeInsets.all(12),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            _summaryRow(
-              "Food & Beverage",
-              editController.foodAndBeverageCost.toStringAsFixed(2),
-            ),
-            _summaryRow(
-              "Service Cost",
-              editController.serviceCost.toStringAsFixed(2),
-            ),
-            _summaryRow("VAT (20%)", editController.vat.toStringAsFixed(2)),
+            summaryRow("Food & Beverage", controller.foodAndBeverageCost),
+            summaryRow("Service Cost", controller.serviceCost),
+            summaryRow("VAT (20%)", controller.vat),
             const Divider(),
-            // _summaryRow("Total Amount", editController.totalAmount.toStringAsFixed(2), isBold: true, fontSize: 18,),
             Obx(
-              () => _summaryRow(
+              () => summaryRow(
                 "Total Amount",
-                (editController.foodAndBeverageCost +
-                        editController.serviceCost +
-                        editController.vat)
-                    .toStringAsFixed(2),
+                controller.foodAndBeverageCost +
+                    controller.serviceCost +
+                    controller.vat,
                 isBold: true,
                 fontSize: 18,
               ),
             ),
             Obx(
               () => Visibility(
-                visible: editController.isDiscountApplied.value,
+                visible: controller.isDiscountApplied.value,
                 child: Obx(
-                  () => _summaryRow(
+                  () => summaryRow(
                     "Grand Total Amount",
-                    editController.totalAmount.toStringAsFixed(2),
+                    controller.totalAmount,
                     isBold: true,
                     fontSize: 18,
                   ),
@@ -1505,9 +1747,9 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-  Widget _summaryRow(
+  Widget summaryRow(
     String label,
-    String value, {
+    double value, {
     bool isBold = false,
     double fontSize = 16,
   }) {
@@ -1524,7 +1766,7 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
             ),
           ),
           Text(
-            "£$value",
+            "£${value.toStringAsFixed(2)}",
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
@@ -1535,410 +1777,282 @@ class _FoodBeverageSelectionState extends State<FoodBeverageSelection> {
     );
   }
 
-  // Widget _summaryRow(
-  //   String label,
-  //   dynamic value, {
-  //   bool isBold = false,
-  //   double fontSize = 16,
-  // }) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 4),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         Text(
-  //           label,
-  //           style: TextStyle(
-  //             fontSize: fontSize,
-  //             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-  //           ),
-  //         ),
-  //         Text(
-  //           "£${value}",
-  //           style: TextStyle(
-  //             fontSize: fontSize,
-  //             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  void commitEditsToController() {
+    // Ensure we have the latest menu state
+    final currentMenu = {
+      'Food Items': List<Map<String, dynamic>>.from(
+        controller.menu['Food Items']!,
+      ),
+      'Services': List<Map<String, dynamic>>.from(controller.menu['Services']!),
+    };
 
-  // ===========================================================================
-  // VALIDATION METHODS
-  // ===========================================================================
-
-  /// Check if form is valid for submission
-  bool get _isFormValid {
-    return editController.nameController.text.isNotEmpty &&
-        editController.emailController.text.isNotEmpty &&
-        editController.contactController.text.isNotEmpty &&
-        editController.selectedCity.value.isNotEmpty &&
-        editController.selectedEventType.value.isNotEmpty &&
-        editController.selectedDate.value != null &&
-        editController.startTime.value != null &&
-        editController.endTime.value != null;
+    controller.updateCustomPackageItems(
+      controller.selectedPackage.value,
+      currentMenu,
+    );
+    // ScaffoldMessenger.of(
+    //   context,
+    // ).showSnackBar(SnackBar(content: Text('Package updated')));
   }
-
-  // ===========================================================================
-  // MAIN BUILD METHOD
-  // ===========================================================================
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Container(
-        width: 340,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Package header
-              Obx(() {
-                final packageTitle = editController.selectedPackage.value;
+    return Container(
+      width: 340,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Obx(() {
+              final isModified =
+                  controller.isPackageEditing.value &&
+                  controller.selectedPackage.value == 'Custom Package';
+              final packageTitle = controller.selectedPackage.value;
 
-                return Column(
-                  children: [
+              return Column(
+                children: [
+                  Text(
+                    "Selected Package",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isModified ? Colors.orange : Colors.black,
+                    ),
+                  ),
+                  Text(
+                    packageTitle,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontStyle: isModified
+                          ? FontStyle.italic
+                          : FontStyle.normal,
+                      color: isModified ? Colors.orange : Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (isModified)
                     Text(
-                      "Selected Package",
+                      "Custom Package - Item-based Pricing",
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        fontSize: 12,
+                        color: Colors.green,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
-                    Text(
-                      packageTitle.isEmpty
-                          ? "No Package Selected"
-                          : packageTitle,
-                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 16),
-                  ],
-                );
-              }),
-
-              // Food Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Food Items",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  if (isEditing)
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle,
-                            color: Colors.green,
-                          ),
-                          onPressed: _showAddMenuItemsDialog,
-                        ),
-                      ],
-                    ),
+                  SizedBox(height: 16),
                 ],
-              ),
-              const Divider(),
-              if (editController.selectedMenuItems.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "No food items added",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                )
-              else
-                ...() {
-                  // Group items by packageTitle
-                  final groupedItems = <String, List<SelectedMenuItem>>{};
-                  for (final item in editController.selectedMenuItems) {
-                    final title = item.packageTitle ?? 'Other Items';
-                    if (!groupedItems.containsKey(title)) {
-                      groupedItems[title] = [];
-                    }
-                    groupedItems[title]!.add(item);
-                  }
+              );
+            }),
 
-                  final widgets = <Widget>[];
-                  for (final entry in groupedItems.entries) {
-                    final isExpanded = _expandedCategories[entry.key] ?? false;
-
-                    // Add header for the group
-                    widgets.add(
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _expandedCategories[entry.key] = !isExpanded;
-                          });
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10.0,
-                            horizontal: 12.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blueGrey[50],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      entry.key,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      isExpanded
-                                          ? Icons.keyboard_arrow_down
-                                          : Icons.keyboard_arrow_right,
-                                      color: Colors.black54,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (isEditing && entry.key != 'Other Items')
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.add_circle_outline,
-                                    color: Colors.green,
-                                    size: 24,
-                                  ),
-                                  onPressed: () =>
-                                      _showAddMenuItemsDialog(entry.key),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-
-                    // Add items under this group only if expanded
-                    if (isExpanded) {
-                      widgets.addAll(
-                        entry.value.map((item) => buildItemRow(item, true)),
-                      );
-                    }
-                  }
-                  return widgets;
-                }(),
-
-              const SizedBox(height: 20),
-
-              // Services Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Services",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+            // Food Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Food Items",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                if (isEditing)
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.add_circle, color: Colors.green),
-                        onPressed: _showAddServiceItemsDialog,
+                        onPressed: () => addDish("Food Items"),
                       ),
                     ],
                   ),
-                ],
-              ),
-              const Divider(),
-              if (editController.selectedServiceItems.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "No services added",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                )
-              else
-                ...editController.selectedServiceItems.map(
-                  (item) => buildItemRow(item, false),
-                ),
+              ],
+            ),
 
-              // Cost Summary
-              _buildSummary(),
-              const SizedBox(height: 10),
+            const Divider(),
+            ...() {
+              final groupedItems = <String, List<Map<String, dynamic>>>{};
+              for (final dish in controller.menu["Food Items"]!) {
+                final title = dish['packageTitle'] as String? ?? 'Other';
+                if (!groupedItems.containsKey(title)) {
+                  groupedItems[title] = [];
+                }
+                groupedItems[title]!.add(dish);
+              }
 
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
+              final widgets = <Widget>[];
+              for (final entry in groupedItems.entries) {
+                final isExpanded = _expandedCategories[entry.key] ?? false;
+
+                // Add header for the group
+                widgets.add(
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
-                        isEditing = !isEditing;
-                        isEdited = !isEdited;
-                        editController.isEditingItems.value = isEditing;
-
-                        if (isEditing) {
-                          editController.isCustomEditing.value = true;
-                          // Always sync selected package to current order package when entering edit mode
-                          final pkgs = editController.currentOrderPackages;
-                          if (pkgs.isNotEmpty && pkgs.first.packageId != null) {
-                            editController.selectedPackageId.value = pkgs
-                                .first
-                                .packageId!
-                                .toString();
-                            final pkgTitle = pkgs.first.package?.title ?? '';
-                            if (pkgTitle.isNotEmpty) {
-                              editController.selectedPackage.value = pkgTitle;
-                            }
-                          }
-                        } else {
-                          isEdited = true;
-                          // Leaving edit mode retains items
-                          editController.isCustomEditing.value = true;
-                        }
+                        _expandedCategories[entry.key] = !isExpanded;
                       });
                     },
-                    child: Text(isEditing ? "Done Editing" : "Edit Items"),
-                  ),
-
-                  ElevatedButton(
-                    onPressed: _isFormValid
-                        ? () async {
-                            final List<String> errors = editController
-                                .validateEdit();
-
-                            if (errors.isNotEmpty) {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Incomplete Information"),
-                                    content: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Text(
-                                            "Please fill in all required fields before confirming your booking:",
-                                          ),
-                                          const SizedBox(height: 12),
-                                          ...errors.map((e) => Text("• $e")),
-                                        ],
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text("OK"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              return;
-                            }
-
-                            // Show loading
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-
-                            try {
-                              // final success = await editController
-                              //     .completeEdit();
-                              editController.showEditConfirmation();
-                              // Get.offAll(() => SchedulePage());
-
-                              // Hide loading
-                              // if (mounted) {
-                              //   Navigator.of(context).pop();
-                              // }
-                              //
-                              // if (success) {
-                              //   // Show success dialog then navigate to main screen
-                              //   if (mounted) {
-                              //     await showDialog(
-                              //       context: context,
-                              //       builder: (context) => AlertDialog(
-                              //         title: const Text('Success'),
-                              //         content: const Text(
-                              //           'Event updated successfully!',
-                              //         ),
-                              //         actions: [
-                              //           TextButton(
-                              //             onPressed: () {
-                              //               Navigator.of(context).pop();
-                              //             },
-                              //             child: const Text('OK'),
-                              //           ),
-                              //         ],
-                              //       ),
-                              //     );
-                              //     if (!mounted) return;
-                              //   }
-                              // } else {
-                              //   // Show error
-                              //   if (mounted) {
-                              //     ScaffoldMessenger.of(context).showSnackBar(
-                              //       SnackBar(
-                              //         content: Text(
-                              //           'Failed to update event: ${editController.errorMessage.value}',
-                              //         ),
-                              //         backgroundColor: Colors.red,
-                              //       ),
-                              //     );
-                              //   }
-                              // }
-                            } catch (e) {
-                              // Hide loading
-                              if (mounted) {
-                                Navigator.of(context).pop();
-                              }
-
-                              // Show error
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error updating event: $e'),
-                                    backgroundColor: Colors.red,
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 12.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  entry.key,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
                                   ),
-                                );
-                              }
-                            }
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  isExpanded
+                                      ? Icons.keyboard_arrow_down
+                                      : Icons.keyboard_arrow_right,
+                                  color: Colors.black54,
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isEditing && entry.key != 'Other')
+                            IconButton(
+                              icon: const Icon(
+                                Icons.add_circle_outline,
+                                color: Colors.green,
+                                size: 24,
+                              ),
+                              onPressed: () => addDish(
+                                "Food Items",
+                                targetPackageTitle: entry.key,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                        ],
+                      ),
                     ),
-                    child: const Text('Update Event'),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+                );
+
+                // Add dish rows for this group only if expanded
+                if (isExpanded) {
+                  widgets.addAll(
+                    entry.value.map((dish) => buildmenuRow("Food Items", dish)),
+                  );
+                }
+              }
+              return widgets;
+            }(),
+
+            const SizedBox(height: 20),
+
+            // Services Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Services",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: Colors.green),
+                      onPressed: () => addDish("Services"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(),
+            ...controller.menu["Services"]!.map(
+              (service) => buildServiceRow("Services", service),
+            ),
+
+            buildSummary(),
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      isEditing = !isEditing;
+                      controller.toggleEditMode(isEditing);
+                    });
+                    if (!isEditing) {
+                      commitEditsToController();
+                    }
+                  },
+                  child: Text(isEditing ? "Done" : "Edit"),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    controller.testInquiryData();
+                    setState(() {});
+                  },
+                  child: Text("Inquiry"),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    commitEditsToController();
+                    final List<String> errors = controller.validateEdit();
+
+                    if (errors.isNotEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Incomplete Information"),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    "Please fill in all required fields before confirming your booking:",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...errors.map((e) => Text("• $e")),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("OK"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
+                    controller.showEditConfirmation();
+                  },
+                  child: const Text("Save Changes"),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+          ],
         ),
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:schedule_app/controllers/booking_controller.dart';
-import 'package:schedule_app/pages/Edit/EditController.dart';
+
+import 'package:schedule_app/pages/Edit/edit_controller.dart';
 import 'package:schedule_app/pages/schedule_page.dart';
 import 'package:schedule_app/theme/app_colors.dart';
 
@@ -43,25 +43,15 @@ class EditReceiptScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: ()async {
+            onPressed: () async {
               // Print or share functionality
-              bool success = await controller.completeEdit();
-              if (success) {
-                Get.offAll(()=>SchedulePage());
-              } else {
-                // Show error message if update fails
-                Get.snackbar(
-                    'Error',
-                    'Failed to update order',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white
-                );
-              }
+              await controller.completeEdit();
+              Get.offAll(() => SchedulePage());
             },
             backgroundColor: AppColors.primary,
             child: const Icon(Icons.arrow_forward, color: Colors.white),
           ),
-          SizedBox(width: 20,),
+          SizedBox(width: 20),
           FloatingActionButton(
             onPressed: () {
               // Print or share functionality
@@ -80,7 +70,6 @@ class EditReceiptScreen extends StatelessWidget {
       controller.selectedPackage.value,
       controller.guests.value > 0 ? controller.guests.value : 1,
     );
-    print("TESTING RECEIPT MENU: $menu");
     // Calculate totals
     double foodSubtotal = 0;
     double servicesSubtotal = 0;
@@ -116,13 +105,9 @@ class EditReceiptScreen extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _buildCustomerInfo(),
-            ),
+            Expanded(child: _buildCustomerInfo()),
             const SizedBox(width: 10),
-            Expanded(
-              child: _buildEventDetails(),
-            ),
+            Expanded(child: _buildEventDetails()),
           ],
         ),
         const SizedBox(height: 20),
@@ -169,7 +154,7 @@ class EditReceiptScreen extends StatelessWidget {
         const SizedBox(height: 3),
         const Text(
           '123 Wedding Lane, London, EC1A 1BB\n'
-              'Tel: +44-20-7123-4567 | Email: events@qahall.co.uk | VAT: GB123456789',
+          'Tel: +44-20-7123-4567 | Email: events@qahall.co.uk | VAT: GB123456789',
           style: TextStyle(
             fontSize: 10,
             fontFamily: 'Times New Roman',
@@ -178,11 +163,7 @@ class EditReceiptScreen extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          height: 2,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 2, color: Colors.black),
         const SizedBox(height: 8),
         const Text(
           'Booking Confirmation Receipt',
@@ -224,15 +205,24 @@ class EditReceiptScreen extends StatelessWidget {
           children: [
             Text(
               'Receipt No: WED-${DateFormat('yyyy-MM-dd').format(DateTime.now())}-001',
-              style: const TextStyle(fontSize: 9, fontFamily: 'Times New Roman'),
+              style: const TextStyle(
+                fontSize: 9,
+                fontFamily: 'Times New Roman',
+              ),
             ),
             Text(
               'Date: ${_formatDate(DateTime.now())}',
-              style: const TextStyle(fontSize: 9, fontFamily: 'Times New Roman'),
+              style: const TextStyle(
+                fontSize: 9,
+                fontFamily: 'Times New Roman',
+              ),
             ),
             Text(
               'Payment Method: Cash',
-              style: const TextStyle(fontSize: 9, fontFamily: 'Times New Roman'),
+              style: const TextStyle(
+                fontSize: 9,
+                fontFamily: 'Times New Roman',
+              ),
             ),
           ],
         ),
@@ -245,7 +235,10 @@ class EditReceiptScreen extends StatelessWidget {
             ),
             Text(
               'Reference: WEDDING-${getCustomerInitials()}-001',
-              style: const TextStyle(fontSize: 9, fontFamily: 'Times New Roman'),
+              style: const TextStyle(
+                fontSize: 9,
+                fontFamily: 'Times New Roman',
+              ),
             ),
             const Text(
               'Status: CONFIRMED',
@@ -270,11 +263,7 @@ class EditReceiptScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Container(
-          width: double.infinity,
-          height: 1,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 1, color: Colors.black),
         const SizedBox(height: 5),
         _buildInfoRow('Customer Name:', controller.nameController.text),
         _buildInfoRow('Email:', controller.emailController.text),
@@ -297,15 +286,14 @@ class EditReceiptScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Container(
-          width: double.infinity,
-          height: 1,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 1, color: Colors.black),
         const SizedBox(height: 5),
         _buildInfoRow('Event Type:', controller.selectedEventType.value),
         _buildInfoRow('Date:', _formatDate(controller.selectedDate.value)),
-        _buildInfoRow('Time:', '${_formatTime(controller.startTime.value)} - ${_formatTime(controller.endTime.value)}'),
+        _buildInfoRow(
+          'Time:',
+          '${_formatTime(controller.startTime.value)} - ${_formatTime(controller.endTime.value)}',
+        ),
         _buildInfoRow('Guests:', '${controller.guests.value} persons'),
         _buildInfoRow('Package:', controller.selectedPackage.value),
       ],
@@ -356,11 +344,7 @@ class EditReceiptScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Container(
-          width: double.infinity,
-          height: 1,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 1, color: Colors.black),
         const SizedBox(height: 5),
         _buildItemsTable(foodItems, isFood: true),
       ],
@@ -380,18 +364,17 @@ class EditReceiptScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Container(
-          width: double.infinity,
-          height: 1,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 1, color: Colors.black),
         const SizedBox(height: 5),
-        _buildServiceItemsTable(),
+        _buildServiceItemsTable(services),
       ],
     );
   }
 
-  Widget _buildItemsTable(List<Map<String, dynamic>> items, {bool isFood = true}) {
+  Widget _buildItemsTable(
+    List<Map<String, dynamic>> items, {
+    bool isFood = true,
+  }) {
     return Table(
       border: TableBorder.all(color: Colors.black, width: 1),
       columnWidths: const {
@@ -454,57 +437,60 @@ class EditReceiptScreen extends StatelessWidget {
             ),
           ],
         ),
-        ...items.map((item) => TableRow(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                item['name']?.toString() ?? 'Unknown Item',
-                style: const TextStyle(
-                  fontSize: 8,
-                  fontFamily: 'Times New Roman',
+        ...items.map(
+          (item) => TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(3),
+                child: Text(
+                  item['name']?.toString() ?? 'Unknown Item',
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontFamily: 'Times New Roman',
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                (item['qty'] ?? 1).toString(),
-                style: const TextStyle(
-                  fontSize: 8,
-                  fontFamily: 'Times New Roman',
+              Padding(
+                padding: const EdgeInsets.all(3),
+                child: Text(
+                  (item['qty'] ?? 1).toString(),
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.right,
                 ),
-                textAlign: TextAlign.right,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                '£${(item['price'] as num).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 8,
-                  fontFamily: 'Times New Roman',
+              Padding(
+                padding: const EdgeInsets.all(3),
+                child: Text(
+                  '£${(item['price'] as num).toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.right,
                 ),
-                textAlign: TextAlign.right,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                '£${((item['price'] as num).toDouble() * (item['qty'] as int)).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 8,
-                  fontFamily: 'Times New Roman',
+              Padding(
+                padding: const EdgeInsets.all(3),
+                child: Text(
+                  '£${((item['price'] as num).toDouble() * (item['qty'] as int)).toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.right,
                 ),
-                textAlign: TextAlign.right,
               ),
-            ),
-          ],
-        )).toList(),
+            ],
+          ),
+        ),
       ],
     );
   }
-  Widget _buildServiceItemsTable() {
+
+  Widget _buildServiceItemsTable(List<Map<String, dynamic>> services) {
     return Column(
       children: [
         // Header Row
@@ -549,13 +535,13 @@ class EditReceiptScreen extends StatelessWidget {
           child: ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.selectedServiceItems.length,
+            itemCount: services.length,
             itemBuilder: (context, index) {
-              final service = controller.selectedServiceItems[index];
+              final service = services[index];
               return Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: index < controller.selectedServiceItems.length - 1
+                    bottom: index < services.length - 1
                         ? BorderSide(color: Colors.black, width: 1)
                         : BorderSide.none,
                   ),
@@ -567,7 +553,7 @@ class EditReceiptScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(3),
                         child: Text(
-                          service.title,
+                          service['name'] ?? '',
                           style: const TextStyle(
                             fontSize: 8,
                             fontFamily: 'Times New Roman',
@@ -578,7 +564,7 @@ class EditReceiptScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(3),
                       child: Text(
-                        service.price,
+                        '£${(service['price'] as num).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 8,
                           fontFamily: 'Times New Roman',
@@ -710,42 +696,59 @@ class EditReceiptScreen extends StatelessWidget {
   // }
 
   Widget _buildSubtotalSection(
-      double foodSubtotal,
-      double servicesSubtotal,
-      double netAmount,
-      double serviceCharge,
-      double discount,
-      double subtotalAfterDiscount,
-      double vat,
-      double totalAmount,
-      ) {
+    double foodSubtotal,
+    double servicesSubtotal,
+    double netAmount,
+    double serviceCharge,
+    double discount,
+    double subtotalAfterDiscount,
+    double vat,
+    double totalAmount,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black, width: 1),
       ),
       child: Column(
-          children: [
-          _buildSubtotalRow('Food Items Subtotal:', controller.foodAndBeverageCost),
-      _buildSubtotalRow('Services Subtotal:', controller.serviceCost),
-      _buildSubtotalRow('Net Amount:', controller.foodAndBeverageCost+controller.serviceCost),
-      _buildSubtotalRow('Discount:', controller.discountAmount.value),
-      _buildSubtotalRow('Subtotal after Discount:', controller.totalAmount -controller.discountAmount.value),
-      _buildSubtotalRow('VAT @ 20%:', controller.vat),
-      Container(
-        margin: const EdgeInsets.only(top: 5),
-        padding: const EdgeInsets.only(top: 4),
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black, width: 2)),
+        children: [
+          _buildSubtotalRow(
+            'Food Items Subtotal:',
+            controller.foodAndBeverageCost,
+          ),
+          _buildSubtotalRow('Services Subtotal:', controller.serviceCost),
+          _buildSubtotalRow(
+            'Net Amount:',
+            controller.foodAndBeverageCost + controller.serviceCost,
+          ),
+          _buildSubtotalRow('Discount:', controller.discountAmount.value),
+          _buildSubtotalRow(
+            'Subtotal after Discount:',
+            controller.totalAmount - controller.discountAmount.value,
+          ),
+          _buildSubtotalRow('VAT @ 20%:', controller.vat),
+          Container(
+            margin: const EdgeInsets.only(top: 5),
+            padding: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: Colors.black, width: 2)),
+            ),
+            child: _buildSubtotalRow(
+              'TOTAL AMOUNT:',
+              controller.totalAmount,
+              isTotal: true,
+            ),
+          ),
+        ],
       ),
-      child: _buildSubtotalRow('TOTAL AMOUNT:', controller.totalAmount, isTotal: true),
-    ),
-    ],
-    ),
     );
   }
 
-  Widget _buildSubtotalRow(String label, double amount, {bool isTotal = false}) {
+  Widget _buildSubtotalRow(
+    String label,
+    double amount, {
+    bool isTotal = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
@@ -775,14 +778,10 @@ class EditReceiptScreen extends StatelessWidget {
   Widget _buildFooter() {
     return Column(
       children: [
-        Container(
-          width: double.infinity,
-          height: 2,
-          color: Colors.black,
-        ),
+        Container(width: double.infinity, height: 2, color: Colors.black),
         const SizedBox(height: 8),
-         Text(
-           'BOOKING CONFIRMED - PAYMENT DUE: 50% DEPOSIT BY ${DateFormat('dd-MM-yyyy').format(DateTime.now().add(const Duration(days: 15)))}',
+        Text(
+          'BOOKING CONFIRMED - PAYMENT DUE: 50% DEPOSIT BY ${DateFormat('dd-MM-yyyy').format(DateTime.now().add(const Duration(days: 15)))}',
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.bold,
@@ -793,18 +792,15 @@ class EditReceiptScreen extends StatelessWidget {
         const SizedBox(height: 4),
         const Text(
           'Balance payment due 7 days prior to event date',
-          style: TextStyle(
-            fontSize: 9,
-            fontFamily: 'Times New Roman',
-          ),
+          style: TextStyle(fontSize: 9, fontFamily: 'Times New Roman'),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         const Text(
           'Terms & Conditions: This booking is subject to our standard terms and conditions. '
-              'Cancellation policy: 30 days notice required for full refund minus 10% administration fee. '
-              'Final guest numbers must be confirmed 7 days prior to event. Additional charges may apply for changes made within 48 hours of event. '
-              'All prices include VAT at current rate.',
+          'Cancellation policy: 30 days notice required for full refund minus 10% administration fee. '
+          'Final guest numbers must be confirmed 7 days prior to event. Additional charges may apply for changes made within 48 hours of event. '
+          'All prices include VAT at current rate.',
           style: TextStyle(
             fontSize: 7,
             fontFamily: 'Times New Roman',
@@ -838,10 +834,7 @@ class EditReceiptScreen extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 8,
-              fontFamily: 'Times New Roman',
-            ),
+            style: const TextStyle(fontSize: 8, fontFamily: 'Times New Roman'),
           ),
         ],
       ),
@@ -853,13 +846,35 @@ class EditReceiptScreen extends StatelessWidget {
     final day = date.day;
     final month = date.month;
     final year = date.year;
-    final suffixes = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+    final suffixes = [
+      'th',
+      'st',
+      'nd',
+      'rd',
+      'th',
+      'th',
+      'th',
+      'th',
+      'th',
+      'th',
+    ];
     final suffix = day % 10 <= suffixes.length - 1 ? suffixes[day % 10] : 'th';
     final months = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
-    return '${day}$suffix ${months[month]} $year';
+    return '$day$suffix ${months[month]} $year';
   }
 
   String _formatTime(TimeOfDay? time) {
