@@ -9,6 +9,7 @@ import 'package:schedule_app/widgets/Payment_Popup.dart';
 
 import '../model/discount_model.dart';
 import 'package:schedule_app/model/order/order_model.dart';
+import 'package:schedule_app/pages/Recipt/bookingrecipt.dart';
 
 class BookingController extends GetxController {
   // Form controllers
@@ -1126,9 +1127,8 @@ class BookingController extends GetxController {
 
         // Success - navigation will show the confirmation
 
-        // Clear form after successful booking
-        clearForm();
-        Get.to(() => SchedulePage());
+        // Navigate to the native receipt instead of SchedulePage directly
+        Get.to(() => BookingReceiptScreen());
       } else {
         throw Exception(result['error'] ?? 'Failed to create order');
       }
